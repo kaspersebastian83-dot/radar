@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Radar</title>
+<style>
+:root{
+  --bg:#f5f6f8;--panel:#fff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
+  --accent:#2563eb;--accent-ink:#fff;--soft:#eff6ff;
+  --radar:#a78bfa;--research:#60a5fa;--watch:#fbbf24;--bought:#34d399;--out:#94a3b8;
+  --danger:#ef4444;--ok:#16a34a;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0b1220;--panel:#111a2e;--ink:#e5eaf3;--muted:#8a97ad;--line:#1f2b44;--soft:#16233d;
+}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:env(safe-area-inset-top) 0 0}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 14px;max-width:1300px;margin:0 auto}
+.bar h1{font-size:18px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.bar h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--soft)}
+.bar .sp{flex:1}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:10px}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:8px;color:var(--muted)}
+.tabs button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.btn{border:1px solid var(--line);background:var(--panel);padding:7px 12px;border-radius:9px;color:var(--ink);white-space:nowrap}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:4px 9px;font-size:13px}
+.btn.danger{color:var(--danger)}
+.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--out);display:inline-block}
+.sync.ok i{background:var(--bought)}.sync.busy i{background:var(--watch)}.sync.err i{background:var(--danger)}
+
+main{max-width:1300px;margin:0 auto;padding:12px 14px 80px}
+
+/* board */
+.board{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.col{flex:0 0 88vw;max-width:360px;scroll-snap-align:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:200px}
+@media(min-width:900px){.col{flex:1 1 0;max-width:none;min-width:220px}}
+.col h2{margin:0;padding:10px 12px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.col h2 .sw{width:9px;height:9px;border-radius:50%}
+.col h2 .n{margin-left:auto;background:var(--bg);padding:1px 8px;border-radius:99px;font-size:12px}
+.cards{padding:8px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:10px 11px;cursor:pointer;border-left:4px solid var(--out);transition:transform .08s}
+.card:active{transform:scale(.985)}
+.card .t{display:flex;align-items:baseline;gap:8px}
+.card .tk{font-weight:700;letter-spacing:.3px}
+.card .nm{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.card .th{font-size:13px;margin-top:5px;color:var(--ink);opacity:.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{display:flex;gap:10px;margin-top:7px;font-size:12px;color:var(--muted);flex-wrap:wrap;align-items:center}
+.conv{letter-spacing:1px;color:var(--watch)}
+.chg{font-variant-numeric:tabular-nums;font-weight:600}
+.chg.up{color:var(--ok)}.chg.dn{color:var(--danger)}
+.due{color:var(--danger);font-weight:600}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:24px 8px}
+
+/* scorecard */
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:720px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);cursor:pointer;user-select:none}
+tbody tr{cursor:pointer}tbody tr:hover{background:var(--soft)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;background:var(--bg);border:1px solid var(--line)}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:20px}.stat span{font-size:12px;color:var(--muted)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(2,6,23,.55);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.modal.on{display:flex}
+@media(min-width:700px){.modal{align-items:center}}
+.sheet{background:var(--panel);width:100%;max-width:760px;max-height:94vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.sheet{border-radius:18px}}
+.sheet h3{margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.sheet h3 .sp{flex:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(min-width:700px){.grid{grid-template-columns:1fr 1fr 1fr 1fr}.grid .w2{grid-column:span 2}.grid .w4{grid-column:span 4}}
+@media(max-width:699px){.grid .w2,.grid .w4{grid-column:span 2}}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+input,select,textarea{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:8px 10px;color:var(--ink);width:100%}
+textarea{min-height:64px;resize:vertical}
+.stars{display:flex;gap:4px;font-size:22px;line-height:1}
+.stars span{cursor:pointer;color:var(--line)}.stars span.on{color:var(--watch)}
+.notes{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.note{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.note small{color:var(--muted);margin-right:8px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.foot{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.foot .sp{flex:1}
+.hint{font-size:12px;color:var(--muted)}
+code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;z-index:30;pointer-events:none}
+.toast.on{opacity:1}
+.fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;border:0;font-size:28px;box-shadow:0 6px 18px rgba(37,99,235,.4);z-index:6}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <h1><span class="dot"></span>Radar</h1>
+  <div class="tabs"><button class="on" data-v="board">Board</button><button data-v="score">Scorecard</button></div>
+  <span class="sp"></span>
+  <span class="sync" id="sync"><i></i><span>local</span></span>
+  <button class="btn small" id="btnImportClaude">Import from Claude</button>
+  <button class="btn small" id="btnMenu">⋯</button>
+</div></header>
+
+<main>
+  <section id="viewBoard"><div class="board" id="board"></div></section>
+  <section id="viewScore" hidden>
+    <div class="summary" id="summary"></div>
+    <div class="tablewrap"><table id="scoreTbl"><thead><tr>
+      <th data-k="ticker">Ticker</th><th data-k="status">Status</th><th data-k="loggedDate">Logged</th>
+      <th data-k="loggedPrice" class="num">@ price</th><th data-k="currentPrice" class="num">Now</th>
+      <th data-k="chg" class="num">Change</th><th data-k="conviction">Conv.</th><th data-k="buyBelow" class="num">Buy below</th><th data-k="nextReview">Review</th>
+    </tr></thead><tbody></tbody></table></div>
+    <p class="hint" style="margin-top:10px">"Now" is typed by hand (offline tool) — update it whenever you check the stock. Change is measured from the price when the idea was logged, so Passed ideas show what you missed and Bought ideas show how it went.</p>
+  </section>
+</main>
+<button class="fab" id="fab" title="New idea">+</button>
+
+<!-- edit sheet -->
+<div class="modal" id="mEdit"><div class="sheet">
+  <h3><span id="eTitle">New idea</span><span class="sp"></span><button class="btn small" data-close>✕</button></h3>
+  <div class="grid">
+    <label>Ticker<input id="f_ticker" placeholder="PEP" style="text-transform:uppercase"></label>
+    <label>Name<input id="f_name" placeholder="PepsiCo"></label>
+    <label>Sector<input id="f_sector" placeholder="Consumer staples"></label>
+    <label>Status<select id="f_status"></select></label>
+    <label>Logged date<input id="f_loggedDate" type="date"></label>
+    <label>Price at log<input id="f_loggedPrice" type="number" step="any" inputmode="decimal"></label>
+    <label>Currency<input id="f_currency" placeholder="EUR" style="text-transform:uppercase"></label>
+    <label>Current price<input id="f_currentPrice" type="number" step="any" inputmode="decimal"></label>
+    <label>Buy below<input id="f_buyBelow" type="number" step="any" inputmode="decimal"></label>
+    <label>Next review<input id="f_nextReview" type="date"></label>
+    <label class="w2">Source<input id="f_source" placeholder="Claude chat / screen / article"></label>
+    <label class="w2">Conviction<div class="stars" id="f_conviction"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div></label>
+    <label class="w4">Thesis (your words, 2–3 sentences)<textarea id="f_thesis"></textarea></label>
+    <label class="w2">Bull case<textarea id="f_bull"></textarea></label>
+    <label class="w2">Bear case (steelman)<textarea id="f_bear"></textarea></label>
+    <label class="w4">Kill criteria — I'm wrong if…<textarea id="f_kill"></textarea></label>
+  </div>
+  <div class="notes" id="notesBox">
+    <div class="row"><strong style="font-size:13px">Journal</strong><span class="sp" style="flex:1"></span></div>
+    <div id="noteList"></div>
+    <div class="row" style="margin-top:8px"><input id="f_note" placeholder="Add a dated note…" style="flex:1"><button class="btn small" id="btnNote">Add</button></div>
+  </div>
+  <div class="foot">
+    <button class="btn danger" id="btnDelete">Delete</button><span class="sp"></span>
+    <button class="btn" data-close>Cancel</button><button class="btn primary" id="btnSave">Save</button>
+  </div>
+</div></div>
+
+<!-- import from claude -->
+<div class="modal" id="mClaude"><div class="sheet">
+  <h3>Import from Claude<span class="sp"></span><button class="btn small" data-close>✕</button></h3>
+  <p class="hint">Paste the JSON block Claude gives you at the end of a stock discussion. One object or an array. Existing cards with the same <code>id</code> are updated; new ones are added to Radar unless a status is given.</p>
+  <textarea id="claudeJson" style="min-height:180px;font-family:ui-monospace,Menlo,monospace;font-size:13px" placeholder='{"ticker":"PEP","name":"PepsiCo",...}'></textarea>
+  <div class="foot"><span class="sp"></span><button class="btn" data-close>Cancel</button><button class="btn primary" id="btnClaudeGo">Import</button></div>
+</div></div>
+
+<!-- menu / settings -->
+<div class="modal" id="mMenu"><div class="sheet">
+  <h3>Data &amp; sync<span class="sp"></span><button class="btn small" data-close>✕</button></h3>
+  <div class="row" style="margin-bottom:14px">
+    <button class="btn" id="btnExport">Export JSON</button>
+    <button class="btn" id="btnImport">Import JSON (merge)</button>
+    <input type="file" id="fileIn" accept="application/json" hidden>
+  </div>
+  <h4 style="margin:0 0 6px">GitHub sync</h4>
+  <p class="hint">Keeps <code>ideas.json</code> in your repo so every device sees the same cards. Needs a fine-grained personal access token with <em>Contents: read &amp; write</em> on that one repo. The token is stored only in this browser.</p>
+  <div class="grid">
+    <label class="w2">Owner / repo<input id="s_repo" placeholder="username/radar"></label>
+    <label>Branch<input id="s_branch" placeholder="main"></label>
+    <label>File path<input id="s_path" placeholder="ideas.json"></label>
+    <label class="w4">Token<input id="s_token" type="password" placeholder="github_pat_…"></label>
+  </div>
+  <div class="foot">
+    <button class="btn" id="btnSyncNow">Sync now</button><span class="sp"></span>
+    <button class="btn" id="btnSyncClear">Clear</button><button class="btn primary" id="btnSyncSave">Save settings</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+const STATUSES = [
+  {k:'radar',label:'Radar',c:'var(--radar)'},
+  {k:'researching',label:'Researching',c:'var(--research)'},
+  {k:'watchlist',label:'Watchlist',c:'var(--watch)'},
+  {k:'bought',label:'Bought',c:'var(--bought)'},
+  {k:'out',label:'Passed / Sold',c:'var(--out)'},
+];
+const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const today=()=>new Date().toISOString().slice(0,10);
+const now=()=>new Date().toISOString();
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- state ----------
+let data = load();
+let sync = JSON.parse(localStorage.getItem(LS_SYNC)||'null') || {repo:'',branch:'main',path:'ideas.json',token:''};
+let editingId=null, view='board', sortKey='loggedDate', sortDir=-1;
+
+function load(){
+  try{ const d=JSON.parse(localStorage.getItem(LS_DATA)); if(d&&Array.isArray(d.ideas)) return d; }catch{}
+  return {version:1, ideas:[]};
+}
+function persist(){ localStorage.setItem(LS_DATA, JSON.stringify(data)); render(); schedulePush(); }
+const live=()=>data.ideas.filter(i=>!i.deletedAt);
+
+function blank(){ return {id:uid(),ticker:'',name:'',sector:'',source:'',status:'radar',
+  loggedDate:today(),loggedPrice:null,currency:'EUR',currentPrice:null,currentDate:null,buyBelow:null,
+  conviction:3,thesis:'',bull:'',bear:'',kill:'',nextReview:'',notes:[],createdAt:now(),updatedAt:now()}; }
+
+// ---------- merge (by id, newest updatedAt wins, tombstones respected) ----------
+function merge(incoming){
+  const map=new Map(data.ideas.map(i=>[i.id,i]));
+  let changed=0;
+  for(const raw of incoming){
+    if(!raw||!raw.id) continue;
+    const cur=map.get(raw.id);
+    if(!cur || (raw.updatedAt||'')>(cur.updatedAt||'')){ map.set(raw.id,{...blank(),...raw}); changed++; }
+  }
+  data.ideas=[...map.values()];
+  return changed;
+}
+
+// ---------- rendering ----------
+function chgOf(i){
+  if(i.loggedPrice>0 && i.currentPrice>0) return (i.currentPrice/i.loggedPrice-1)*100;
+  return null;
+}
+const fmtP=(v,c)=>v==null||v===''?'—':Number(v).toLocaleString('de-DE',{maximumFractionDigits:2})+(c?' '+c:'');
+const fmtChg=v=>v==null?'—':(v>0?'+':'')+v.toFixed(1)+' %';
+const stars=n=>'★'.repeat(n||0)+'☆'.repeat(5-(n||0));
+
+function render(){ view==='board'?renderBoard():renderScore(); }
+
+function renderBoard(){
+  const b=$('#board'); b.innerHTML='';
+  const ideas=live().sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+  for(const s of STATUSES){
+    const items=ideas.filter(i=>i.status===s.k);
+    const col=document.createElement('div'); col.className='col';
+    col.innerHTML=`<h2><span class="sw" style="background:${s.c}"></span>${s.label}<span class="n">${items.length}</span></h2><div class="cards"></div>`;
+    const cards=col.querySelector('.cards');
+    if(!items.length) cards.innerHTML=`<div class="empty">nothing here</div>`;
+    for(const i of items){
+      const c=chgOf(i), due=i.nextReview&&i.nextReview<=today();
+      const el=document.createElement('div'); el.className='card'; el.style.borderLeftColor=s.c;
+      el.innerHTML=`<div class="t"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span></div>
+        <div class="th">${esc(i.thesis)||'<i>no thesis yet</i>'}</div>
+        <div class="meta"><span class="conv">${stars(i.conviction)}</span>
+        ${c!=null?`<span class="chg ${c>=0?'up':'dn'}">${fmtChg(c)}</span>`:''}
+        ${i.buyBelow?`<span>buy &lt; ${fmtP(i.buyBelow,i.currency)}</span>`:''}
+        ${i.nextReview?`<span class="${due?'due':''}">${due?'⚠ review':'review '+i.nextReview}</span>`:''}
+        </div>`;
+      el.onclick=()=>openEdit(i.id);
+      cards.appendChild(el);
+    }
+    b.appendChild(col);
+  }
+}
+
+function renderScore(){
+  const rows=live().map(i=>({...i,chg:chgOf(i)}));
+  const dir=sortDir;
+  rows.sort((a,b)=>{const x=a[sortKey]??'',y=b[sortKey]??''; return (x>y?1:x<y?-1:0)*dir;});
+  const tb=$('#scoreTbl tbody'); tb.innerHTML='';
+  for(const i of rows){
+    const tr=document.createElement('tr');
+    const due=i.nextReview&&i.nextReview<=today();
+    tr.innerHTML=`<td><b>${esc(i.ticker)}</b> <span class="hint">${esc(i.name)}</span></td>
+      <td><span class="pill">${STATUSES.find(s=>s.k===i.status)?.label||i.status}</span></td>
+      <td>${i.loggedDate||'—'}</td><td class="num">${fmtP(i.loggedPrice,i.currency)}</td>
+      <td class="num">${fmtP(i.currentPrice)}${i.currentDate?` <span class="hint">${i.currentDate}</span>`:''}</td>
+      <td class="num"><span class="chg ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtChg(i.chg)}</span></td>
+      <td class="conv">${stars(i.conviction)}</td>
+      <td class="num">${fmtP(i.buyBelow)}${i.buyBelow&&i.currentPrice&&i.currentPrice<=i.buyBelow?' ✅':''}</td>
+      <td class="${due?'due':''}">${i.nextReview||'—'}</td>`;
+    tr.onclick=()=>openEdit(i.id);
+    tb.appendChild(tr);
+  }
+  // summary
+  const withChg=rows.filter(r=>r.chg!=null);
+  const avg=a=>a.length?a.reduce((s,r)=>s+r.chg,0)/a.length:null;
+  const bought=withChg.filter(r=>r.status==='bought'), passed=withChg.filter(r=>r.status==='out');
+  const hits=withChg.filter(r=>r.chg>0).length;
+  const due=rows.filter(r=>r.nextReview&&r.nextReview<=today()).length;
+  $('#summary').innerHTML=`
+    <div class="stat"><b>${rows.length}</b><span>ideas tracked</span></div>
+    <div class="stat"><b>${withChg.length?Math.round(hits/withChg.length*100)+' %':'—'}</b><span>ideas up since logged</span></div>
+    <div class="stat"><b class="${(avg(bought)??0)>=0?'':''}">${fmtChg(avg(bought))}</b><span>avg. change, bought</span></div>
+    <div class="stat"><b>${fmtChg(avg(passed))}</b><span>avg. change, passed/sold</span></div>
+    <div class="stat"><b>${due}</b><span>reviews due</span></div>`;
+}
+
+$$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
+$$('.tabs button').forEach(b=>b.onclick=()=>{ $$('.tabs button').forEach(x=>x.classList.toggle('on',x===b)); view=b.dataset.v;
+  $('#viewBoard').hidden=view!=='board'; $('#viewScore').hidden=view!=='score'; render(); });
+
+// ---------- edit sheet ----------
+const sel=$('#f_status'); sel.innerHTML=STATUSES.map(s=>`<option value="${s.k}">${s.label}</option>`).join('');
+let conv=3;
+$$('#f_conviction span').forEach((s,i)=>s.onclick=()=>setConv(i+1));
+function setConv(n){ conv=n; $$('#f_conviction span').forEach((s,i)=>s.classList.toggle('on',i<n)); }
+const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','currentPrice','buyBelow','nextReview','source','thesis','bull','bear','kill'];
+
+function openEdit(id){
+  editingId=id;
+  const i=id?data.ideas.find(x=>x.id===id):blank();
+  $('#eTitle').textContent=id?`${i.ticker||'Idea'} · ${i.name||''}`:'New idea';
+  F.forEach(k=>$('#f_'+k).value=i[k]??'');
+  setConv(i.conviction||3);
+  $('#btnDelete').style.visibility=id?'visible':'hidden';
+  $('#notesBox').style.display=id?'':'none';
+  renderNotes(i);
+  $('#mEdit').classList.add('on');
+}
+function renderNotes(i){
+  $('#noteList').innerHTML=(i.notes||[]).slice().reverse().map(n=>`<div class="note"><small>${n.date}</small>${esc(n.text)}</div>`).join('')||'<div class="hint">no notes yet</div>';
+}
+$('#btnNote').onclick=()=>{
+  const t=$('#f_note').value.trim(); if(!t||!editingId) return;
+  const i=data.ideas.find(x=>x.id===editingId); i.notes=i.notes||[]; i.notes.push({date:today(),text:t}); i.updatedAt=now();
+  $('#f_note').value=''; renderNotes(i); persist();
+};
+$('#btnSave').onclick=()=>{
+  const i=editingId?data.ideas.find(x=>x.id===editingId):blank();
+  const prevCur=i.currentPrice;
+  F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency') v=v.toUpperCase().trim(); i[k]=v; });
+  i.conviction=conv;
+  if(i.currentPrice!=null && i.currentPrice!==prevCur) i.currentDate=today();
+  if(!i.ticker && !i.name){ toast('Ticker or name needed'); return; }
+  i.updatedAt=now();
+  if(!editingId) data.ideas.push(i);
+  closeAll(); persist(); toast('Saved');
+};
+$('#btnDelete').onclick=()=>{
+  if(!editingId||!confirm('Delete this idea?')) return;
+  const i=data.ideas.find(x=>x.id===editingId); i.deletedAt=now(); i.updatedAt=now();
+  closeAll(); persist();
+};
+$('#fab').onclick=()=>openEdit(null);
+$$('[data-close]').forEach(b=>b.onclick=closeAll);
+$$('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeAll(); }));
+function closeAll(){ $$('.modal').forEach(m=>m.classList.remove('on')); }
+
+// ---------- import from claude ----------
+$('#btnImportClaude').onclick=()=>{ $('#claudeJson').value=''; $('#mClaude').classList.add('on'); };
+$('#btnClaudeGo').onclick=()=>{
+  let txt=$('#claudeJson').value.trim();
+  txt=txt.replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
+  let obj; try{ obj=JSON.parse(txt); }catch{ toast('That is not valid JSON'); return; }
+  const arr=Array.isArray(obj)?obj:(obj.ideas||[obj]);
+  let n=0;
+  for(const raw of arr){
+    if(!raw||typeof raw!=='object') continue;
+    const o={...raw}; o.ticker=(o.ticker||'').toUpperCase(); o.currency=(o.currency||'EUR').toUpperCase();
+    if(!o.id) o.id=uid();
+    ['loggedPrice','currentPrice','buyBelow'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
+    if(!o.loggedDate) o.loggedDate=today();
+    if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
+    if(typeof o.notes==='string') o.notes=[{date:today(),text:o.notes}];
+    o.updatedAt=now(); if(!o.createdAt) o.createdAt=o.updatedAt;
+    n+=merge([o]);
+  }
+  closeAll(); persist(); toast(`Imported ${n} idea${n===1?'':'s'}`);
+};
+
+// ---------- export / import file ----------
+$('#btnMenu').onclick=()=>{ $('#s_repo').value=sync.repo; $('#s_branch').value=sync.branch; $('#s_path').value=sync.path; $('#s_token').value=sync.token; $('#mMenu').classList.add('on'); };
+$('#btnExport').onclick=()=>{
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ideas-${today()}.json`; a.click();
+};
+$('#btnImport').onclick=()=>$('#fileIn').click();
+$('#fileIn').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{ const d=JSON.parse(await f.text()); const n=merge(d.ideas||d); persist(); toast(`Merged ${n} change${n===1?'':'s'}`); }catch{ toast('Could not read file'); }
+  e.target.value='';
+};
+
+// ---------- github sync ----------
+$('#btnSyncSave').onclick=()=>{ sync={repo:$('#s_repo').value.trim(),branch:$('#s_branch').value.trim()||'main',path:$('#s_path').value.trim()||'ideas.json',token:$('#s_token').value.trim()};
+  localStorage.setItem(LS_SYNC,JSON.stringify(sync)); closeAll(); pull(); };
+$('#btnSyncClear').onclick=()=>{ localStorage.removeItem(LS_SYNC); sync={repo:'',branch:'main',path:'ideas.json',token:''}; closeAll(); setSync('','local'); };
+$('#btnSyncNow').onclick=()=>{ closeAll(); pull(true); };
+
+const cfg=()=>sync.repo&&sync.token;
+const api=()=>`https://api.github.com/repos/${sync.repo}/contents/${sync.path}`;
+const hdr=()=>({Authorization:`Bearer ${sync.token}`,Accept:'application/vnd.github+json'});
+const b64enc=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+const b64dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,'')),c=>c.charCodeAt(0)));
+let remoteSha=null, pushTimer=null, pushing=false;
+
+function setSync(cls,txt){ const s=$('#sync'); s.className='sync '+cls; s.querySelector('span').textContent=txt; }
+
+async function pull(thenPush){
+  if(!cfg()) return;
+  setSync('busy','syncing…');
+  try{
+    const r=await fetch(`${api()}?ref=${sync.branch}&t=${Date.now()}`,{headers:hdr(),cache:'no-store'});
+    if(r.status===404){ remoteSha=null; setSync('ok','repo (new file)'); if(thenPush||live().length) await push(); return; }
+    if(!r.ok) throw new Error(r.status);
+    const j=await r.json(); remoteSha=j.sha;
+    const remote=JSON.parse(b64dec(j.content));
+    const n=merge(remote.ideas||[]);
+    localStorage.setItem(LS_DATA,JSON.stringify(data)); render();
+    setSync('ok','synced');
+    if(n) toast(`Pulled ${n} change${n===1?'':'s'}`);
+    // push back if local has anything remote lacks
+    const remoteIds=new Set((remote.ideas||[]).map(i=>i.id+'|'+i.updatedAt));
+    if(thenPush || data.ideas.some(i=>!remoteIds.has(i.id+'|'+i.updatedAt))) await push();
+  }catch(e){ console.error(e); setSync('err','sync failed'); toast('Sync failed: '+e.message); }
+}
+function schedulePush(){ if(!cfg()) return; clearTimeout(pushTimer); pushTimer=setTimeout(push,1500); }
+async function push(retry=true){
+  if(!cfg()||pushing) return; pushing=true; setSync('busy','saving…');
+  try{
+    const body={message:`radar: update ${today()}`,content:b64enc(JSON.stringify(data,null,2)),branch:sync.branch};
+    if(remoteSha) body.sha=remoteSha;
+    const r=await fetch(api(),{method:'PUT',headers:{...hdr(),'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if((r.status===409||r.status===422)&&retry){ pushing=false; await pull(); return; }
+    if(!r.ok) throw new Error(r.status);
+    const j=await r.json(); remoteSha=j.content.sha; setSync('ok','synced');
+  }catch(e){ console.error(e); setSync('err','push failed'); }
+  finally{ pushing=false; }
+}
+
+// ---------- misc ----------
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2200); }
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) pull(); });
+
+render();
+pull();
+})();
+</script>
+</body>
+</html>
