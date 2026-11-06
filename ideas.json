@@ -134,7 +134,7 @@
       "name": "National Grid plc",
       "sector": "Utilities – regulated electricity networks (UK & US Northeast)",
       "source": "Claude chat 2026-11-06",
-      "status": "radar",
+      "status": "researching",
       "loggedDate": "2026-11-06",
       "loggedPrice": 1285.5,
       "currency": "GBP",
@@ -155,7 +155,7 @@
         }
       ],
       "createdAt": "2026-11-06T12:49:42.223Z",
-      "updatedAt": "2026-11-06T20:08:08.833Z"
+      "updatedAt": "2026-11-06T20:08:10.846Z"
     },
     {
       "id": "wluiammw52r9pl",
