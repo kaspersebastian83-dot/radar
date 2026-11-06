@@ -28,6 +28,24 @@ def utc(idx):
     return idx.tz_convert("UTC") if idx.tz is not None else idx.tz_localize("UTC")
 
 
+def pay_freq(d):
+    """Typical number of payments per year (median over the last 5 full years)."""
+    years = d.groupby(d.index.year).size()
+    cur = pd.Timestamp.now(tz="UTC").year
+    full = years[(years.index < cur) & (years.index >= cur - 5)]
+    if not len(full):
+        return None
+    return max(1, int(round(float(full.median()))))
+
+
+def trailing(d, dt, freq):
+    """Sum of the last `freq` payments up to dt (only payments within ~15 months count,
+    so a cut or suspension shows up). More robust than a fixed 365-day window,
+    which catches one payment too many or too few when pay dates drift."""
+    win = d[(d.index <= dt) & (d.index > dt - pd.Timedelta(days=455))]
+    return float(win.iloc[-freq:].sum()) if len(win) else 0.0
+
+
 def yield_history(t, divs):
     """Average trailing-12-month dividend yield over the last 5 years.
 
@@ -53,15 +71,18 @@ def yield_history(t, divs):
     end = monthly.index.max()
     monthly = monthly[monthly.index > end - pd.DateOffset(years=5)]
     first_div = d.index.min()
+    freq = pay_freq(d)
+    if not freq:
+        return None
     ys = []
     for dt, px in monthly.items():
         if px <= 0 or dt - pd.Timedelta(days=365) < first_div - pd.Timedelta(days=45):
             continue  # not a full dividend year of history yet
-        ttm = float(d[(d.index > dt - pd.Timedelta(days=365)) & (d.index <= dt)].sum())
-        ys.append(ttm / float(px) * 100)
+        ys.append(trailing(d, dt, freq) / float(px) * 100)
     if len(ys) < 36:  # need at least 3 years for a meaningful average
         return None
     return {
+        "payFreq": freq,
         "avgYield5y": round(sum(ys) / len(ys), 2),
         "yieldLow5y": round(min(ys), 2),
         "yieldHigh5y": round(max(ys), 2),
@@ -105,8 +126,10 @@ def main():
             try:
                 d = t.dividends
                 if len(d):
-                    cutoff = pd.Timestamp.now(tz=d.index.tz) - pd.Timedelta(days=365)
-                    ttm = float(d[d.index > cutoff].sum())
+                    du = d.copy(); du.index = utc(du.index)
+                    f = pay_freq(du)
+                    now_ts = pd.Timestamp.now(tz="UTC")
+                    ttm = trailing(du, now_ts, f) if f else float(du[du.index > now_ts - pd.Timedelta(days=365)].sum())
                     if ttm > 0:
                         q["divTTM"] = round(ttm, 4)
                         q["yieldTTM"] = round(ttm / price * 100, 2)
