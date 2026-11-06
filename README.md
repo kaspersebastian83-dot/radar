@@ -7,7 +7,8 @@ Works in any browser (phone, tablet, PC). Optional GitHub sync keeps all devices
 
 1. Create a GitHub repo, e.g. `radar`. Put `index.html` in it. Commit.
 2. Settings → Pages → Source: *Deploy from a branch*, branch `main`, folder `/ (root)`.
-   Your app is now at `https://<username>.github.io/radar/`. Add it to your phone's home screen.
+   Your app is now at `https://<username>.github.io/radar/`.
+   On the iPhone open it in Safari → Share → "Add to Home Screen": you get the Radar icon and it opens full-screen like an app.
 3. Token for sync: GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens**
    → Generate. Repository access: *Only select repositories* → `radar`.
    Permissions → Repository permissions → **Contents: Read and write**. Copy the token.
