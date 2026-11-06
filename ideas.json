@@ -155,6 +155,35 @@
       ],
       "createdAt": "2026-11-06T12:49:42.223Z",
       "updatedAt": "2026-11-06T12:49:42.223Z"
+    },
+    {
+      "id": "wluiammw52r9pl",
+      "ticker": "O",
+      "name": "Realty Income Corporation",
+      "sector": "Real estate – net-lease REIT (retail/industrial, US + Europe)",
+      "source": "Claude chat 2026-11-06",
+      "status": "watchlist",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 59.5,
+      "currency": "USD",
+      "symbol": "O",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 54,
+      "conviction": 3,
+      "thesis": "The Monthly Dividend Company: 15,500+ net-lease properties, 98.8% occupied, with tenants paying taxes, insurance and maintenance. Pays ~5.5% yield (annualized $3.258) at ~73% of 2026 AFFO guidance of $4.45–4.46. Growth comes from buying properties at 6.8% cash yields with a ~170 bp spread over its cost of capital. For a German investor the cleanest foreign dividend: 15% US withholding, fully credited, no manual reclaim.",
+      "bull": "Occupancy 98.8%, rent recapture 103.5% on re-leases, 2026 AFFO guidance raised, $10bn investment target intact, equity needs for 2026 prefunded, Europe now ~40% of deal flow with less competition. 55-year record, 644+ consecutive monthly dividends. A rate-cut cycle re-rates bond proxies like this one upward.",
+      "bear": "External-growth model: total AFFO grows ~10% but per-share only 3–4% because of constant share issuance; same-store rent growth of 1.1% is below inflation. Pivot into loans, preferred equity and a private fund adds credit risk (provisions up to $14.2m from $11.6m). Retail tenant concentration (dollar stores, pharmacies, convenience). Analysts cooling: Scotiabank downgrade to Sector Perform ($59 PT), Stifel PT cut to $63.75. Highly rate-sensitive; 52-week range $53–68.",
+      "kill": "I'm wrong if: AFFO per share growth falls below 2% for a full year; occupancy drops below 97.5%; net debt/EBITDAre rises above 6.0x; credit-loss provisions on loans/preferred equity exceed $25m in a single quarter; or the monthly dividend is frozen for more than 12 months.",
+      "nextReview": "2027-03-01",
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "Logged at $59.50 (close 2026-11-05), three days after Q3 2026 results (AFFO $1.12, guidance raised by $0.01). Yield 5.5%, P/AFFO ~13.4x. Buy-below $54 = ~6% yield / ~12x AFFO, roughly the 52-week low. Next review after FY2026 results and 2027 guidance (late Feb 2027)."
+        }
+      ],
+      "createdAt": "2026-11-06T14:33:27.273Z",
+      "updatedAt": "2026-11-06T14:33:27.273Z"
     }
   ]
 }
