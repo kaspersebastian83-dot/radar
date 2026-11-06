@@ -17,7 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#eef0f3;--panel:#ffffff;--panel2:#f6f7f9;--ink:#15202b;--ink2:#4b5563;--mute:#8a94a3;--line:#dfe3e8;--line2:#eceff2;
+  --bg:#eef0f3;--panel:#ffffff;--panel2:#f6f7f9;--ink:#15202b;--ink2:#4b5563;--mute:#687280;--line:#dfe3e8;--line2:#eceff2;
   --ochre:#b8862b;--ochre-soft:#f7efdc;--teal:#1f7a6b;--teal-soft:#dff0ec;--coral:#c8503f;--coral-soft:#f9e3df;
   --radar:#8b7cc7;--research:#4f8fd6;--watch:#d9a441;--bought:#2f9e7a;--out:#9aa3ae;
   --r:14px;--r2:10px;
@@ -316,6 +316,45 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
   .scorebox{padding:12px;gap:12px}.ring.big{width:72px;height:72px}.ring.big b{font-size:26px}
   .sbar{grid-template-columns:80px 1fr 40px;font-size:12px}
 }
+/* ---------- idea card (v2.3.0): every fact once, nothing hidden on the phone ---------- */
+.card2{--ti:color-mix(in srgb,var(--tc) 72%,var(--ink));background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:12px;min-width:0;transition:border-color .15s}
+.card2:hover{border-color:var(--mute)}
+.card2:active{transform:scale(.995)}
+.c2top{display:flex;gap:12px;align-items:flex-start}
+.c2sc{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--ti);background:color-mix(in srgb,var(--tc) 15%,transparent)}
+.c2id{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.c2nm{display:flex;flex-wrap:wrap;gap:0 6px;align-items:baseline}
+.c2nm .tk{font-weight:800;font-size:16px;letter-spacing:-.01em}
+.c2nm .nm{font-size:13px;color:var(--ink2);line-height:1.3}
+.c2st{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink2)}
+.c2st i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--stage)}
+.c2st b{font-weight:700}
+.c2px{flex:none;text-align:right;display:flex;flex-direction:column;gap:4px}
+.c2px .p{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-weight:800;font-size:16px;white-space:nowrap}
+.c2px .s{font-size:12px;color:var(--ink2);white-space:nowrap}
+.c2px .s b{font-weight:700}
+.c2dec{font-size:13.5px;line-height:1.35;color:var(--ink2)}
+.c2dec b{color:var(--ti);font-weight:800}
+.c2bar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.c2bar .rt{position:relative;flex:1;height:14px}
+.c2bar .tr{position:absolute;left:0;right:0;top:4px;height:6px;border-radius:3px;background:var(--line)}
+.c2bar .zn{position:absolute;left:0;top:4px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--teal) 32%,transparent)}
+.c2bar .bt{position:absolute;top:0;width:2px;height:14px;margin-left:-1px;background:var(--ink)}
+.c2bar .nw{position:absolute;top:1px;width:12px;height:12px;box-sizing:border-box;margin-left:-6px;border-radius:50%;background:var(--panel);border:3px solid var(--tc)}
+.c2box{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:var(--panel2);border-radius:var(--r2);padding:10px 12px}
+.c2box>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.c2box span{font-size:11.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c2box b{font-size:15px;font-weight:800;white-space:nowrap}
+.c2box .due{color:var(--coral);font-weight:700}
+.c2th{margin:0;font-size:13px;line-height:1.4;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* one status pill: price age + sync state */
+#sync{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+#sync span{display:inline!important}
+/* add sheet */
+.addopts{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
+.addopts button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid var(--line);background:var(--panel);padding:14px 16px;border-radius:var(--r2);text-align:left;font-weight:700;font-size:15px;min-height:44px}
+.addopts button small{color:var(--mute);font-size:12.5px;font-weight:500}
+.addopts button:hover{border-color:var(--mute)}
 /* ---------- portfolio view ---------- */
 .badge{display:inline-flex;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--teal);color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center;vertical-align:1px}
 .badge[hidden]{display:none}
@@ -376,9 +415,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
     <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="score"><span class="lg">Scorecard</span><span class="sm">Score</span></button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button></div>
     <span class="sp"></span>
     <button class="btn small quiet num" id="btnEur" title="Show foreign prices in euros">€</button>
-    <span class="status" id="pxInfo"></span>
-    <span class="status" id="sync"><i></i><span>local</span></span>
-    <button class="btn small" id="btnImportClaude"><span class="lg">Import from Claude</span><span class="sm">Import</span></button>
+    <button class="status" id="sync" title="Prices and sync"><i></i><span>local</span></button>
     <button class="btn small quiet" id="btnMenu" title="Data and sync">⋯</button>
   </div>
   <div class="chips" id="chips"></div>
@@ -413,7 +450,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
     <p class="hint" style="margin-top:18px">The Add score works like the Buy score on the Ideas board: 50 points for the distance to your add-below price, 30 for yield vs. its 5-year average, 20 for the position in the 52-week range. Without your own add level, a matching Radar card's buy-below is used; with no level at all a stock can reach "Getting close" but never the add zone. Stocks above your max weight are listed as full, however cheap they get. Share counts and values come from the statement you import and stay in this browser; only the list of holdings and your add levels are saved to GitHub.</p>
   </section>
 </main>
-<button class="fab" id="fab" title="New idea">+</button>
+<button class="fab" id="fab" title="Add" aria-label="Add: import from Claude or write an idea by hand">+</button>
 
 <!-- reading mode -->
 <div class="modal" id="mRead"><div class="sheet">
@@ -490,6 +527,14 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 </div></div>
 
 <!-- menu / settings -->
+<div class="modal" id="mAdd"><div class="sheet">
+  <h3>Add<span class="sp"></span><button class="btn small quiet" data-close>✕</button></h3>
+  <div class="addopts">
+    <button id="addClaude">Import from Claude<small>Paste a Radar card or a holdings block from a chat</small></button>
+    <button id="addHand">Write an idea by hand<small>Empty card, you fill in ticker, price and thesis</small></button>
+  </div>
+</div></div>
+
 <div class="modal" id="mMenu"><div class="sheet">
   <h3>Data and sync<span class="sp"></span><button class="btn small quiet" data-close>✕</button></h3>
   <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnLog">What's new</button></div>
@@ -537,8 +582,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='2.2.0';
+const VERSION='2.3.0';
 const CHANGELOG=[
+  {v:'2.3.0',d:'2026-11-06',t:'Calmer idea cards',items:[
+    'Cards are shorter and say every fact once: score tile, then one line with the tier and how far it is to your buy price, then the 52-week bar with its low and high at the ends.',
+    'Yield, return in € and next review sit side by side in one box. An arrow shows whether the yield is above (▲) or below (▼) its usual level.',
+    'On the phone, cards now show the thesis, the return and the review date too. They were hidden there before.',
+    'The top bar is quieter: price age and sync status are one small pill (tap it for details), and Import from Claude now lives in the + button.',
+    'Stages without cards are hidden from the filter row until they hold something.',
+    'Grey text is a bit darker so it is easier to read.']},
   {v:'2.2.0',d:'2026-11-06',t:'Prices in €',items:[
     'New € button in the top bar. Tap it and foreign stocks show their price, buy-below, add level, 52-week range and "price at its usual yield" in euros, on Ideas, Scorecard and Portfolio.',
     'Live prices and levels use today\'s rate, logged and bought prices the rate on that day. The local price stays visible in small type and in the quote line.',
@@ -773,7 +825,7 @@ function openSort(){
 function render(){ renderChips(); view==='board'?renderBoard():view==='score'?renderScore():renderPort(); renderPxInfo(); renderBadge(); }
 function renderPxInfo(){
   const n=Object.keys(prices.quotes||{}).length, e=Object.keys(prices.errors||{});
-  $('#pxInfo').innerHTML=n?`<span>prices ${ago(prices.updated)}</span>`:'';
+  renderStatus();
   $('#pxStatus').innerHTML=n||e.length
     ? `Last price change ${ago(prices.updated)}, ${n} quote${n===1?'':'s'}.`+(e.length?`<br><span class="dn">No quote for ${e.map(esc).join(', ')}.</span> Set the Yahoo symbol on those cards, e.g. ENI.MI, SAP.DE, NESN.SW.`:'')
     : 'No price file loaded yet. It appears after the first run of the GitHub Action.';
@@ -782,6 +834,7 @@ function renderChips(){
   const ideas=live(); const counts=Object.fromEntries(STATUSES.map(s=>[s.k,ideas.filter(i=>i.status===s.k).length]));
   const all=[{k:'all',label:'All',c:'var(--ink)'},...STATUSES];
   $('#chips').innerHTML=`<button class="chip sort" id="btnSort" aria-label="Sort: ${sortOf().label}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>${sortOf().label}</button><span class="csep"></span>`+all.map(s=>{ const n=s.k==='all'?ideas.length:counts[s.k];
+    if(!n&&s.k!=='all'&&filter!==s.k) return '';  // empty stages appear once they hold a card
     return `<button class="chip ${filter===s.k?'on':''} ${n?'':'zero'}" data-f="${s.k}">${s.k==='all'?'':`<i style="background:${s.c}"></i>`}${s.label} <b>${n}</b></button>`; }).join('');
   $('#btnSort').onclick=openSort;
   $$('#chips .chip[data-f]').forEach(b=>b.onclick=()=>{ filter=b.dataset.f; try{localStorage.setItem(LS_FILTER,filter);}catch{} if(view!=='board') switchView('board'); else render(); });
@@ -800,32 +853,58 @@ function renderBoard(){
   const g=$('#grid'); g.innerHTML='';
   const ideas=sortIdeas(live().filter(i=>filter==='all'||i.status===filter));
   if(!ideas.length){ g.innerHTML=`<div class="empty"><b>${live().length?'Nothing in this stage':'No ideas yet'}</b>${live().length?'Pick another stage above.':'Discuss a stock with Claude, then paste the card with "Import from Claude", or add one with +.'}</div>`; return; }
-  for(const i of ideas){
-    const s=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), chg=chgOf(i), h=histOf(i), sc=scoreOf(i);
-    const due=i.nextReview&&i.nextReview<=today();
-    const el=document.createElement('article'); el.className='idea'; el.style.setProperty('--stage',s.c); el.tabIndex=0;
-    el.innerHTML=`
-      <div class="head"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span><span class="stage">${s.label}</span></div>
-      <div class="main" style="--tc:${sc?sc.c:'var(--t-none)'}">
-        ${ringHtml(sc)}
-        <div class="why">${sc?`<b class="tier">${sc.tier}</b><span>${esc(whyOf(i,sc))}</span>`
-          :!q&&errOf(i)?`<b class="tier">No quote</b><span class="dn">No quote for ${esc(symOf(i))}. Open the card and set the Yahoo symbol.</span>`
-          :`<b class="tier">No score yet</b><span>${c?'Set a buy-below price to score it.':'Waiting for the first price.'}</span>`}</div>
-        <div class="price num">${c?`${liveDot(i)}${mP(c,curOfI(i))}`:'—'}${c&&isConv(curOfI(i))?`<small class="fx" style="color:var(--mute)">${fmtP(c,curOfI(i))}</small>`:c&&curOfI(i)!=='EUR'&&eurOf(c,curOfI(i))!=null?`<small class="fx" style="color:var(--mute)">≈ ${fmtP(eurOf(c,curOfI(i)),'EUR')}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
+  for(const i of ideas) g.appendChild(cardEl(i));
+}
+// Idea card (v2.3.0). Every fact of the old card is here once: score + tier + distance to buy in one
+// line, range bar with its ends, then yield / return / review, then two lines of thesis.
+const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
+function cardEl(i){
+  const st=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), h=histOf(i), sc=scoreOf(i), cur=curOfI(i), t=totalOf(i);
+  const due=i.nextReview&&i.nextReview<=today();
+  const tc=sc?sc.c:'var(--t-none)';
+  // decision line: tier · distance to the buy level (· near the 52-week high/low)
+  const bp=sc?.parts.find(x=>x.k==='buy'), rp=sc?.parts.find(x=>x.k==='rng');
+  const tier=sc?sc.tier:!q&&errOf(i)?'No quote':'No score yet';
+  let dist=i.buyBelow>0?(bp?(bp.above<=0?`in the buy zone, buy below ${mN(i.buyBelow,cur)}`:`${fmtN(bp.above,0)} % above buy at ${mN(i.buyBelow,cur)}`):`buy below ${mN(i.buyBelow,cur)}`)
+    :'no buy price set';
+  if(!sc&&!q&&errOf(i)) dist=`no quote for ${symOf(i)}, set the Yahoo symbol in Edit`;
+  else if(!sc&&!c) dist='waiting for the first price';
+  if(rp&&rp.pos>=.85) dist+=' · near 52w high'; else if(rp&&rp.pos<=.15) dist+=' · near 52w low';
+  // price: chosen currency first, the other one small next to today's move
+  const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
+  // range bar
+  const p=posOf(i);
+  let bar='';
+  if(p!=null){ const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
+    bar=`<div class="c2bar" title="52-week range${b!=null?', your buy level (line)':''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`; }
+  // yield vs its usual
+  const yArr=h?(h.v==='cheap'?['▲','up']:h.v==='expensive'?['▼','dn']:['≈','']):null;
+  const chg=t?t.best:null, retCls=chg==null||Math.abs(chg)<.05?'':chg>0?'up':'dn';
+  const el=document.createElement('article'); el.className='card2'; el.tabIndex=0;
+  el.style.setProperty('--stage',st.c); el.style.setProperty('--tc',tc);
+  el.innerHTML=`
+    <div class="c2top">
+      <div class="c2sc" title="Buy score${sc?`: ${sc.score} of 100`:''}">${sc?sc.score:'–'}</div>
+      <div class="c2id">
+        <div class="c2nm"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span></div>
+        <div class="c2st"><i></i><b>${st.label}</b>${stars(i.conviction)}</div>
       </div>
-      ${runwayHtml(i,sc)}
-      <p class="thesis">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>
-      <div class="foot">
-        <span class="yl num">${y!=null?`<b>${fmtN(y,2)} %</b> yield${h?` · usual ${fmtN(h.avg,2)} %`:''}`:'no yield data'}</span>
-        ${stars(i.conviction)}
-        ${chg!=null?(t=>`<span class="ret num ${chg>=0?'up':'dn'}" title="Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${fmtPct(t.fx)}`:''}">${fmtPct(chg)} ${retLabel(i)} ${sinceLabel(i)}</span>`)(totalOf(i)):''}
-        <span class="sp"></span>
-        ${i.nextReview?`<span class="pill rv ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}
-      </div>`;
-    el.onclick=()=>openRead(i.id);
-    el.onkeydown=e=>{ if(e.key==='Enter') openRead(i.id); };
-    g.appendChild(el);
-  }
+      <div class="c2px num">
+        <div class="p">${c?`${liveDot(i)}${mP(c,cur)}`:'—'}</div>
+        <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
+      </div>
+    </div>
+    <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
+    ${bar}
+    <div class="c2box num">
+      <div><span>Yield</span><b>${y!=null?fmtN(y,2)+' %':'—'}</b><span class="${yArr?yArr[1]:''}">${h?`${yArr[0]} usual ${fmtN(h.avg,2)} %`:y!=null?'no 5-yr history':'no data'}</span></div>
+      <div title="${t?`Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${t.inEur?fmtPct(t.fx):'n/a'}`:''}`:''}"><span>${t&&t.foreign&&!t.inEur?'Return (local)':'Return in €'}</span><b class="${retCls}">${fmtPct(chg)}</b><span>${t?`${t.base.what==='bought'?'bought':'since'} ${fmtDay(t.base.date)}`:'no price yet'}</span></div>
+      <div><span>Review</span><b title="${i.nextReview?fmtDate(i.nextReview):''}">${i.nextReview?new Date(i.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!i.nextReview?'not set':due?'due now':'next look'}</span></div>
+    </div>
+    <p class="c2th">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>`;
+  el.onclick=()=>openRead(i.id);
+  el.onkeydown=e=>{ if(e.key==='Enter') openRead(i.id); };
+  return el;
 }
 
 function renderScore(){
@@ -888,7 +967,7 @@ $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
 function switchView(v){ view=v; try{localStorage.setItem(LS_VIEW,v);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
   $('#viewBoard').hidden=v!=='board'; $('#viewScore').hidden=v!=='score'; $('#viewPort').hidden=v!=='port';
-  $('#chips').style.display=v==='board'?'':'none'; $('#fab').style.display=v==='port'?'none':''; render(); }
+  $('#chips').style.display=v==='board'?'':'none'; $('#fab').style.display=''; render(); }
 $$('.seg button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
 // ---------- reading mode ----------
@@ -1013,14 +1092,17 @@ $('#btnDelete').onclick=()=>{
   const i=data.ideas.find(x=>x.id===editingId); i.deletedAt=now(); i.updatedAt=now();
   closeAll(); persist(); toast('Deleted');
 };
-$('#fab').onclick=()=>openEdit(null);
+$('#fab').onclick=()=>$('#mAdd').classList.add('on');
 $$('[data-close]').forEach(b=>b.onclick=closeAll);
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeAll(); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeAll(); });
 function closeAll(){ $$('.modal').forEach(m=>m.classList.remove('on')); }
 
 // ---------- import from claude ----------
-$('#btnImportClaude').onclick=()=>{ $('#claudeJson').value=''; $('#mClaude').classList.add('on'); };
+const openClaude=()=>{ closeAll(); $('#claudeJson').value=''; $('#mClaude').classList.add('on'); };
+$('#addClaude').onclick=openClaude;
+$('#addHand').onclick=()=>{ closeAll(); if(view==='port') switchView('board'); openEdit(null); };
+$('#sync').onclick=()=>$('#btnMenu').click();
 $('#btnClaudeGo').onclick=()=>{
   let txt=$('#claudeJson').value.trim();
   txt=txt.replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
@@ -1074,7 +1156,12 @@ const hdr=()=>({Authorization:`Bearer ${sync.token}`,Accept:'application/vnd.git
 const b64enc=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 const b64dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,'')),c=>c.charCodeAt(0)));
 let remoteSha=null, pushTimer=null, pushing=false;
-function setSync(cls,txt){ const s=$('#sync'); s.className='status '+cls; s.querySelector('span').textContent=txt; }
+let syncTxt='saved on this device';
+function setSync(cls,txt){ const s=$('#sync'); s.className='status '+cls; syncTxt=txt==='local'?'saved on this device':txt; renderStatus(); }
+// One pill: the text is the price age, the dot the sync state; full wording in the tooltip and in ⋯.
+function renderStatus(){ const s=$('#sync'); if(!s) return; const n=Object.keys(prices.quotes||{}).length;
+  s.querySelector('span').textContent=n?ago(prices.updated).replace(/ ago$/,''):'no prices';
+  s.title=`${n?'Prices updated '+ago(prices.updated):'No prices loaded yet'} · ${syncTxt}`; s.setAttribute('aria-label',s.title); }
 
 async function pull(thenPush){
   if(!cfg()) return;
