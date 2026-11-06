@@ -166,6 +166,8 @@ td .tk{font-weight:800}
 .srow .cell small{font-size:12px;color:var(--ink2);font-weight:600;margin-left:4px}
 .srow .rev{margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute)}td .nm{color:var(--mute);font-size:12.5px;margin-left:6px}
 .hint{font-size:12.5px;color:var(--mute)}
+#btnEur{font-weight:800;min-width:34px}
+#btnEur.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
 
 /* sheet */
@@ -373,6 +375,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
     <div class="brand"><i></i><span>Radar</span><button class="ver num" id="verBtn" title="What's new"></button></div>
     <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="score"><span class="lg">Scorecard</span><span class="sm">Score</span></button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button></div>
     <span class="sp"></span>
+    <button class="btn small quiet num" id="btnEur" title="Show foreign prices in euros">€</button>
     <span class="status" id="pxInfo"></span>
     <span class="status" id="sync"><i></i><span>local</span></span>
     <button class="btn small" id="btnImportClaude"><span class="lg">Import from Claude</span><span class="sm">Import</span></button>
@@ -534,8 +537,13 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='2.1.0';
+const VERSION='2.2.0';
 const CHANGELOG=[
+  {v:'2.2.0',d:'2026-11-06',t:'Prices in €',items:[
+    'New € button in the top bar. Tap it and foreign stocks show their price, buy-below, add level, 52-week range and "price at its usual yield" in euros, on Ideas, Scorecard and Portfolio.',
+    'Live prices and levels use today\'s rate, logged and bought prices the rate on that day. The local price stays visible in small type and in the quote line.',
+    'Display only: scores, buy and add levels are still worked out in the stock\'s own currency, so a currency move never changes a score.',
+    'The setting is remembered per device.']},
   {v:'2.1.0',d:'2026-11-06',t:'Version number and changelog',items:[
     'The version is shown next to the logo and in ⋯. Tap it for this list.',
     'A dot on ⋯ tells you when a new version has loaded that you haven\'t looked at yet.']},
@@ -574,7 +582,7 @@ const CHANGELOG=[
     'Stages Radar → Researching → Watchlist → Bought → Passed / Sold, and the Scorecard.',
     'Import from Claude, export/import JSON, GitHub sync across devices.']},
 ];
-const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1', LS_VIEW='radar.view.v1', LS_SEEN='radar.seenVersion.v1';
+const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1', LS_VIEW='radar.view.v1', LS_SEEN='radar.seenVersion.v1', LS_EUR='radar.eurView.v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const today=()=>new Date().toISOString().slice(0,10);
 const now=()=>new Date().toISOString();
@@ -623,6 +631,22 @@ function dayOf(i){ const q=quoteOf(i); return q&&q.price>0&&q.prevClose>0?(q.pri
 const FX_UNIT={GBp:['GBP',100],GBX:['GBP',100],ZAc:['ZAR',100]};
 const fxCode=c=>FX_UNIT[c]||[String(c||'').toUpperCase(),1];
 function eurOf(v,cur){ const [c,u]=fxCode(cur); if(v==null) return null; if(c==='EUR') return v/u; const r=(prices.fx||{})[c]; return r?v/u/r:null; }
+// ---------- € view (display only) ----------
+// When on, foreign prices and levels are shown in EUR: today's rate for live prices and levels,
+// the rate on that day for logged/bought prices. Scores, buy/add levels and stored data stay in
+// the listing currency, so a currency move never changes a score.
+let eurView=false; try{ eurView=localStorage.getItem(LS_EUR)==='1'; }catch{}
+function fxRate(c,date){ const r=date?((prices.fxAt||{})[c]||{})[date]:null; return r||(prices.fx||{})[c]||null; }
+function inView(v,cur,date){
+  if(!eurView||v==null||v==='') return null;
+  const [c,u]=fxCode(cur); if(!c||c==='EUR') return null;
+  const r=fxRate(c,date); return r?Number(v)/u/r:null;
+}
+const mP=(v,cur,date)=>{ const e=inView(v,cur,date); return e!=null?fmtP(e,'EUR'):fmtP(v,cur); };   // price with currency
+const mN=(v,cur,date)=>{ const e=inView(v,cur,date); return e!=null?fmtN(e)+' €':fmtN(v); };        // bare level (gauges, labels)
+const isConv=cur=>inView(1,cur)!=null;
+const fxNote=cur=>{ if(!isConv(cur)) return ''; const [c,u]=fxCode(cur);
+  return ` € view: ${fmtN((prices.fx||{})[c]*u,4)} ${u>1?esc(cur):c} per EUR.`; };
 // Base for the return: the purchase for Bought cards (if a price was entered), otherwise the day the idea was logged.
 const isBought=i=>i.boughtPrice>0&&(i.status==='bought'||i.status==='out');
 const baseOf=i=>isBought(i)?{price:i.boughtPrice,date:i.boughtDate||i.loggedDate,what:'bought'}:{price:i.loggedPrice,date:i.loggedDate,what:'logged'};
@@ -680,11 +704,11 @@ function gaugeHtml(i,mode="mini"){
   let buy='', zone='';
   if(i.buyBelow>0){
     const b=Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/span));
-    buy=`<span class="buy ${b<.15?'edge-l':b>.85?'edge-r':''}" style="left:${(b*100).toFixed(1)}%" data-l="buy ${fmtP(i.buyBelow)}"></span>`;
+    buy=`<span class="buy ${b<.15?'edge-l':b>.85?'edge-r':''}" style="left:${(b*100).toFixed(1)}%" data-l="buy ${mN(i.buyBelow,curOfI(i))}"></span>`;
     zone=`<span class="zone" style="left:0;width:${(b*100).toFixed(1)}%"></span>`;
   }
   return `<div class="gauge ${mode}" title="52-week range">
-    <span class="lo">52-week low ${fmtN(q.yearLow)}</span><span class="hi">high ${fmtN(q.yearHigh)}</span>
+    <span class="lo">52-week low ${mN(q.yearLow,curOfI(i))}</span><span class="hi">high ${mN(q.yearHigh,curOfI(i))}</span>
     <span class="track"></span>${zone}${buy}<span class="now" style="left:${(p*100).toFixed(1)}%"></span></div>`;
 }
 
@@ -727,7 +751,7 @@ function runwayHtml(i,s){
   const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
   return `<div class="runway" style="--tc:${s?s.c:'var(--ink)'}" title="52-week range, your buy price and today's price">
     <div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div>
-    <div class="lb num"><span>52w low ${fmtN(q.yearLow)}</span>${i.buyBelow>0?`<b>buy &lt; ${fmtN(i.buyBelow)}</b>`:''}<span>high ${fmtN(q.yearHigh)}</span></div></div>`;
+    <div class="lb num"><span>52w low ${mN(q.yearLow,curOfI(i))}</span>${i.buyBelow>0?`<b>buy &lt; ${mN(i.buyBelow,curOfI(i))}</b>`:''}<span>high ${mN(q.yearHigh,curOfI(i))}</span></div></div>`;
 }
 const SORTS=[
   {k:'score',label:'Best buy right now',sub:'Buy score, high to low',f:i=>scoreOf(i)?.score,dir:-1},
@@ -787,7 +811,7 @@ function renderBoard(){
         <div class="why">${sc?`<b class="tier">${sc.tier}</b><span>${esc(whyOf(i,sc))}</span>`
           :!q&&errOf(i)?`<b class="tier">No quote</b><span class="dn">No quote for ${esc(symOf(i))}. Open the card and set the Yahoo symbol.</span>`
           :`<b class="tier">No score yet</b><span>${c?'Set a buy-below price to score it.':'Waiting for the first price.'}</span>`}</div>
-        <div class="price num">${c?`${liveDot(i)}${fmtP(c,curOfI(i))}`:'—'}${c&&curOfI(i)!=='EUR'&&eurOf(c,curOfI(i))!=null?`<small class="fx" style="color:var(--mute)">≈ ${fmtP(eurOf(c,curOfI(i)),'EUR')}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
+        <div class="price num">${c?`${liveDot(i)}${mP(c,curOfI(i))}`:'—'}${c&&isConv(curOfI(i))?`<small class="fx" style="color:var(--mute)">${fmtP(c,curOfI(i))}</small>`:c&&curOfI(i)!=='EUR'&&eurOf(c,curOfI(i))!=null?`<small class="fx" style="color:var(--mute)">≈ ${fmtP(eurOf(c,curOfI(i)),'EUR')}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
       </div>
       ${runwayHtml(i,sc)}
       <p class="thesis">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>
@@ -816,9 +840,9 @@ function renderScore(){
       <td class="r">${scHtml(i)}${i.sc?` <span class="nm">${i.sc.tier}</span>`:''}</td>
       <td class="r num" style="font-weight:800">${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</td>
       <td class="r num">${i.h?`<span class="vtag ${i.h.v}">${i.h.v==='fair'?'usual':i.h.v}</span> <span class="nm">avg ${fmtN(i.h.avg,2)} %</span>`:'—'}</td>
-      <td class="r num">${liveDot(i)}${fmtP(i.now,curOfI(i))}${!quoteOf(i)&&errOf(i)?' <span class="dn" title="no quote">!</span>':''}</td>
+      <td class="r num">${liveDot(i)}${mP(i.now,curOfI(i))}${!quoteOf(i)&&errOf(i)?' <span class="dn" title="no quote">!</span>':''}</td>
       <td class="r num ${i.day==null?'':i.day>=0?'up':'dn'}">${fmtPct(i.day)}</td>
-      <td class="r num">${i.toBuy==null?(i.buyBelow?fmtP(i.buyBelow,curOfI(i)):'—'):hit?`<span class="pill hit">in zone</span> <span class="nm">${fmtP(i.buyBelow,curOfI(i))}</span>`:`−${fmtN(-i.toBuy,0)} % <span class="nm">to ${fmtP(i.buyBelow,curOfI(i))}</span>`}</td>
+      <td class="r num">${i.toBuy==null?(i.buyBelow?mP(i.buyBelow,curOfI(i)):'—'):hit?`<span class="pill hit">in zone</span> <span class="nm">${mP(i.buyBelow,curOfI(i))}</span>`:`−${fmtN(-i.toBuy,0)} % <span class="nm">to ${mP(i.buyBelow,curOfI(i))}</span>`}</td>
       <td class="r num ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtPct(i.chg)}</td>
       <td>${fmtDate(i.loggedDate)}</td>
       <td>${stars(i.conviction)}</td>
@@ -837,12 +861,12 @@ function renderScore(){
         <div class="y num"><b>${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</b><span>${i.h?`avg ${fmtN(i.h.avg,2)} %`:'yield'}</span></div></div>
       ${i.h?`<div style="margin-top:8px"><span class="vtag ${i.h.v}">${i.h.label}</span></div>`:''}
       <div class="cells">
-        <div class="cell"><span>Price</span><b class="num">${liveDot(i)}${fmtP(i.now,curOfI(i))}</b></div>
+        <div class="cell"><span>Price</span><b class="num">${liveDot(i)}${mP(i.now,curOfI(i))}</b></div>
         <div class="cell"><span>Today</span><b class="num ${i.day==null?'':i.day>=0?'up':'dn'}">${fmtPct(i.day)}</b></div>
-        <div class="cell"><span>Buy price</span><b class="num ${hit?'up':''}">${i.buyBelow?fmtP(i.buyBelow,curOfI(i)):'—'}</b>${i.toBuy!=null?`<small class="num">${hit?'in zone':`−${fmtN(-i.toBuy,0)} % away`}</small>`:''}</div>
+        <div class="cell"><span>Buy price</span><b class="num ${hit?'up':''}">${i.buyBelow?mP(i.buyBelow,curOfI(i)):'—'}</b>${i.toBuy!=null?`<small class="num">${hit?'in zone':`−${fmtN(-i.toBuy,0)} % away`}</small>`:''}</div>
         <div class="cell"><span>Total in EUR</span><b class="num ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtPct(i.chg)}</b></div>
       </div>
-      <div class="rev"><span>${isBought(i)?'bought '+fmtDate(i.boughtDate||i.loggedDate)+' at '+fmtP(i.boughtPrice,curOfI(i)):'logged '+fmtDate(i.loggedDate)}</span>${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}</div>`;
+      <div class="rev"><span>${isBought(i)?'bought '+fmtDate(i.boughtDate||i.loggedDate)+' at '+mP(i.boughtPrice,curOfI(i),i.boughtDate||i.loggedDate):'logged '+fmtDate(i.loggedDate)}</span>${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}</div>`;
     el.onclick=()=>openRead(i.id);
     sl.appendChild(el);
   }
@@ -877,7 +901,7 @@ function openRead(id){
   $('#dossier').innerHTML=`
     <div class="top">
       <div class="title"><div class="tk">${esc(i.ticker)}</div><div class="nm">${esc(i.name)}${i.sector?' · '+esc(i.sector):''}</div>
-        <div class="meta"><span style="color:${s.c};font-weight:700">${s.label}</span> &nbsp; ${stars(i.conviction)} &nbsp; logged ${fmtDate(i.loggedDate)} at ${fmtP(i.loggedPrice,i.currency)}${isBought(i)?` · bought ${fmtDate(i.boughtDate||i.loggedDate)} at ${fmtP(i.boughtPrice,i.currency)}`:''}${i.source?' · '+esc(i.source):''}</div></div>
+        <div class="meta"><span style="color:${s.c};font-weight:700">${s.label}</span> &nbsp; ${stars(i.conviction)} &nbsp; logged ${fmtDate(i.loggedDate)} at ${mP(i.loggedPrice,i.currency,i.loggedDate)}${isBought(i)?` · bought ${fmtDate(i.boughtDate||i.loggedDate)} at ${mP(i.boughtPrice,i.currency,i.boughtDate||i.loggedDate)}`:''}${i.source?' · '+esc(i.source):''}</div></div>
     </div>
     <div class="stagebar" id="stagebar"></div>
     <div class="buyform" id="buyform" hidden></div>
@@ -887,9 +911,9 @@ function openRead(id){
     <div class="kpis">
       <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
       ${(h=>h?`<div class="kpi"><b class="num ${h.v==='cheap'?'up':h.v==='expensive'?'dn':''}">${fmtN(h.avg,2)} %</b><span>5-yr average yield</span></div>
-      <div class="kpi"><b class="num">${h.fair?fmtP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
-      <div class="kpi"><b class="num">${c?fmtP(c,curOfI(i)):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
-      <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${tb==null?(i.buyBelow?fmtN(i.buyBelow):'—'):tb>=0?'In zone':'−'+fmtN(-tb,0)+' %'}</b><span>${i.buyBelow?'to buy below '+fmtN(i.buyBelow):'no buy level'}</span></div>
+      <div class="kpi"><b class="num">${h.fair?mP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
+      <div class="kpi"><b class="num">${c?mP(c,curOfI(i)):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
+      <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${tb==null?(i.buyBelow?mN(i.buyBelow,curOfI(i)):'—'):tb>=0?'In zone':'−'+fmtN(-tb,0)+' %'}</b><span>${i.buyBelow?'to buy below '+mN(i.buyBelow,curOfI(i)):'no buy level'}</span></div>
       <div class="kpi"><b class="num ${chg==null?'':chg>=0?'up':'dn'}">${fmtPct(chg)}</b><span>${retLabel(i)}</span></div>
       ${i.nextReview?`<div class="kpi"><b style="font-size:16px">${fmtDate(i.nextReview)}</b><span>${i.nextReview<=today()?'<span class="dn">review due</span>':'next review'}</span></div>`:''}
     </div>
@@ -904,7 +928,7 @@ function openRead(id){
       <p><span class="vtag ${h.v}">${h.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(h.dev),0)} % ${h.dev>=0?'above':'below'} its ${fmtN(h.yrs,1)}-year average of ${fmtN(h.avg,2)} %. ${h.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':h.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
       ${ybarHtml(i)}</div>`:'')(histOf(i))}
     ${posOf(i)!=null?`<div class="sec"><h4>52-week range</h4>${runwayHtml(i,scoreOf(i))}</div>`:''}
-    ${q?`<div class="quote">${liveDot(i)}${esc(symOf(i))} ${fmtP(q.price,q.currency)}${q.divTTM?`, ${fmtN(q.divTTM)} ${esc(q.currency)} dividends in the last 12 months`:''}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${i.currency&&q.currency&&i.currency!==q.currency?` <span class="warn">Quote is in ${esc(q.currency)}, the card in ${esc(i.currency)}.</span>`:''}</div>`
+    ${q?`<div class="quote">${liveDot(i)}${esc(symOf(i))} ${fmtP(q.price,q.currency)}${q.divTTM?`, ${fmtN(q.divTTM)} ${esc(q.currency)} dividends in the last 12 months`:''}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${fxNote(q.currency)}${i.currency&&q.currency&&i.currency!==q.currency?` <span class="warn">Quote is in ${esc(q.currency)}, the card in ${esc(i.currency)}.</span>`:''}</div>`
        :errOf(i)?`<div class="quote"><span class="warn">No quote for ${esc(symOf(i))}.</span> Set the Yahoo Finance symbol in Edit, e.g. ENI.MI (Milan), SAP.DE (Xetra), NESN.SW (Zurich), ULVR.L (London); US stocks just the ticker.</div>`:''}
     ${sec('Thesis',i.thesis)}
     <div class="folds">${fold('Bull case',i.bull,'bull')}${fold('Bear case',i.bear,'bear')}${fold("I'm wrong if",i.kill,'kill')}</div>
@@ -1021,6 +1045,11 @@ $('#btnClaudeGo').onclick=()=>{
 };
 
 // ---------- export / import file ----------
+const syncEur=()=>{ const b=$('#btnEur'); b.classList.toggle('on',eurView);
+  b.title=eurView?'Showing foreign prices in euros. Tap for local currency':'Show foreign prices in euros'; };
+$('#btnEur').onclick=()=>{ eurView=!eurView; try{localStorage.setItem(LS_EUR,eurView?'1':'0');}catch{}
+  syncEur(); render(); toast(eurView?'Prices in €':'Prices in local currency'); };
+syncEur();
 $('#btnMenu').onclick=()=>{ $('#s_repo').value=sync.repo; $('#s_branch').value=sync.branch; $('#s_path').value=sync.path; $('#s_token').value=sync.token; $('#mMenu').classList.add('on'); };
 $('#btnExport').onclick=()=>{
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -1183,7 +1212,7 @@ function holdCard(r){
     <div class="main" style="--tc:${s?s.c:'var(--t-none)'}">
       ${s?ringHtml(s):''}
       <div class="why">${why}</div>
-      <div class="price num">${c?`${liveDot(x)}${fmtP(c,cur)}`:'—'}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
+      <div class="price num">${c?`${liveDot(x)}${mP(c,cur)}`:'—'}${c&&isConv(cur)?`<small class="fx" style="color:var(--mute)">${fmtP(c,cur)}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
     </div>
     ${s?runwayHtml(x,s):''}
     ${mm!=null?`<div class="warnbox">Quote is ${fmtPct(mm*100,0)} off the statement price. Probably the wrong Yahoo symbol.</div>`:''}
@@ -1244,17 +1273,17 @@ function openHold(id){
       </div></div>`:''}
     ${mm!=null?`<div class="warnbox">The live quote for ${esc(hSym(h))} converts to ${fmtP(v.unit,'EUR')}, the statement says ${fmtP(p.priceEur,'EUR')}. That is ${fmtPct(mm*100,0)} apart, so the Yahoo symbol is probably the wrong line or share class.</div>`:''}
     <div class="kpis">
-      <div class="kpi"><b class="num">${c?fmtP(c,cur):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
+      <div class="kpi"><b class="num">${c?mP(c,cur):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
       <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
       <div class="kpi"><b class="num ${!isFund(h)&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${isFund(h)?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
       <div class="kpi"><b class="num">${p?fmtN(p.shares,3):'—'}</b><span>shares</span></div>
       <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
-      ${hi?`<div class="kpi"><b class="num">${fmtN(hi.avg,2)} %</b><span>5-yr average yield</span></div><div class="kpi"><b class="num">${hi.fair?fmtP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
-      <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':fmtN(a.v)):'—'}</b><span>${a?`to add below ${fmtN(a.v)}${a.src==='radar'?' (Radar)':''}`:'no add level'}</span></div>
+      ${hi?`<div class="kpi"><b class="num">${fmtN(hi.avg,2)} %</b><span>5-yr average yield</span></div><div class="kpi"><b class="num">${hi.fair?mP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
+      <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':mN(a.v,cur)):'—'}</b><span>${a?`to add below ${mN(a.v,cur)}${a.src==='radar'?' (Radar)':''}`:'no add level'}</span></div>
       ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
     </div>
     ${posOf(x)!=null?`<div class="sec"><h4>52-week range</h4>${runwayHtml(x,s)}</div>`:''}
-    ${q?`<div class="quote">${liveDot(x)}${esc(hSym(h))} ${fmtP(q.price,q.currency)}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.</div>`
+    ${q?`<div class="quote">${liveDot(x)}${esc(hSym(h))} ${fmtP(q.price,q.currency)}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${fxNote(q.currency)}</div>`
       :hSym(h)&&errOf(x)?`<div class="quote"><span class="warn">No quote for ${esc(hSym(h))}.</span> Set the Yahoo symbol below, e.g. ALV.DE, DG.PA, ENEL.MI, 8058.T.</div>`:''}
     ${idea?`<div class="row"><button class="btn" id="hIdea">↗ Open the Radar card (${esc(stageOf(idea).label)})</button><span class="hint">thesis, bull, bear, journal</span></div>`:''}
     ${h.note?`<div class="sec"><h4>Note</h4><p>${esc(h.note)}</p></div>`:''}
