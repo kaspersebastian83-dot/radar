@@ -11,6 +11,7 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 23.4,
       "currency": "EUR",
+      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 19.5,
@@ -40,6 +41,7 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 86.5,
       "currency": "USD",
+      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 70,
@@ -69,6 +71,7 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 25.46,
       "currency": "EUR",
+      "symbol": "ENI.MI",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 19.5,
@@ -89,8 +92,7 @@
         }
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
-      "updatedAt": "2026-11-06T11:50:00.000Z",
-      "symbol": "ENI.MI"
+      "updatedAt": "2026-11-06T11:50:00.000Z"
     },
     {
       "id": "ko-20261105",
@@ -102,6 +104,7 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 95.45,
       "currency": "USD",
+      "symbol": "KO",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 70,
@@ -122,8 +125,36 @@
         }
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
-      "updatedAt": "2026-11-06T11:50:00.000Z",
-      "symbol": "KO"
+      "updatedAt": "2026-11-06T11:50:00.000Z"
+    },
+    {
+      "id": "qmtgi1mw4z1ufj",
+      "ticker": "NG",
+      "name": "National Grid plc",
+      "sector": "Utilities – regulated electricity networks (UK & US Northeast)",
+      "source": "Claude chat 2026-11-06",
+      "status": "watchlist",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 1285.5,
+      "currency": "GBP",
+      "symbol": "NG.L",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 1100,
+      "conviction": 3,
+      "thesis": "Regulated grid owner whose profits grow with the networks it builds: RIIO-T3 is locked in to 2031, assets grow ~10% a year and EPS 8–10% a year. The dividend grows with UK CPIH and is untouched by withholding tax for a German investor. A buy only when the yield reaches ~4.6%, because at ~3.9% it pays less than gilts.",
+      "bull": "H1 FY27: capex £6.7bn (+33%), underlying EPS +22% to 36.5p, FY27 EPS guidance raised to +15–16% (~90p). RIIO-T3 accepted (base RoE 5.70% real, management targets >9% incl. incentives). £70bn+ five-year plan. Joulent (35%, US data-centre power, Microsoft 20-yr PPA) adds growth. UK withholding tax 0%, beta ~0.6.",
+      "bear": "~3.9% yield sits below the 10y gilt (~5.1%) while the BoE is hiking again. Net debt £48.6bn and rising ~£4bn per half, gearing heading to 65%. The 2024 £7bn rights issue at 645p rebased the dividend, and another raise is possible. DPS grows only with CPIH and is diluted by scrip. UK bill-affordability politics and US rate cases. Mega-project overrun risk. Near 30-year highs. 0.5% UK stamp duty on purchase.",
+      "kill": "I'm wrong if: the dividend grows below UK CPIH in any year or is rebased; any new equity raise beyond scrip; regulatory gearing above 70% or any credit-rating downgrade; the 8–10% EPS CAGR framework (to FY31) is cut; UK Electricity Transmission RoE reported below 8% in two consecutive years.",
+      "nextReview": "2027-05-14",
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "Logged 2026-11-06 after H1 FY27 results (5 Nov). loggedPrice = 5 Nov LSE close 1,285.50p (Sharecast/Barclays/AJ Bell). On 6 Nov it traded ~1,238p (−3.7%) in a global selloff after the BoE's first hike since 2023 (Bank Rate 4.0%), so 'since logged' starts negative. FY27 dividend est. ~50.3p (interim 16.97p, ex-div 19 Nov 2026). Buy-below 1,100p = ~4.6% yield, ~12x FY27 EPS, near the 52-week low of 1,096.5p. Review after FY27 results on 13 May 2027: dividend vs CPIH, net debt and gearing, any equity raise."
+        }
+      ],
+      "createdAt": "2026-11-06T12:49:42.223Z",
+      "updatedAt": "2026-11-06T12:49:42.223Z"
     }
   ]
 }
