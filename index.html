@@ -348,13 +348,29 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
   .hold .ring{width:44px;height:44px}.hold .ring b{font-size:16px}
   .hold .foot .val{display:inline}
 }
+/* version + changelog */
+.ver{border:0;background:none;padding:2px 4px;font-size:11.5px;font-weight:700;color:var(--mute);letter-spacing:0;border-radius:6px}
+.ver:hover{color:var(--ink)}
+#btnMenu{position:relative}
+#btnMenu.new::after{content:"";position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 2px var(--bg)}
+.verrow{display:flex;align-items:center;gap:10px;background:var(--panel2);border-radius:var(--r2);padding:10px 12px;margin-bottom:18px;font-size:13px;color:var(--ink2)}
+.verrow b{color:var(--ink)}.verrow .sp{flex:1}
+.log{display:flex;flex-direction:column;gap:18px}
+.log .rel h4{margin:0;font-size:15px;font-weight:800;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.log .rel h4 .v{font-variant-numeric:tabular-nums}
+.log .rel h4 small{font-weight:600;color:var(--mute);font-size:12.5px}
+.log .rel h4 .cur{font-size:11px;font-weight:800;color:var(--teal);background:var(--teal-soft);padding:2px 8px;border-radius:999px}
+.log .rel ul{margin:6px 0 0;padding-left:18px;color:var(--ink2);font-size:13.5px;line-height:1.5}
+.log .rel li{margin:2px 0}
+.log .rel.unseen h4 .v{color:var(--teal)}
+@media(max-width:700px){.brand .ver{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
-    <div class="brand"><i></i><span>Radar</span></div>
+    <div class="brand"><i></i><span>Radar</span><button class="ver num" id="verBtn" title="What's new"></button></div>
     <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="score"><span class="lg">Scorecard</span><span class="sm">Score</span></button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button></div>
     <span class="sp"></span>
     <span class="status" id="pxInfo"></span>
@@ -450,6 +466,12 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
   </div>
 </div></div>
 
+<!-- changelog -->
+<div class="modal" id="mLog"><div class="sheet" style="max-width:620px">
+  <h3>What's new<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <div class="log" id="logBody"></div>
+</div></div>
+
 <!-- holding sheet -->
 <div class="modal" id="mHold"><div class="sheet">
   <h3><span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
@@ -467,6 +489,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 <!-- menu / settings -->
 <div class="modal" id="mMenu"><div class="sheet">
   <h3>Data and sync<span class="sp"></span><button class="btn small quiet" data-close>✕</button></h3>
+  <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnLog">What's new</button></div>
   <div class="row" style="margin-bottom:18px">
     <button class="btn" id="btnExport">Export JSON</button>
     <button class="btn" id="btnImport">Import JSON (merge)</button>
@@ -508,7 +531,50 @@ const STATUSES = [
   {k:'bought',label:'Bought',c:'var(--bought)'},
   {k:'out',label:'Passed / Sold',c:'var(--out)'},
 ];
-const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1', LS_VIEW='radar.view.v1';
+// ---------- version ----------
+// Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
+// major: new area of the app · minor: new feature · patch: fix or small tweak
+const VERSION='2.1.0';
+const CHANGELOG=[
+  {v:'2.1.0',d:'2026-11-06',t:'Version number and changelog',items:[
+    'The version is shown next to the logo and in ⋯. Tap it for this list.',
+    'A dot on ⋯ tells you when a new version has loaded that you haven\'t looked at yet.']},
+  {v:'2.0.1',d:'2026-11-06',t:'Fix',items:[
+    'Core € Corp Bond ETF now quoted on the right Xetra line (EUN5.DE). The old symbol was a different fund, about 10 % off.']},
+  {v:'2.0.0',d:'2026-11-06',t:'Portfolio tab',items:[
+    'New tab for what you own, kept separate from the idea tracking.',
+    'Import the Trade Republic Vermögensübersicht PDF. Share counts are read in the browser and stay on the device; the repo only gets the list of holdings and your add levels.',
+    'Add score per stock, same 50/30/20 scale as the Buy score. Add zone only with an add-below price; a Radar card on the same symbol lends its buy-below.',
+    'Max weight per stock (default 7 %): stocks above it are listed as full and never flagged.',
+    'Depot value at live prices, dividends per year, badge on the tab when something is in the add zone.',
+    'Warning when a live quote is more than 20 % off the statement price (wrong symbol).',
+    'Holdings with a Radar card link straight to the thesis.']},
+  {v:'1.6.0',d:'2026-11-06',t:'Buy score',items:[
+    'Every card gets a 0–100 Buy score: distance to buy-below (50), yield vs. 5-year average (30), position in the 52-week range (20).',
+    'Board sorted by best buy right now, with a sort sheet that explains the score.',
+    'Clearer cards: score ring, a one-line reason, runway from 52-week low to high with your buy level.',
+    'Bull, bear and kill criteria fold away in the reading view.']},
+  {v:'1.5.0',d:'2026-11-06',t:'Phone cards and stages',items:[
+    'Compact cards on the phone: one glance per stock, tap for the full dossier.',
+    'Stage switcher in the reading view. Moving to Bought asks for purchase price and date, which become the base for returns.']},
+  {v:'1.4.0',d:'2026-11-06',t:'Total return in EUR',items:[
+    'Return since logging (or purchase) = price + dividends + currency effect, at the exchange rate of that day vs. today.']},
+  {v:'1.3.0',d:'2026-11-06',t:'Yield vs. its own history',items:[
+    'Cheap / expensive tag from today\'s yield vs. the 5-year average yield, plus the price at the usual yield.',
+    'Trailing dividends counted as the last N payments, so drifting pay dates don\'t double count.']},
+  {v:'1.2.0',d:'2026-11-06',t:'Redesign',items:[
+    'Dividend-first cards with the 52-week gauge and buy price marker.',
+    'Reading mode for each idea, app icon for the home screen.',
+    'Phone layout for the Scorecard.']},
+  {v:'1.1.0',d:'2026-11-06',t:'Live prices',items:[
+    'GitHub Action fetches Yahoo Finance quotes every 2 hours on weekdays and whenever ideas change.',
+    'Refresh prices button in ⋯.']},
+  {v:'1.0.0',d:'2026-11-05',t:'First version',items:[
+    'Idea cards with thesis, bull, bear, kill criteria, conviction, buy-below and dated journal.',
+    'Stages Radar → Researching → Watchlist → Bought → Passed / Sold, and the Scorecard.',
+    'Import from Claude, export/import JSON, GitHub sync across devices.']},
+];
+const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1', LS_VIEW='radar.view.v1', LS_SEEN='radar.seenVersion.v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const today=()=>new Date().toISOString().slice(0,10);
 const now=()=>new Date().toISOString();
@@ -1325,6 +1391,26 @@ async function pushP(retry=true){
   }catch(e){ console.warn(e); toast('Saving portfolio.json failed'); }
   finally{ pushingP=false; }
 }
+
+// ---------- version and changelog ----------
+const vcmp=(a,b)=>{ const x=String(a||'0').split('.').map(Number), y=String(b||'0').split('.').map(Number);
+  for(let k=0;k<3;k++){ const d=(x[k]||0)-(y[k]||0); if(d) return d; } return 0; };
+let seenVer=null; try{ seenVer=localStorage.getItem(LS_SEEN); }catch{}
+function renderVersion(){
+  $('#verBtn').textContent='v'+VERSION; $('#verMenu').textContent='v'+VERSION; $('#verDate').textContent='· '+fmtDate(CHANGELOG[0].d);
+  // first visit ever: nothing to announce; afterwards a dot when the loaded version is newer than the last one you opened
+  if(seenVer==null){ try{ localStorage.setItem(LS_SEEN,VERSION); }catch{} seenVer=VERSION; }
+  $('#btnMenu').classList.toggle('new',vcmp(VERSION,seenVer)>0);
+}
+function openLog(){
+  $('#logBody').innerHTML=CHANGELOG.map(r=>`<div class="rel ${vcmp(r.v,seenVer)>0?'unseen':''}"><h4><span class="v">v${esc(r.v)}</span> ${esc(r.t)} <small>${fmtDate(r.d)}</small>${r.v===VERSION?'<span class="cur">you have this</span>':''}</h4>
+    <ul>${r.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');
+  closeAll(); $('#mLog').classList.add('on');
+  seenVer=VERSION; try{ localStorage.setItem(LS_SEEN,VERSION); }catch{} renderVersion();
+}
+$('#verBtn').onclick=openLog;
+$('#btnLog').onclick=openLog;
+renderVersion();
 
 // ---------- misc ----------
 let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2200); }

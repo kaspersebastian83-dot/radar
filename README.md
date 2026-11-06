@@ -3,6 +3,10 @@
 Single-file, offline-capable dashboard for tracking stock ideas from first spark to verdict.
 Works in any browser (phone, tablet, PC). Optional GitHub sync keeps all devices on the same data.
 
+**Version:** shown next to the logo (desktop) and in `⋯` (always). Tap it for the changelog.
+If the version you see is older than the newest entry in the `CHANGELOG` list at the top of the script in `index.html`, your browser has an old copy cached: pull to refresh, or close and reopen the home-screen app.
+Every change to the app bumps `VERSION` and adds a changelog entry (major: new area, minor: new feature, patch: fix).
+
 ## Setup (once)
 
 1. Create a GitHub repo, e.g. `radar`. Put `index.html` in it. Commit.
