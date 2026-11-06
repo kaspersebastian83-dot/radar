@@ -95,7 +95,8 @@ def years_from(t):
 
 
 def div_years(t):
-    """Dividends per share per calendar year (full years only, last 25)."""
+    """[year, dividends per share, number of payments] per calendar year (full years only, last 25).
+    The count lets the app tell a real cut from a payment Yahoo is missing."""
     try:
         d = t.dividends
     except Exception:
@@ -105,9 +106,10 @@ def div_years(t):
     d = d.copy()
     d.index = d.index.tz_convert("UTC") if d.index.tz is not None else d.index.tz_localize("UTC")
     cur = pd.Timestamp.now(tz="UTC").year
-    s = d.groupby(d.index.year).sum()
+    g = d.groupby(d.index.year)
+    s, n = g.sum(), g.size()
     s = s[s.index < cur]
-    return [[int(y), round(float(v), 4)] for y, v in s.items()][-25:]
+    return [[int(y), round(float(v), 4), int(n[y])] for y, v in s.items()][-25:]
 
 
 def next_earnings(t):

@@ -346,6 +346,34 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .c2box span{font-size:11.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .c2box b{font-size:15px;font-weight:800;white-space:nowrap}
 .c2box .due{color:var(--coral);font-weight:700}
+.c2biz{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);min-width:0}
+.c2biz span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bz{display:inline-flex;align-items:center;flex:none;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:800;color:var(--bc);background:var(--bb);vertical-align:middle}
+.idea .c2biz{margin-top:8px}
+.biz h4{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.biz .bzn{font-weight:600;color:var(--mute)}
+.biz .bzwhy{margin:0 0 10px;font-size:13.5px;color:var(--ink2);white-space:normal}
+.bzflags{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.bzf{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:9px 12px;border-radius:var(--r2);background:var(--panel2)}
+.bzf>b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:12px;color:#fff;background:var(--ochre)}
+.bzf.r{background:var(--coral-soft)}.bzf.r>b{background:var(--coral)}
+.bzf.ok{background:var(--panel2)}.bzf.ok>b{background:var(--teal)}
+.bzf .t{font-weight:700;font-size:14px}
+.bzf .d{font-size:12.5px;color:var(--ink2);margin-top:2px}
+.bzf .d a{color:var(--mute)}
+.bzf .ck{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.bzf .ck input{flex:1;min-width:180px;font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.bztbl{overflow-x:auto;margin:0 -2px 10px}
+.bztbl table{border-collapse:collapse;font-size:13px;min-width:100%}
+.bztbl th,.bztbl td{padding:5px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line2)}
+.bztbl th:first-child{text-align:left;font-weight:600;color:var(--ink2);position:sticky;left:0;background:var(--panel)}
+.bztbl thead th{font-size:11.5px;color:var(--mute);font-weight:700}
+.bztbl tr.k td{font-weight:800}
+.bzdiv{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-bottom:6px}
+.dvbars{display:flex;align-items:flex-end;gap:3px;height:44px;padding-bottom:13px}
+.dvbars i{position:relative;width:14px;background:var(--ochre);border-radius:3px 3px 0 0}
+.dvbars i.gap{opacity:.35}
+.dvbars s{position:absolute;top:100%;left:50%;transform:translateX(-50%);text-decoration:none;font-size:9.5px;color:var(--mute);font-style:normal}
 .c2th{margin:0;font-size:13px;line-height:1.4;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 /* one status pill: price age + sync state */
 #sync{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer}
@@ -432,7 +460,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
       <button class="btn small" id="sortDir" title="Reverse order">↓</button></div>
     <div class="slist" id="slist"></div>
     <div class="tablewrap"><table id="scoreTbl"><thead><tr>
-      <th data-k="ticker">Stock</th><th data-k="status">Stage</th><th data-k="score" class="r">Buy score</th><th data-k="yld" class="r">Yield</th><th data-k="dev" class="r">vs 5-yr avg</th>
+      <th data-k="ticker">Stock</th><th data-k="status">Stage</th><th data-k="score" class="r">Buy score</th><th data-k="bizRank">Business</th><th data-k="yld" class="r">Yield</th><th data-k="dev" class="r">vs 5-yr avg</th>
       <th data-k="now" class="r">Price</th><th data-k="day" class="r">Today</th><th data-k="toBuy" class="r">To buy level</th>
       <th data-k="chg" class="r">Total in EUR</th><th data-k="loggedDate">Logged</th><th data-k="conviction">Conviction</th><th data-k="nextReview">Review</th>
     </tr></thead><tbody></tbody></table></div>
@@ -447,7 +475,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
       <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
     </div>
     <div id="portBody"></div>
-    <p class="hint" style="margin-top:18px">The Add score works like the Buy score on the Ideas board: 50 points for the distance to your add-below price, 30 for yield vs. its 5-year average, 20 for the position in the 52-week range. Without your own add level, a matching Radar card's buy-below is used; with no level at all a stock can reach "Getting close" but never the add zone. Stocks above your max weight are listed as full, however cheap they get. Share counts and values come from the statement you import and stay in this browser; only the list of holdings and your add levels are saved to GitHub.</p>
+    <p class="hint" style="margin-top:18px">The Add score works like the Buy score on the Ideas board: 50 points for the distance to your add-below price, 30 for yield vs. its 5-year average, 20 for the position in the 52-week range. Without your own add level, a matching Radar card's buy-below is used; with no level at all a stock can reach "Getting close" but never the add zone. Stocks above your max weight are listed as full, however cheap they get. An unchecked red flag in the business holds a stock at Hold. Share counts and values come from the statement you import and stay in this browser; only the list of holdings and your add levels are saved to GitHub.</p>
   </section>
 </main>
 <button class="fab" id="fab" title="Add" aria-label="Add: import from Claude or write an idea by hand">+</button>
@@ -503,6 +531,9 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
     <p style="margin-top:-6px">Position in the 52-week range. Full points at the low, zero at the high.</p>
     <div class="tiers"><span style="--tc:var(--t-buy)">75+ Buy zone</span><span style="--tc:var(--t-close)">55–74 Getting close</span><span style="--tc:var(--t-wait)">35–54 Wait</span><span style="--tc:var(--t-exp)">under 35 Expensive</span></div>
     <p class="hint">If one input is missing (no buy price, no dividend history), its points are spread over the others. Bought positions are scored the same way, so you can see when it is a good moment to add.</p>
+    <h4 style="margin-top:14px">Two limits on top</h4>
+    <p><b>Red flag in the business:</b> the score stops at 54 (Wait) while the business shows an unchecked red flag: cash per share falling 2 years in a row, dividend not covered for 2 years, a dividend cut, share count up without per-share growth, or debt rising fast. Open the card, look at it, and mark it as checked if there's a harmless reason. The next year's figures raise it again.</p>
+    <p><b>No buy price:</b> without your own buy-below, yield and 52-week range alone stop at 74 (Getting close).</p>
   </div>
 </div></div>
 
@@ -582,8 +613,16 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='2.3.0';
+const VERSION='2.4.0';
 const CHANGELOG=[
+  {v:'2.4.0',d:'2026-11-06',t:'Business trend and red flags',items:[
+    'Every stock now shows how the business itself is doing, not just its price: a line on each card (Steady, Watch or Red flag) and a Business section in the details with up to four years of cash per share, payout, debt, return on capital and share count, plus ten years of dividends.',
+    'Red flags: cash per share falling two years in a row, a dividend not covered for two years, a dividend cut, more shares without per-share growth, or debt rising fast. While one is open, the Buy score stops at Wait (Hold on Portfolio), however cheap the stock looks, so a falling business can\'t climb the board.',
+    'A flag is a prompt to look, not a verdict. If there\'s a harmless reason, tap "Checked, it\'s fine" and add a note. The score is free again until the next year\'s figures come in.',
+    'Utilities and REITs are judged on operating cash flow and banks and insurers on earnings, because free cash flow doesn\'t mean much for them.',
+    'Ideas without your own buy price now stop at Getting close, like holdings without an add level already did.',
+    'Scorecard has a Business column. The details also show the next results date.',
+    'The figures come from Yahoo Finance once a week.']},
   {v:'2.3.0',d:'2026-11-06',t:'Calmer idea cards',items:[
     'Cards are shorter and say every fact once: score tile, then one line with the tier and how far it is to your buy price, then the 52-week bar with its low and high at the ends.',
     'Yield, return in € and next review sit side by side in one box. An arrow shows whether the yield is above (▲) or below (▼) its usual level.',
@@ -764,6 +803,154 @@ function gaugeHtml(i,mode="mini"){
     <span class="track"></span>${zone}${buy}<span class="now" style="left:${(p*100).toFixed(1)}%"></span></div>`;
 }
 
+// ---------- business trend (v2.4.0) ----------
+// fundamentals.json comes from the weekly Action: raw annual figures per Yahoo symbol.
+// Trends, payout, leverage and flags are worked out here, so the rules can change without the Action.
+// Three bases: most companies on free cash flow; utilities and REITs on operating cash flow
+// (their growth capex makes FCF negative by design); banks and insurers on earnings.
+const LS_FUND='radar.fund.v1';
+let fund={companies:{}};
+try{ const f=JSON.parse(localStorage.getItem(LS_FUND)); if(f&&f.companies) fund=f; }catch{}
+const bizCache=new Map();
+const BASIS={
+  std:{ps:'FCF per share',short:'FCF/sh',pay:'of free cash flow',cov:'by free cash flow',why:'Measured on free cash flow (operating cash flow minus capex).'},
+  cash:{ps:'Operating cash flow per share',short:'OCF/sh',pay:'of operating cash flow',cov:'by operating cash flow',why:'Utilities and REITs are measured on operating cash flow, because their growth capex makes free cash flow negative by design. It is a rough stand-in for FFO.'},
+  fin:{ps:'Earnings per share',short:'EPS',pay:'of earnings',cov:'by earnings',why:'Banks, insurers and BDCs are measured on earnings; cash flow and debt ratios don\'t mean much for them.'}};
+const modelOf=c=>c.sector==='Financial Services'?'fin':(c.sector==='Real Estate'||c.sector==='Utilities')?'cash':'std';
+const fyOf=e=>{ const [y,m]=String(e).split('-'); return m==='12'?y:`FY${Number(m)}/${y.slice(2)}`; };
+const cagr=(a,b,n)=>a>0&&b>0&&n>0?(Math.pow(a/b,1/n)-1)*100:null;
+function bizRaw(sym){
+  if(bizCache.has(sym)) return bizCache.get(sym);
+  const c=(fund.companies||{})[sym]; let r=null;
+  if(c&&((c.years||[]).length||(c.divYears||[]).length)){
+    const m=modelOf(c), B=BASIS[m];
+    const ys=(c.years||[]).filter(y=>y.shares>0).map(y=>{       // newest first
+      const basis=m==='std'?y.fcf:m==='cash'?y.ocf:y.netIncome;
+      const ps=m==='fin'?(y.eps!=null?y.eps:y.netIncome!=null?y.netIncome/y.shares:null):basis!=null?basis/y.shares:null;
+      const div=y.divPaid!=null&&y.divPaid<0?-y.divPaid:null;
+      const pay=div&&basis!=null?(basis>0?div/basis*100:Infinity):null;
+      const lev=m!=='fin'&&y.netDebt!=null&&y.ebitda>0?y.netDebt/y.ebitda:null;
+      const tax=Math.min(.5,Math.max(0,y.taxRate??.25));
+      const roc=m==='fin'?(y.netIncome!=null&&y.equity>0?y.netIncome/y.equity*100:null)
+        :(y.ebit!=null&&y.investedCapital>0?y.ebit*(1-tax)/y.investedCapital*100:null);
+      return {end:y.end,fy:fyOf(y.end),ps,pay,div,basis,lev,roc,shares:y.shares};
+    });
+    // dividends per calendar year; a year with fewer payments than usual is a data gap, not a cut
+    const dv=(c.divYears||[]).map(([y,v,n])=>({y,v,n}));
+    const ns=dv.slice(-6,-1).map(d=>d.n).filter(n=>n!=null).sort((a,b)=>a-b);
+    const typ=ns.length?ns[Math.floor(ns.length/2)]:null;
+    const full=d=>d.n==null||typ==null||d.n>=typ;
+    const curY=new Date().getFullYear();
+    let streak=0, lastRaise=null;
+    for(let k=dv.length-1;k>0;k--){ const a=dv[k], b=dv[k-1];
+      if(a.y!==b.y+1) break;
+      if(full(a)&&full(b)){ if(a.v<b.v*.95) break; if(lastRaise==null&&a.v>b.v*1.005) lastRaise=a.y; }
+      streak++; }
+    const fd=dv.filter(full), dl=fd[fd.length-1], d5=fd.find(d=>dl&&d.y===dl.y-5);
+    const dg=dl&&d5?cagr(dl.v,d5.v,5):null;
+    // flags: red ones cap the Buy score at Wait until you mark them as checked
+    const F=[], W=[], y0=ys[0], o=ys[ys.length-1], ps=k=>ys[k]?.ps, f2=v=>fmtN(v,2);
+    const key=y0?y0.end:'';
+    if(ys.length>=3&&ps(0)!=null&&ps(1)>0&&ps(2)>0&&ps(0)<ps(1)*.97&&ps(1)<ps(2)*.97)
+      F.push({id:'ps',key,t:`${B.ps} fell 2 years in a row`,d:`${f2(ps(2))} → ${f2(ps(1))} → ${f2(ps(0))} (${ys[2].fy}–${y0.fy})`});
+    else if(ys.length>=2&&ps(0)!=null&&ps(1)>0&&ps(0)<ps(1)*.85)
+      W.push({id:'ps1',key,t:`${B.ps} down ${fmtN((1-ps(0)/ps(1))*100,0)} % last year`,d:`${f2(ps(1))} → ${f2(ps(0))} (${y0.fy})`});
+    const two=ys.slice(0,2).filter(y=>y.div&&y.basis!=null);
+    if(two.length===2){ const D=two[0].div+two[1].div, S=two[0].basis+two[1].basis, p=S>0?D/S*100:Infinity;
+      if(p>100) F.push({id:'pay',key,t:`Dividend not covered ${B.cov} for 2 years`,d:S>0?`paid out ${fmtN(p,0)} % ${B.pay} in ${ys[1].fy}–${y0.fy}`:`${B.short} was negative in ${ys[1].fy}–${y0.fy}`});
+      else if(y0.pay>100) W.push({id:'pay1',key,t:`Payout above 100 % ${B.pay} last year`,d:isFinite(y0.pay)?`${fmtN(y0.pay,0)} % in ${y0.fy}`:`${B.short} negative in ${y0.fy}`}); }
+    const fp=dv.filter(full), a=fp[fp.length-1], b=fp[fp.length-2];
+    if(dv.length>=3&&dv[dv.length-1].y<curY-1)
+      F.push({id:'cut',key:'div'+(curY-1),t:`No dividend paid in ${curY-1}`,d:`last payments in ${dv[dv.length-1].y}`});
+    else if(a&&b&&a.y===b.y+1&&a.y>=curY-2&&a.v<b.v*.95)
+      F.push({id:'cut',key:'div'+a.y,t:`Dividend per share cut in ${a.y}`,d:`${f2(b.v)} → ${f2(a.v)} (${fmtPct((a.v/b.v-1)*100,0)}). A special dividend or a rights issue can explain it.`});
+    else if(lastRaise&&dl&&lastRaise<dl.y-2&&streak>=3)
+      W.push({id:'flat',key:'div'+dl.y,t:`No dividend raise since ${lastRaise}`,d:`${dl.y-lastRaise} years flat`});
+    if(ys.length>=3&&o.shares>0){ const g=(y0.shares/o.shares-1)*100, grew=ps(0)>0&&o.ps!=null&&ps(0)>o.ps;
+      if(g>=5&&!grew) F.push({id:'dil',key,t:`Share count up ${fmtN(g,0)} % without per-share growth`,d:`${o.fy}–${y0.fy}; ${B.short} ${o.ps!=null?f2(o.ps):'—'} → ${ps(0)!=null?f2(ps(0)):'—'}`}); }
+    if(m!=='fin'&&y0&&y0.lev!=null){ const L=m==='cash'?[7,6]:[3.5,3], older=ys.slice(1).map(y=>y.lev).filter(v=>v!=null), first=older[older.length-1];
+      if(y0.lev>L[0]&&first!=null&&y0.lev-first>=1) F.push({id:'lev',key,t:`Debt rising: ${fmtN(y0.lev,1)}× EBITDA`,d:`from ${fmtN(first,1)}× in ${ys[older.length].fy}`});
+      else if(y0.lev>L[1]) W.push({id:'lev1',key,t:`High debt: ${fmtN(y0.lev,1)}× EBITDA`,d:`net debt / EBITDA in ${y0.fy}`}); }
+    const psG=ys.length>=3&&ps(0)>0&&o.ps>0?cagr(ps(0),o.ps,ys.length-1):null;
+    if(psG!=null&&psG<=-10&&!F.some(f=>f.id==='ps')&&!W.some(f=>f.id==='ps1'))
+      W.push({id:'psT',key,t:`${B.ps} down ${fmtN(-psG,0)} %/yr since ${o.fy}`,d:`${f2(o.ps)} → ${f2(ps(0))}. Fine if ${o.fy} was a peak year, worth a look if not.`});
+    r={sym,m,B,c,ys,dv,typ,streak,lastRaise,dg,psG,F,W,next:c.nextEarnings&&c.nextEarnings>=today()?c.nextEarnings:null,time:c.time,stale:!!c.stale};
+  }
+  bizCache.set(sym,r); return r;
+}
+// "Checked, it's fine" notes live on the Radar card or the holding (field `checks`), keyed by flag id.
+// A note only counts for the data it was written for: next year's figures raise the flag again.
+function checksOf(sym){ const out={};
+  try{ for(const i of live()) if(symOf(i)===sym&&i.checks) Object.assign(out,i.checks);
+       for(const h of holdings()) if(hSym(h)===sym&&h.checks) Object.assign(out,h.checks); }catch{}
+  return out; }
+function bizOf(sym){
+  const r=sym?bizRaw(sym):null; if(!r) return null;
+  const ck=checksOf(sym), ok=f=>ck[f.id]&&ck[f.id].key===f.key?ck[f.id]:null;
+  const F=r.F.map(f=>({...f,ok:ok(f)})), red=F.filter(f=>!f.ok);
+  const st=red.length?'red':r.W.length?'watch':F.length?'checked':r.ys.length?'ok':'none';
+  return {...r,F,red,st};
+}
+const BZ={red:['Red flag','var(--coral)','var(--coral-soft)'],watch:['Watch','var(--ochre)','var(--ochre-soft)'],
+  checked:['Checked','var(--teal)','var(--teal-soft)'],ok:['Steady','var(--teal)','var(--teal-soft)'],none:['No data','var(--mute)','var(--panel2)']};
+const bzChip=st=>`<b class="bz" style="--bc:${BZ[st][1]};--bb:${BZ[st][2]}">${BZ[st][0]}</b>`;
+// one line for the board card
+function bizLine(b){
+  if(!b) return '';
+  if(b.st==='red') return `${bzChip('red')}<span>${esc(b.red[0].t)}${b.red.length>1?` · +${b.red.length-1} more`:''}</span>`;
+  if(b.st==='watch') return `${bzChip('watch')}<span>${esc(b.W[0].t)}${b.W.length>1?` · +${b.W.length-1} more`:''}</span>`;
+  const y0=b.ys[0], bits=[];
+  if(b.psG!=null) bits.push(`${b.B.short} ${b.psG>=0?'▲':'▼'} ${fmtN(Math.abs(b.psG),0)} %/yr`);
+  if(y0&&y0.pay!=null) bits.push(isFinite(y0.pay)?`payout ${fmtN(y0.pay,0)} %`:'payout n/a');
+  if(b.lastRaise) bits.push(`raised ${b.lastRaise}`); else if(!b.dv.length) bits.push('no dividend');
+  return `${bzChip(b.st==='none'?'none':b.st)}<span>${b.st==='checked'?'flags checked by you · ':''}${esc(bits.join(' · ')||'too little data')}</span>`;
+}
+// full section for the dossier and the holding sheet; owner = the card or holding that stores "checked" notes
+function bizHtml(sym,owner,kind){
+  const b=bizOf(sym);
+  if(!b) return `<div class="sec biz"><h4>Business</h4><p class="none">${(fund.companies||{})[sym]===undefined?'No business data yet. The weekly fundamentals update picks it up.':'Yahoo has no statements for this one.'}</p></div>`;
+  const ys=b.ys.slice().reverse(), dash='—';
+  const row=(lbl,f,cls='')=>`<tr class="${cls}"><th>${lbl}</th>${ys.map(y=>`<td class="num">${f(y)}</td>`).join('')}</tr>`;
+  const tbl=ys.length?`<div class="bztbl"><table><thead><tr><th></th>${ys.map(y=>`<th class="num">${y.fy}</th>`).join('')}</tr></thead><tbody>
+    ${row(b.B.ps,y=>y.ps!=null?fmtN(y.ps,2):dash,'k')}
+    ${row(`Payout ${b.B.pay}`,y=>y.pay==null?dash:isFinite(y.pay)?fmtN(y.pay,0)+' %':`<span class="dn">neg.</span>`)}
+    ${b.m!=='fin'?row('Net debt / EBITDA',y=>y.lev!=null?fmtN(y.lev,1)+'×':dash):''}
+    ${row(b.m==='fin'?'Return on equity':'Return on capital',y=>y.roc!=null?fmtN(y.roc,1)+' %':dash)}
+    ${row('Shares (m)',y=>fmtN(y.shares/1e6,0))}
+  </tbody></table></div>`:'';
+  const dvs=b.dv.slice(-10), mx=Math.max(...dvs.map(d=>d.v),0);
+  const bars=dvs.length?`<div class="dvbars" title="Dividends per share by calendar year (faded: fewer payments than usual recorded)">${dvs.map(d=>`<i style="height:${mx?Math.max(4,d.v/mx*100):0}%" class="${d.n!=null&&b.typ!=null&&d.n<b.typ?'gap':''}" title="${d.y}: ${fmtN(d.v,2)}${d.n!=null?`, ${d.n} payments`:''}"><s>${String(d.y).slice(2)}</s></i>`).join('')}</div>`:'';
+  const dtext=b.dv.length?[b.streak?`no cut for ${b.streak}${b.streak>=24?'+':''} years`:'',b.lastRaise?`last raised ${b.lastRaise}`:'',b.dg!=null?`${fmtPct(b.dg,1)}/yr over 5 years`:''].filter(Boolean).join(' · '):'Pays no dividend.';
+  const flag=(f,red)=>`<div class="bzf ${red?'r':'w'} ${f.ok?'ok':''}"><b>${f.ok?'✓':red?'!':'·'}</b><div><div class="t">${esc(f.t)}</div><div class="d">${esc(f.d||'')}</div>
+    ${red?(f.ok?`<div class="d">Checked ${fmtDate(f.ok.date)}${f.ok.note?': '+esc(f.ok.note):''} <a href="#" data-unck="${f.id}">undo</a></div>`
+      :`<div class="ck" data-ck="${f.id}"><button class="btn small" data-ckopen>Checked, it's fine</button></div>`):''}</div></div>`;
+  const flags=b.F.length||b.W.length?`<div class="bzflags">${b.F.map(f=>flag(f,true)).join('')}${b.W.map(f=>flag(f,false)).join('')}</div>`:'';
+  return `<div class="sec biz" data-sym="${esc(sym)}" data-owner="${esc(owner?.id||'')}" data-kind="${kind}">
+    <h4>Business ${bzChip(b.st)}${b.next?` <span class="bzn">next results ${fmtDate(b.next)}</span>`:''}</h4>
+    ${b.st==='red'?`<p class="bzwhy">While ${b.red.length>1?'these red flags are':'this red flag is'} open, the Buy score can't go above <b>Wait</b>. If it has a harmless reason (a one-off payment, a known data quirk), mark it as checked.</p>`:''}
+    ${flags}${tbl}
+    <div class="bzdiv"><span><b>Dividend</b> ${esc(dtext)}</span>${bars}</div>
+    <p class="hint">${esc(b.B.why)} Fiscal years from Yahoo Finance${b.c.finCurrency?`, in ${esc(b.c.finCurrency)}`:''}; updated ${b.time?fmtDate(b.time.slice(0,10)):'—'}${b.stale?' (last update failed)':''}.</p>
+  </div>`;
+}
+function wireBiz(root,rerender){
+  const box=root.querySelector('.sec.biz[data-sym]'); if(!box) return;
+  const sym=box.dataset.sym, kind=box.dataset.kind, oid=box.dataset.owner;
+  const owner=kind==='hold'?port.holdings.find(h=>h.id===oid):data.ideas.find(i=>i.id===oid);
+  const save=()=>{ owner.updatedAt=now(); kind==='hold'?persistPort():persist(); rerender(); };
+  box.querySelectorAll('[data-ckopen]').forEach(btn=>btn.onclick=e=>{ e.stopPropagation(); const w=btn.parentElement;
+    w.innerHTML=`<input placeholder="Why it's fine (optional), e.g. one-off payment in 2024"><button class="btn small primary">Save</button>`;
+    const inp=w.querySelector('input'); inp.focus();
+    const go=()=>{ const b=bizOf(sym), f=b&&b.F.find(x=>x.id===w.dataset.ck); if(!f||!owner) return;
+      owner.checks={...(owner.checks||{}),[f.id]:{key:f.key,date:today(),note:inp.value.trim()}}; save(); toast('Marked as checked'); };
+    w.querySelector('button').onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter') go(); }; });
+  box.querySelectorAll('[data-unck]').forEach(a=>a.onclick=e=>{ e.preventDefault(); const id=a.dataset.unck;
+    // the note may sit on the other object (card vs. holding) with the same symbol
+    for(const o of [...live().filter(i=>symOf(i)===sym),...holdings().filter(h=>hSym(h)===sym)]) if(o.checks&&o.checks[id]){
+      const c={...o.checks}; delete c[id]; o.checks=c; o.updatedAt=now(); }
+    persist(); persistPort(); rerender(); });
+}
+
 // ---------- buy score ----------
 // 0–100: how cheap the stock is against the card's own thesis.
 // 50 pts distance to buy-below (full at/below it, zero at +25 %), 30 pts yield vs. 5-yr average
@@ -780,14 +967,20 @@ function scoreOf(i){
   if(!parts.length) return null;
   const W=parts.reduce((s,x)=>s+x.w,0);
   parts.forEach(x=>{ x.max=x.w*100/W; x.pts=x.f*x.max; });
-  const score=Math.round(parts.reduce((s,x)=>s+x.pts,0));
+  const raw=Math.round(parts.reduce((s,x)=>s+x.pts,0));
+  // Caps (v2.4.0): an unchecked red flag in the business holds it at Wait; without your own
+  // buy level, yield and range alone can't reach the buy zone.
+  let score=raw, cap=null; const biz=bizOf(symOf(i));
+  if(biz&&biz.red.length&&score>54){ score=54; cap='flag'; }
+  if(!(i.buyBelow>0)&&score>74){ score=74; cap=cap||'level'; }
   const t=TIERS.find(t=>score>=t[0]);
-  return {score,parts,tier:t[1],c:t[2]};
+  return {score,raw,cap,biz,parts,tier:t[1],c:t[2]};
 }
 function whyOf(i,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng');
   if(i.status==='bought') out.push('Holding');
-  out.push(b?(b.above<=0?'in the buy zone':`${fmtN(b.above,0)} % above buy`):'no buy price set');
+  if(s.cap==='flag') out.push(`held at Wait by a red flag (would be ${s.raw})`);
+  out.push(b?(b.above<=0?'in the buy zone':`${fmtN(b.above,0)} % above buy`):s.cap==='level'?`no buy price set, so it stops at Getting close (would be ${s.raw})`:'no buy price set');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
   return out.join(' · ');
@@ -901,6 +1094,7 @@ function cardEl(i){
       <div title="${t?`Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${t.inEur?fmtPct(t.fx):'n/a'}`:''}`:''}"><span>${t&&t.foreign&&!t.inEur?'Return (local)':'Return in €'}</span><b class="${retCls}">${fmtPct(chg)}</b><span>${t?`${t.base.what==='bought'?'bought':'since'} ${fmtDay(t.base.date)}`:'no price yet'}</span></div>
       <div><span>Review</span><b title="${i.nextReview?fmtDate(i.nextReview):''}">${i.nextReview?new Date(i.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!i.nextReview?'not set':due?'due now':'next look'}</span></div>
     </div>
+    ${(b=>b?`<div class="c2biz" title="Business trend, tap the card for details">${bizLine(b)}</div>`:'')(sc?sc.biz:bizOf(symOf(i)))}
     <p class="c2th">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>`;
   el.onclick=()=>openRead(i.id);
   el.onkeydown=e=>{ if(e.key==='Enter') openRead(i.id); };
@@ -908,7 +1102,8 @@ function cardEl(i){
 }
 
 function renderScore(){
-  const rows=live().map(i=>{const h=histOf(i),s=scoreOf(i);return {...i,chg:chgOf(i),now:curOf(i),day:dayOf(i),yld:yldOf(i),toBuy:toBuyOf(i),h,dev:h?h.dev:null,sc:s,score:s?s.score:null};});
+  const BZRANK={red:0,watch:1,none:2,checked:3,ok:4};
+  const rows=live().map(i=>{const h=histOf(i),s=scoreOf(i),b=bizOf(symOf(i));return {...i,chg:chgOf(i),now:curOf(i),day:dayOf(i),yld:yldOf(i),toBuy:toBuyOf(i),h,dev:h?h.dev:null,sc:s,score:s?s.score:null,biz:b,bizRank:b?BZRANK[b.st]:null};});
   const scHtml=r=>r.sc?`<span class="sc num" style="--tc:${r.sc.c}" title="${r.sc.tier}">${r.sc.score}</span>`:'—';
   rows.sort((a,b)=>{const x=a[sortKey]??(sortDir<0?-1e9:1e9),y=b[sortKey]??(sortDir<0?-1e9:1e9); return (x>y?1:x<y?-1:0)*sortDir;});
   const tb=$('#scoreTbl tbody'); tb.innerHTML='';
@@ -917,6 +1112,7 @@ function renderScore(){
     tr.innerHTML=`<td><span class="tk">${esc(i.ticker)}</span><span class="nm">${esc(i.name)}</span></td>
       <td><span class="pill" style="color:${stageOf(i).c}">${stageOf(i).label}</span></td>
       <td class="r">${scHtml(i)}${i.sc?` <span class="nm">${i.sc.tier}</span>`:''}</td>
+      <td title="${i.biz?esc((i.biz.red[0]||i.biz.W[0]||{}).t||''):''}">${i.biz?bzChip(i.biz.st):'—'}</td>
       <td class="r num" style="font-weight:800">${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</td>
       <td class="r num">${i.h?`<span class="vtag ${i.h.v}">${i.h.v==='fair'?'usual':i.h.v}</span> <span class="nm">avg ${fmtN(i.h.avg,2)} %</span>`:'—'}</td>
       <td class="r num">${liveDot(i)}${mP(i.now,curOfI(i))}${!quoteOf(i)&&errOf(i)?' <span class="dn" title="no quote">!</span>':''}</td>
@@ -936,7 +1132,7 @@ function renderScore(){
     const el=document.createElement('article'); el.className='srow'; el.style.setProperty('--stage',s.c);
     el.innerHTML=`<div class="top">
         <div class="who"><span class="tk">${esc(i.ticker)}</span><span class="nm">${esc(i.name)}</span>
-          <div class="sub">${scHtml(i)}<span style="color:${s.c};font-weight:700">${s.label}</span>${stars(i.conviction)}</div></div>
+          <div class="sub">${scHtml(i)}<span style="color:${s.c};font-weight:700">${s.label}</span>${stars(i.conviction)}${i.biz&&(i.biz.st==='red'||i.biz.st==='watch')?bzChip(i.biz.st):''}</div></div>
         <div class="y num"><b>${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</b><span>${i.h?`avg ${fmtN(i.h.avg,2)} %`:'yield'}</span></div></div>
       ${i.h?`<div style="margin-top:8px"><span class="vtag ${i.h.v}">${i.h.label}</span></div>`:''}
       <div class="cells">
@@ -1003,6 +1199,7 @@ function openRead(id){
         ${t.foreign?`<div class="kpi"><b class="num ${t.fx>=0?'up':'dn'}">${t.inEur?fmtPct(t.fx):'—'}</b><span>${t.inEur?`currency, ${fmtN(t.f0,4)} to ${fmtN(t.f1,4)} ${t.code} per EUR`:`currency, rate for the ${t.base.what==='bought'?'purchase':'logging'} day not loaded yet`}</span></div>`:''}
         <div class="kpi"><b class="num ${t.best>=0?'up':'dn'}">${fmtPct(t.best)}</b><span>${retLabel(i)}</span></div>
       </div></div>`:'')(totalOf(i))}
+    ${symOf(i)?bizHtml(symOf(i),i,'idea'):''}
     ${(h=>h?`<div class="sec"><h4>Yield vs. its own history</h4>
       <p><span class="vtag ${h.v}">${h.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(h.dev),0)} % ${h.dev>=0?'above':'below'} its ${fmtN(h.yrs,1)}-year average of ${fmtN(h.avg,2)} %. ${h.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':h.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
       ${ybarHtml(i)}</div>`:'')(histOf(i))}
@@ -1015,6 +1212,7 @@ function openRead(id){
       <div class="add"><input id="f_note" placeholder="Add a dated note"><button class="btn" id="btnNote">Add</button></div></div>`;
   renderNotes(i);
   renderStagebar(i);
+  wireBiz($('#dossier'),()=>openRead(i.id));
   $('#btnNote').onclick=()=>{
     const t=$('#f_note').value.trim(); if(!t) return;
     i.notes=i.notes||[]; i.notes.push({date:today(),text:t}); i.updatedAt=now();
@@ -1195,17 +1393,24 @@ async function push(retry=true){
 }
 
 // ---------- price file ----------
-async function loadPrices(){
+async function repoJson(name){
   let j=null;
   try{
     if(cfg()){
       const dir=sync.path.includes('/')?sync.path.replace(/[^/]+$/,''):'';
-      const r=await fetch(`https://api.github.com/repos/${sync.repo}/contents/${dir}prices.json?ref=${sync.branch}&t=${Date.now()}`,{headers:hdr(),cache:'no-store'});
+      const r=await fetch(`https://api.github.com/repos/${sync.repo}/contents/${dir}${name}?ref=${sync.branch}&t=${Date.now()}`,{headers:hdr(),cache:'no-store'});
       if(r.ok){ const d=await r.json(); j=JSON.parse(b64dec(d.content)); }
     }
-    if(!j){ const r=await fetch(`prices.json?t=${Date.now()}`,{cache:'no-store'}); if(r.ok) j=await r.json(); }
-  }catch(e){ console.warn('prices',e); }
-  if(j&&j.quotes){ prices=j; try{ localStorage.setItem(LS_PRICES,JSON.stringify(j)); }catch{} render(); }
+    if(!j){ const r=await fetch(`${name}?t=${Date.now()}`,{cache:'no-store'}); if(r.ok) j=await r.json(); }
+  }catch(e){ console.warn(name,e); }
+  return j;
+}
+async function loadPrices(){
+  const [j,f]=await Promise.all([repoJson('prices.json'),repoJson('fundamentals.json')]);
+  let ch=false;
+  if(j&&j.quotes){ prices=j; ch=true; try{ localStorage.setItem(LS_PRICES,JSON.stringify(j)); }catch{} }
+  if(f&&f.companies&&f.updated!==fund.updated){ fund=f; bizCache.clear(); ch=true; try{ localStorage.setItem(LS_FUND,JSON.stringify(f)); }catch{} }
+  if(ch) render();
 }
 $('#btnPxRefresh').onclick=async()=>{
   if(!cfg()){ toast('Set up GitHub sync first'); return; }
@@ -1265,7 +1470,8 @@ function hScore(h,T){
 function hWhy(h,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng'), a=addOf(h);
   if(s.full) out.push(`would be ${s.rawTier.toLowerCase()} (${s.score}), but already ${fmtN(s.w,1)} % of the depot`);
-  out.push(b?(b.above<=0?'at or below your add level':`${fmtN(b.above,0)} % above add level`)+(a&&a.src==='radar'?' (from Radar card)':''):s.capped?'set an add level to reach the add zone':'no add level yet');
+  if(s.cap==='flag') out.push(`held at Hold by a red flag (would be ${s.raw})`);
+  out.push(b?(b.above<=0?'at or below your add level':`${fmtN(b.above,0)} % above add level`)+(a&&a.src==='radar'?' (from Radar card)':''):s.capped||s.cap==='level'?'set an add level to reach the add zone':'no add level yet');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
   return out.join(' · ');
@@ -1302,6 +1508,7 @@ function holdCard(r){
       <div class="price num">${c?`${liveDot(x)}${mP(c,cur)}`:'—'}${c&&isConv(cur)?`<small class="fx" style="color:var(--mute)">${fmtP(c,cur)}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
     </div>
     ${s?runwayHtml(x,s):''}
+    ${(b=>b&&!isFund(h)?`<div class="c2biz">${bizLine(b)}</div>`:'')(s?s.biz:bizOf(hSym(h)))}
     ${mm!=null?`<div class="warnbox">Quote is ${fmtPct(mm*100,0)} off the statement price. Probably the wrong Yahoo symbol.</div>`:''}
     <div class="foot">
       <span class="yl num">${y!=null?`<b>${fmtN(y,2)} %</b> yield${hi?` · usual ${fmtN(hi.avg,2)} %`:''}`:isFund(h)&&q?'no distributions':'no yield data'}</span>
@@ -1369,6 +1576,7 @@ function openHold(id){
       <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':mN(a.v,cur)):'—'}</b><span>${a?`to add below ${mN(a.v,cur)}${a.src==='radar'?' (Radar)':''}`:'no add level'}</span></div>
       ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
     </div>
+    ${!isFund(h)&&hSym(h)?bizHtml(hSym(h),h,'hold'):''}
     ${posOf(x)!=null?`<div class="sec"><h4>52-week range</h4>${runwayHtml(x,s)}</div>`:''}
     ${q?`<div class="quote">${liveDot(x)}${esc(hSym(h))} ${fmtP(q.price,q.currency)}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${fxNote(q.currency)}</div>`
       :hSym(h)&&errOf(x)?`<div class="quote"><span class="warn">No quote for ${esc(hSym(h))}.</span> Set the Yahoo symbol below, e.g. ALV.DE, DG.PA, ENEL.MI, 8058.T.</div>`:''}
@@ -1388,6 +1596,7 @@ function openHold(id){
     </div>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
   if(idea) $('#hIdea').onclick=()=>{ closeAll(); openRead(idea.id); };
+  wireBiz($('#holdBody'),()=>openHold(h.id));
   $('#hSave').onclick=()=>{
     const num=v=>v===''?null:Number(v);
     Object.assign(h,{short:$('#h_short').value.trim(),symbol:$('#h_symbol').value.trim().toUpperCase(),currency:$('#h_currency').value.trim().toUpperCase(),
