@@ -8,9 +8,9 @@
     {
       "id": "h-IE00B3F81R35",
       "isin": "IE00B3F81R35",
-      "short": "EUNT",
+      "short": "EUN5",
       "name": "iShares Core € Corp Bond (Dist)",
-      "symbol": "EUNT.DE",
+      "symbol": "EUN5.DE",
       "currency": "EUR",
       "kind": "bond",
       "sector": "Euro investment-grade corporate bonds",
@@ -18,7 +18,7 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "updatedAt": "2026-11-06T17:47:06+00:00"
     },
     {
       "id": "h-US56035L1044",
