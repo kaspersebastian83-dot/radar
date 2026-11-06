@@ -1,0 +1,40 @@
+name: prices
+
+on:
+  schedule:
+    # every 2 hours, 07:17–21:17 UTC, Monday to Friday (covers EU + US sessions)
+    - cron: "17 7-21/2 * * 1-5"
+  workflow_dispatch: {}   # "Refresh prices" button in the app, or Actions tab → Run workflow
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prices
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install --quiet yfinance pandas
+
+      - name: Fetch quotes
+        run: python .github/scripts/fetch_prices.py
+
+      - name: Commit prices.json
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prices.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "prices: update"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push

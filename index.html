@@ -63,7 +63,7 @@ main{max-width:1300px;margin:0 auto;padding:12px 14px 80px}
 
 /* scorecard */
 .tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px}
-table{border-collapse:collapse;width:100%;min-width:720px}
+table{border-collapse:collapse;width:100%;min-width:900px}
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);cursor:pointer;user-select:none}
 tbody tr{cursor:pointer}tbody tr:hover{background:var(--soft)}
@@ -99,6 +99,13 @@ textarea{min-height:64px;resize:vertical}
 code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;z-index:30;pointer-events:none}
 .toast.on{opacity:1}
+.px{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.live{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bought);margin-right:4px;vertical-align:middle}
+.live.stale{background:var(--watch)}
+.warn{color:var(--danger)}
+.quote{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:13px}
+@media(max-width:640px){#pxInfo{display:none}.bar{gap:6px;padding:10px}.bar h1{font-size:16px}.tabs button{padding:6px 8px}#sync span{display:none}.lg{display:none}}
+@media(min-width:641px){.sm{display:none}}
 .fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;border:0;font-size:28px;box-shadow:0 6px 18px rgba(37,99,235,.4);z-index:6}
 </style>
 </head>
@@ -107,8 +114,9 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12px}
   <h1><span class="dot"></span>Radar</h1>
   <div class="tabs"><button class="on" data-v="board">Board</button><button data-v="score">Scorecard</button></div>
   <span class="sp"></span>
+  <span class="sync" id="pxInfo"></span>
   <span class="sync" id="sync"><i></i><span>local</span></span>
-  <button class="btn small" id="btnImportClaude">Import from Claude</button>
+  <button class="btn small" id="btnImportClaude"><span class="lg">Import from Claude</span><span class="sm">Import</span></button>
   <button class="btn small" id="btnMenu">⋯</button>
 </div></header>
 
@@ -118,10 +126,10 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12px}
     <div class="summary" id="summary"></div>
     <div class="tablewrap"><table id="scoreTbl"><thead><tr>
       <th data-k="ticker">Ticker</th><th data-k="status">Status</th><th data-k="loggedDate">Logged</th>
-      <th data-k="loggedPrice" class="num">@ price</th><th data-k="currentPrice" class="num">Now</th>
-      <th data-k="chg" class="num">Change</th><th data-k="conviction">Conv.</th><th data-k="buyBelow" class="num">Buy below</th><th data-k="nextReview">Review</th>
+      <th data-k="loggedPrice" class="num">@ price</th><th data-k="now" class="num">Now</th><th data-k="day" class="num">Day</th>
+      <th data-k="chg" class="num">Since logged</th><th data-k="yld" class="num">Yield</th><th data-k="conviction">Conv.</th><th data-k="buyBelow" class="num">Buy below</th><th data-k="nextReview">Review</th>
     </tr></thead><tbody></tbody></table></div>
-    <p class="hint" style="margin-top:10px">"Now" is typed by hand (offline tool) — update it whenever you check the stock. Change is measured from the price when the idea was logged, so Passed ideas show what you missed and Bought ideas show how it went.</p>
+    <p class="hint" style="margin-top:10px">Prices with a green dot come from the automatic price update (Yahoo Finance, refreshed every 2 hours on weekdays); a yellow dot means the last update for that symbol failed and the previous price is shown. Without a quote, the manually entered price is used. "Since logged" is measured from the price when the idea was logged, so Passed ideas show what you missed and Bought ideas show how it went.</p>
   </section>
 </main>
 <button class="fab" id="fab" title="New idea">+</button>
@@ -137,7 +145,8 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12px}
     <label>Logged date<input id="f_loggedDate" type="date"></label>
     <label>Price at log<input id="f_loggedPrice" type="number" step="any" inputmode="decimal"></label>
     <label>Currency<input id="f_currency" placeholder="EUR" style="text-transform:uppercase"></label>
-    <label>Current price<input id="f_currentPrice" type="number" step="any" inputmode="decimal"></label>
+    <label>Yahoo symbol<input id="f_symbol" placeholder="ENI.MI (blank = ticker)" style="text-transform:uppercase"></label>
+    <label>Manual price<input id="f_currentPrice" type="number" step="any" inputmode="decimal" placeholder="only if no quote"></label>
     <label>Buy below<input id="f_buyBelow" type="number" step="any" inputmode="decimal"></label>
     <label>Next review<input id="f_nextReview" type="date"></label>
     <label class="w2">Source<input id="f_source" placeholder="Claude chat / screen / article"></label>
@@ -147,6 +156,7 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12px}
     <label class="w2">Bear case (steelman)<textarea id="f_bear"></textarea></label>
     <label class="w4">Kill criteria — I'm wrong if…<textarea id="f_kill"></textarea></label>
   </div>
+  <div class="quote" id="liveInfo"></div>
   <div class="notes" id="notesBox">
     <div class="row"><strong style="font-size:13px">Journal</strong><span class="sp" style="flex:1"></span></div>
     <div id="noteList"></div>
@@ -174,6 +184,12 @@ code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:12px}
     <button class="btn" id="btnImport">Import JSON (merge)</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
   </div>
+  <h4 style="margin:0 0 6px">Live prices</h4>
+  <p class="hint" id="pxStatus">No price file loaded yet.</p>
+  <div class="row" style="margin-bottom:14px">
+    <button class="btn" id="btnPxRefresh">Refresh prices now</button>
+    <span class="hint">Starts the price update on GitHub (token needs <em>Actions: read &amp; write</em>). Takes about a minute.</span>
+  </div>
   <h4 style="margin:0 0 6px">GitHub sync</h4>
   <p class="hint">Keeps <code>ideas.json</code> in your repo so every device sees the same cards. Needs a fine-grained personal access token with <em>Contents: read &amp; write</em> on that one repo. The token is stored only in this browser.</p>
   <div class="grid">
@@ -199,7 +215,7 @@ const STATUSES = [
   {k:'bought',label:'Bought',c:'var(--bought)'},
   {k:'out',label:'Passed / Sold',c:'var(--out)'},
 ];
-const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1';
+const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const today=()=>new Date().toISOString().slice(0,10);
 const now=()=>new Date().toISOString();
@@ -210,6 +226,8 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 let data = load();
 let sync = JSON.parse(localStorage.getItem(LS_SYNC)||'null') || {repo:'',branch:'main',path:'ideas.json',token:''};
 let editingId=null, view='board', sortKey='loggedDate', sortDir=-1;
+let prices={quotes:{},errors:{}};
+try{ const p=JSON.parse(localStorage.getItem(LS_PRICES)); if(p&&p.quotes) prices=p; }catch{}
 
 function load(){
   try{ const d=JSON.parse(localStorage.getItem(LS_DATA)); if(d&&Array.isArray(d.ideas)) return d; }catch{}
@@ -236,15 +254,32 @@ function merge(incoming){
 }
 
 // ---------- rendering ----------
+// ---------- live prices ----------
+const symOf=i=>String(i.symbol||i.ticker||'').trim().toUpperCase();
+const quoteOf=i=>(prices.quotes||{})[symOf(i)]||null;
+const errOf=i=>(prices.errors||{})[symOf(i)]||null;
+function curOf(i){ const q=quoteOf(i); return q&&q.price>0?q.price:(i.currentPrice>0?i.currentPrice:null); }
+function dayOf(i){ const q=quoteOf(i); return q&&q.price>0&&q.prevClose>0?(q.price/q.prevClose-1)*100:null; }
 function chgOf(i){
-  if(i.loggedPrice>0 && i.currentPrice>0) return (i.currentPrice/i.loggedPrice-1)*100;
+  const c=curOf(i);
+  if(i.loggedPrice>0 && c>0) return (c/i.loggedPrice-1)*100;
   return null;
 }
+const ago=iso=>{ if(!iso) return ''; const m=Math.round((Date.now()-new Date(iso))/60000);
+  return m<60?`${m} min ago`:m<1440?`${Math.round(m/60)} h ago`:new Date(iso).toLocaleDateString('de-DE'); };
+function liveDot(i){ const q=quoteOf(i); return q?`<span class="live ${q.stale?'stale':''}" title="${q.stale?'last update failed — older price':'live quote'}"></span>`:''; }
 const fmtP=(v,c)=>v==null||v===''?'—':Number(v).toLocaleString('de-DE',{maximumFractionDigits:2})+(c?' '+c:'');
 const fmtChg=v=>v==null?'—':(v>0?'+':'')+v.toFixed(1)+' %';
 const stars=n=>'★'.repeat(n||0)+'☆'.repeat(5-(n||0));
 
-function render(){ view==='board'?renderBoard():renderScore(); }
+function render(){ view==='board'?renderBoard():renderScore(); renderPxInfo(); }
+function renderPxInfo(){
+  const n=Object.keys(prices.quotes||{}).length, e=Object.keys(prices.errors||{});
+  $('#pxInfo').innerHTML=n?`prices ${ago(prices.updated)}`:'';
+  $('#pxStatus').innerHTML=n||e.length
+    ? `Last price change ${ago(prices.updated)} · ${n} quote${n===1?'':'s'}`+(e.length?`<br><span class="warn">No quote for: ${e.map(esc).join(', ')}</span> — set the Yahoo symbol on those cards (e.g. ENI.MI, SAP.DE, NESN.SW).`:'')
+    : 'No price file loaded yet. It appears after the first run of the GitHub Action.';
+}
 
 function renderBoard(){
   const b=$('#board'); b.innerHTML='';
@@ -256,13 +291,17 @@ function renderBoard(){
     const cards=col.querySelector('.cards');
     if(!items.length) cards.innerHTML=`<div class="empty">nothing here</div>`;
     for(const i of items){
-      const c=chgOf(i), due=i.nextReview&&i.nextReview<=today();
+      const c=chgOf(i), due=i.nextReview&&i.nextReview<=today(), cur=curOf(i), d=dayOf(i), q=quoteOf(i);
+      const hit=i.buyBelow&&cur&&cur<=i.buyBelow;
       const el=document.createElement('div'); el.className='card'; el.style.borderLeftColor=s.c;
-      el.innerHTML=`<div class="t"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span></div>
+      el.innerHTML=`<div class="t"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span>
+        ${cur?`<span class="px">${liveDot(i)}${fmtP(cur)}</span>`:''}${d!=null?`<span class="chg ${d>=0?'up':'dn'}" style="font-size:12px">${fmtChg(d)}</span>`:''}</div>
         <div class="th">${esc(i.thesis)||'<i>no thesis yet</i>'}</div>
         <div class="meta"><span class="conv">${stars(i.conviction)}</span>
-        ${c!=null?`<span class="chg ${c>=0?'up':'dn'}">${fmtChg(c)}</span>`:''}
-        ${i.buyBelow?`<span>buy &lt; ${fmtP(i.buyBelow,i.currency)}</span>`:''}
+        ${c!=null?`<span title="since logged" class="chg ${c>=0?'up':'dn'}">${fmtChg(c)} since log</span>`:''}
+        ${i.buyBelow?`<span>${hit?'✅ ':''}buy &lt; ${fmtP(i.buyBelow,i.currency)}</span>`:''}
+        ${q&&q.yieldTTM?`<span>yield ${q.yieldTTM.toLocaleString('de-DE')} %</span>`:''}
+        ${!q&&errOf(i)?`<span class="warn" title="${esc(errOf(i))}">⚠ no quote</span>`:''}
         ${i.nextReview?`<span class="${due?'due':''}">${due?'⚠ review':'review '+i.nextReview}</span>`:''}
         </div>`;
       el.onclick=()=>openEdit(i.id);
@@ -273,7 +312,7 @@ function renderBoard(){
 }
 
 function renderScore(){
-  const rows=live().map(i=>({...i,chg:chgOf(i)}));
+  const rows=live().map(i=>({...i,chg:chgOf(i),now:curOf(i),day:dayOf(i),yld:quoteOf(i)?.yieldTTM??null}));
   const dir=sortDir;
   rows.sort((a,b)=>{const x=a[sortKey]??'',y=b[sortKey]??''; return (x>y?1:x<y?-1:0)*dir;});
   const tb=$('#scoreTbl tbody'); tb.innerHTML='';
@@ -283,10 +322,12 @@ function renderScore(){
     tr.innerHTML=`<td><b>${esc(i.ticker)}</b> <span class="hint">${esc(i.name)}</span></td>
       <td><span class="pill">${STATUSES.find(s=>s.k===i.status)?.label||i.status}</span></td>
       <td>${i.loggedDate||'—'}</td><td class="num">${fmtP(i.loggedPrice,i.currency)}</td>
-      <td class="num">${fmtP(i.currentPrice)}${i.currentDate?` <span class="hint">${i.currentDate}</span>`:''}</td>
+      <td class="num">${liveDot(i)}${fmtP(i.now)}${!quoteOf(i)&&i.currentDate?` <span class="hint">${i.currentDate}</span>`:''}${!quoteOf(i)&&errOf(i)?' <span class="warn" title="no quote">⚠</span>':''}</td>
+      <td class="num"><span class="chg ${i.day==null?'':i.day>=0?'up':'dn'}">${fmtChg(i.day)}</span></td>
       <td class="num"><span class="chg ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtChg(i.chg)}</span></td>
+      <td class="num">${i.yld!=null?i.yld.toLocaleString('de-DE')+' %':'—'}</td>
       <td class="conv">${stars(i.conviction)}</td>
-      <td class="num">${fmtP(i.buyBelow)}${i.buyBelow&&i.currentPrice&&i.currentPrice<=i.buyBelow?' ✅':''}</td>
+      <td class="num">${fmtP(i.buyBelow)}${i.buyBelow&&i.now&&i.now<=i.buyBelow?' ✅':''}</td>
       <td class="${due?'due':''}">${i.nextReview||'—'}</td>`;
     tr.onclick=()=>openEdit(i.id);
     tb.appendChild(tr);
@@ -302,7 +343,8 @@ function renderScore(){
     <div class="stat"><b>${withChg.length?Math.round(hits/withChg.length*100)+' %':'—'}</b><span>ideas up since logged</span></div>
     <div class="stat"><b class="${(avg(bought)??0)>=0?'':''}">${fmtChg(avg(bought))}</b><span>avg. change, bought</span></div>
     <div class="stat"><b>${fmtChg(avg(passed))}</b><span>avg. change, passed/sold</span></div>
-    <div class="stat"><b>${due}</b><span>reviews due</span></div>`;
+    <div class="stat"><b>${due}</b><span>reviews due</span></div>
+    <div class="stat"><b>${rows.filter(r=>r.buyBelow&&r.now&&r.now<=r.buyBelow).length}</b><span>below buy level</span></div>`;
 }
 
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
@@ -314,7 +356,26 @@ const sel=$('#f_status'); sel.innerHTML=STATUSES.map(s=>`<option value="${s.k}">
 let conv=3;
 $$('#f_conviction span').forEach((s,i)=>s.onclick=()=>setConv(i+1));
 function setConv(n){ conv=n; $$('#f_conviction span').forEach((s,i)=>s.classList.toggle('on',i<n)); }
-const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','currentPrice','buyBelow','nextReview','source','thesis','bull','bear','kill'];
+const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','symbol','currentPrice','buyBelow','nextReview','source','thesis','bull','bear','kill'];
+function renderLive(i){
+  const box=$('#liveInfo'), q=i&&symOf(i)?quoteOf(i):null, e=i?errOf(i):null;
+  if(q){
+    const d=dayOf(i);
+    box.innerHTML=`${liveDot(i)}<b>${esc(symOf(i))}</b> ${fmtP(q.price,q.currency)}`+
+      (d!=null?` <span class="chg ${d>=0?'up':'dn'}">${fmtChg(d)} today</span>`:'')+
+      (q.yearLow&&q.yearHigh?` · 52w ${fmtP(q.yearLow)}–${fmtP(q.yearHigh)}`:'')+
+      (q.divTTM?` · dividend TTM ${fmtP(q.divTTM)} (${q.yieldTTM.toLocaleString('de-DE')} %)`:'')+
+      ` · <span class="hint">${q.stale?'last update failed, price from ':'updated '}${ago(q.time)}</span>`+
+      (i.currency&&q.currency&&i.currency!==q.currency?`<br><span class="warn">Quote is in ${esc(q.currency)}, card is in ${esc(i.currency)} — "since logged" compares the two as-is.</span>`:'');
+    box.style.display='';
+  }else if(e){
+    box.innerHTML=`<span class="warn">No quote for <b>${esc(symOf(i))}</b>.</span> Put the Yahoo Finance symbol in "Yahoo symbol" — e.g. ENI.MI (Milan), SAP.DE (Xetra), NESN.SW (Zurich), ULVR.L (London); US stocks just the ticker.`;
+    box.style.display='';
+  }else{
+    box.innerHTML=symOf(i||{})?'<span class="hint">No quote yet — it appears after the next price update.</span>':'';
+    box.style.display=box.innerHTML?'':'none';
+  }
+}
 
 function openEdit(id){
   editingId=id;
@@ -325,6 +386,7 @@ function openEdit(id){
   $('#btnDelete').style.visibility=id?'visible':'hidden';
   $('#notesBox').style.display=id?'':'none';
   renderNotes(i);
+  renderLive(id?i:null);
   $('#mEdit').classList.add('on');
 }
 function renderNotes(i){
@@ -338,7 +400,7 @@ $('#btnNote').onclick=()=>{
 $('#btnSave').onclick=()=>{
   const i=editingId?data.ideas.find(x=>x.id===editingId):blank();
   const prevCur=i.currentPrice;
-  F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency') v=v.toUpperCase().trim(); i[k]=v; });
+  F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
   i.conviction=conv;
   if(i.currentPrice!=null && i.currentPrice!==prevCur) i.currentDate=today();
   if(!i.ticker && !i.name){ toast('Ticker or name needed'); return; }
@@ -367,6 +429,7 @@ $('#btnClaudeGo').onclick=()=>{
   for(const raw of arr){
     if(!raw||typeof raw!=='object') continue;
     const o={...raw}; o.ticker=(o.ticker||'').toUpperCase(); o.currency=(o.currency||'EUR').toUpperCase();
+    if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
     if(!o.id) o.id=uid();
     ['loggedPrice','currentPrice','buyBelow'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     if(!o.loggedDate) o.loggedDate=today();
@@ -438,12 +501,39 @@ async function push(retry=true){
   finally{ pushing=false; }
 }
 
+// ---------- price file ----------
+// Read prices.json written by the GitHub Action: via the API when a token is set
+// (always fresh), otherwise from the published site next to index.html.
+async function loadPrices(){
+  let j=null;
+  try{
+    if(cfg()){
+      const dir=sync.path.includes('/')?sync.path.replace(/[^/]+$/,''):'';
+      const r=await fetch(`https://api.github.com/repos/${sync.repo}/contents/${dir}prices.json?ref=${sync.branch}&t=${Date.now()}`,{headers:hdr(),cache:'no-store'});
+      if(r.ok){ const d=await r.json(); j=JSON.parse(b64dec(d.content)); }
+    }
+    if(!j){ const r=await fetch(`prices.json?t=${Date.now()}`,{cache:'no-store'}); if(r.ok) j=await r.json(); }
+  }catch(e){ console.warn('prices',e); }
+  if(j&&j.quotes){ prices=j; try{ localStorage.setItem(LS_PRICES,JSON.stringify(j)); }catch{} render(); }
+}
+$('#btnPxRefresh').onclick=async()=>{
+  if(!cfg()){ toast('Set up GitHub sync first'); return; }
+  try{
+    const r=await fetch(`https://api.github.com/repos/${sync.repo}/actions/workflows/prices.yml/dispatches`,
+      {method:'POST',headers:{...hdr(),'Content-Type':'application/json'},body:JSON.stringify({ref:sync.branch})});
+    if(r.status===204){ toast('Price update started — about a minute'); closeAll(); [60,100,150].forEach(s=>setTimeout(loadPrices,s*1000)); }
+    else if(r.status===403||r.status===404) toast('Token lacks Actions: read & write (or workflow missing)');
+    else toast('Could not start update: '+r.status);
+  }catch(e){ toast('Could not start update'); }
+};
+
 // ---------- misc ----------
 let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2200); }
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden) pull(); });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ pull(); loadPrices(); } });
 
 render();
 pull();
+loadPrices();
 })();
 </script>
 </body>
