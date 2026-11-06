@@ -841,12 +841,13 @@ function bizRaw(sym){
     const typ=ns.length?ns[Math.floor(ns.length/2)]:null;
     const full=d=>d.n==null||typ==null||d.n>=typ;
     const curY=new Date().getFullYear();
+    // streak = years paid without a cut; raises and cuts compare complete years only
     let streak=0, lastRaise=null;
-    for(let k=dv.length-1;k>0;k--){ const a=dv[k], b=dv[k-1];
-      if(a.y!==b.y+1) break;
-      if(full(a)&&full(b)){ if(a.v<b.v*.95) break; if(lastRaise==null&&a.v>b.v*1.005) lastRaise=a.y; }
-      streak++; }
+    for(let k=dv.length-1;k>0&&dv[k].y===dv[k-1].y+1;k--) streak++;
     const fd=dv.filter(full), dl=fd[fd.length-1], d5=fd.find(d=>dl&&d.y===dl.y-5);
+    for(let k=fd.length-1;k>0;k--){ const a=fd[k], b=fd[k-1];
+      if(a.v<b.v*.95){ streak=Math.min(streak,dv[dv.length-1].y-a.y); break; }
+      if(lastRaise==null&&a.v>b.v*1.005) lastRaise=a.y; }
     const dg=dl&&d5?cagr(dl.v,d5.v,5):null;
     // flags: red ones cap the Buy score at Wait until you mark them as checked
     const F=[], W=[], y0=ys[0], o=ys[ys.length-1], ps=k=>ys[k]?.ps, f2=v=>fmtN(v,2);
