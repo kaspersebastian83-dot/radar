@@ -150,6 +150,13 @@ def main():
         log_dates.add(ld.normalize())
         s_ = sym_of(i)
         first_log[s_] = min(first_log.get(s_, ld), ld)
+        # purchase date of Bought cards: the app measures their return from that day
+        try:
+            bd = pd.Timestamp(i.get("boughtDate")) if i.get("boughtDate") else None
+        except Exception:
+            bd = None
+        if bd is not None and not pd.isna(bd):
+            log_dates.add(bd.normalize())
 
     try:
         prev = json.loads(PRICES.read_text(encoding="utf-8"))

@@ -220,6 +220,35 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
 .fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:var(--ink);color:var(--bg);border:0;font-size:30px;line-height:1;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:6}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;transition:.2s;z-index:30;pointer-events:none}
 .toast.on{opacity:1}
+/* stage switcher in reading mode */
+.stagebar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.stagebar .lbl{font-size:12.5px;color:var(--mute);font-weight:600;margin-right:2px}
+.stagebar .chip{padding:4px 10px 4px 8px;cursor:pointer}
+.stagebar .chip.on{cursor:default}
+.buyform{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;background:var(--teal-soft);border-radius:var(--r2);padding:10px 12px}
+.buyform label{flex:1;min-width:120px}
+.buyform .hint{flex-basis:100%}
+.buyform[hidden]{display:none}
+
+/* compact cards on the phone: one glance per stock, tap for the dossier */
+@media(max-width:700px){
+  .idea{padding:12px 14px 10px;gap:8px}
+  .idea::before{top:12px;bottom:12px}
+  .idea .tk{font-size:16px}
+  .idea .figs{gap:2px 12px;align-items:baseline}
+  .idea .yield{font-size:24px}
+  .idea .yield small{font-size:12px;margin-left:4px}
+  .idea .price{font-size:15px}
+  .idea .price small{display:inline;margin-left:6px;margin-top:0}
+  .idea .hist{margin-top:0;font-size:12px}
+  .idea .hist .num{display:none}
+  .idea .divline,.idea .thesis,.idea .foot .ret,.idea .price .fx,.idea .foot .rv:not(.due){display:none}
+  .idea .head{align-items:center}.idea .nm{font-size:12.5px}
+  .gauge.mini{height:22px;margin:0}
+  .gauge.mini .buy{height:14px}.gauge.mini .buy::after{display:none}
+  .idea .foot{padding-top:8px;gap:8px;font-size:12px}
+  .idea .foot .pill{padding:1px 7px;font-size:11.5px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -252,7 +281,7 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
       <th data-k="now" class="r">Price</th><th data-k="day" class="r">Today</th><th data-k="toBuy" class="r">To buy level</th>
       <th data-k="chg" class="r">Total in EUR</th><th data-k="loggedDate">Logged</th><th data-k="conviction">Conviction</th><th data-k="nextReview">Review</th>
     </tr></thead><tbody></tbody></table></div>
-    <p class="hint" style="margin-top:10px">Green dot: live quote from the automatic price update. Yellow dot: the last update for that symbol failed, so the previous price is shown. "To buy level" is how far the price has to fall to reach your buy-below. "Total in EUR" is price change plus dividends paid since you logged the idea, converted at the exchange rate of the logging day versus today, before withholding tax.</p>
+    <p class="hint" style="margin-top:10px">Green dot: live quote from the automatic price update. Yellow dot: the last update for that symbol failed, so the previous price is shown. "To buy level" is how far the price has to fall to reach your buy-below. "Total in EUR" is price change plus dividends since you logged the idea (for Bought cards: since the purchase), converted at the exchange rate of that day versus today, before withholding tax.</p>
   </section>
 </main>
 <button class="fab" id="fab" title="New idea">+</button>
@@ -278,6 +307,8 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
     <label>Manual price<input id="f_currentPrice" type="number" step="any" inputmode="decimal" placeholder="only if no quote"></label>
     <label>Buy below<input id="f_buyBelow" type="number" step="any" inputmode="decimal"></label>
     <label>Next review<input id="f_nextReview" type="date"></label>
+    <label>Bought on<input id="f_boughtDate" type="date"></label>
+    <label>Bought at<input id="f_boughtPrice" type="number" step="any" inputmode="decimal" placeholder="price per share"></label>
     <label>Source<input id="f_source" placeholder="Claude chat / screen / article"></label>
     <label class="w2">Conviction<div class="starpick" id="f_conviction"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div></label>
     <label class="w4">Thesis, in your words<textarea id="f_thesis"></textarea></label>
@@ -362,7 +393,7 @@ const live=()=>data.ideas.filter(i=>!i.deletedAt);
 
 function blank(){ return {id:uid(),ticker:'',name:'',sector:'',source:'',status:'radar',
   loggedDate:today(),loggedPrice:null,currency:'EUR',symbol:'',currentPrice:null,currentDate:null,buyBelow:null,
-  conviction:3,thesis:'',bull:'',bear:'',kill:'',nextReview:'',notes:[],createdAt:now(),updatedAt:now()}; }
+  conviction:3,thesis:'',bull:'',bear:'',kill:'',nextReview:'',boughtDate:'',boughtPrice:null,notes:[],createdAt:now(),updatedAt:now()}; }
 
 // ---------- merge (by id, newest updatedAt wins, tombstones respected) ----------
 function merge(incoming){
@@ -386,22 +417,26 @@ function dayOf(i){ const q=quoteOf(i); return q&&q.price>0&&q.prevClose>0?(q.pri
 const FX_UNIT={GBp:['GBP',100],GBX:['GBP',100],ZAc:['ZAR',100]};
 const fxCode=c=>FX_UNIT[c]||[String(c||'').toUpperCase(),1];
 function eurOf(v,cur){ const [c,u]=fxCode(cur); if(v==null) return null; if(c==='EUR') return v/u; const r=(prices.fx||{})[c]; return r?v/u/r:null; }
-function divsSince(i){ const q=quoteOf(i); if(!q||!Array.isArray(q.divs)||!i.loggedDate) return null;
-  return q.divs.filter(([d])=>d>i.loggedDate).reduce((s,[,v])=>s+v,0); }
-// Return since logged: price + dividends (ex-date after logging), converted to EUR at
-// the rate on the logging day vs. today. Gross, before withholding tax.
+// Base for the return: the purchase for Bought cards (if a price was entered), otherwise the day the idea was logged.
+const isBought=i=>i.boughtPrice>0&&(i.status==='bought'||i.status==='out');
+const baseOf=i=>isBought(i)?{price:i.boughtPrice,date:i.boughtDate||i.loggedDate,what:'bought'}:{price:i.loggedPrice,date:i.loggedDate,what:'logged'};
+function divsSince(i){ const q=quoteOf(i), b=baseOf(i); if(!q||!Array.isArray(q.divs)||!b.date) return null;
+  return q.divs.filter(([d])=>d>b.date).reduce((s,[,v])=>s+v,0); }
+// Return since the base date: price + dividends (ex-date after it), converted to EUR at
+// the rate on that day vs. today. Gross, before withholding tax.
 function totalOf(i){
-  const P0=i.loggedPrice, P1=curOf(i); if(!(P0>0&&P1>0)) return null;
+  const b=baseOf(i), P0=b.price, P1=curOf(i); if(!(P0>0&&P1>0)) return null;
   const cur=curOfI(i), [c]=fxCode(cur), D=divsSince(i)??0;
   const local=(P1+D)/P0-1;
   let fx=0, eur=local, fxOk=true, f0=null, f1=null;
-  if(c!=='EUR'){ f1=(prices.fx||{})[c]; f0=((prices.fxAt||{})[c]||{})[i.loggedDate];
+  if(c!=='EUR'){ f1=(prices.fx||{})[c]; f0=((prices.fxAt||{})[c]||{})[b.date];
     if(f1&&f0){ fx=f0/f1-1; eur=(1+local)*(f0/f1)-1; } else fxOk=false; }
   return {price:(P1/P0-1)*100, div:D/P0*100, D, fx:fx*100, local:local*100, eur:fxOk?eur*100:null,
-    best:(fxOk?eur:local)*100, inEur:fxOk, foreign:c!=='EUR', f0, f1, code:c, hasDivs:Array.isArray(quoteOf(i)?.divs)};
+    best:(fxOk?eur:local)*100, inEur:fxOk, foreign:c!=='EUR', f0, f1, code:c, hasDivs:Array.isArray(quoteOf(i)?.divs), base:b};
 }
 function chgOf(i){ const t=totalOf(i); return t?t.best:null; }
 const retLabel=i=>{ const t=totalOf(i); return t&&t.foreign&&!t.inEur?'total return (local currency)':'total return in EUR'; };
+const sinceLabel=i=>{ const b=baseOf(i); return `since ${b.what} ${fmtDate(b.date)}`; };
 function toBuyOf(i){ const c=curOf(i); return i.buyBelow>0&&c>0?(i.buyBelow/c-1)*100:null; }  // negative = has to fall
 function yldOf(i){ const q=quoteOf(i); return q&&q.yieldTTM!=null?q.yieldTTM:null; }
 function histOf(i){
@@ -479,7 +514,7 @@ function renderBoard(){
       <div class="head"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span><span class="stage">${s.label}</span></div>
       <div class="figs">
         ${y!=null?`<div class="yield num">${fmtN(y,2)}<small>% yield</small></div>`:`<div class="yield num" style="color:var(--mute)">—<small>no yield data</small></div>`}
-        <div class="price num">${c?`${liveDot(i)}${fmtP(c,curOfI(i))}`:'—'}${c&&curOfI(i)!=='EUR'&&eurOf(c,curOfI(i))!=null?`<small style="color:var(--mute)">≈ ${fmtP(eurOf(c,curOfI(i)),'EUR')}</small>`:''}${d!=null?`<small class="${d>=0?'up':'dn'}">${fmtPct(d)} today</small>`:''}</div>
+        <div class="price num">${c?`${liveDot(i)}${fmtP(c,curOfI(i))}`:'—'}${c&&curOfI(i)!=='EUR'&&eurOf(c,curOfI(i))!=null?`<small class="fx" style="color:var(--mute)">≈ ${fmtP(eurOf(c,curOfI(i)),'EUR')}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
         ${(h=>h?`<div class="hist"><span class="vtag ${h.v}">${h.label}</span><span class="num">5-yr average ${fmtN(h.avg,2)} %</span></div>`:'')(histOf(i))}
         ${q&&q.divTTM?`<div class="divline num"><b>${fmtP(q.divTTM,q.currency)}</b> paid per share in the last 12 months.${(h=>h&&h.fair?` At its usual yield the price would be <b>${fmtP(h.fair,q.currency)}</b>.`:'')(histOf(i))}</div>`:''}
         ${!q&&errOf(i)?`<div class="nq warn">No quote for ${esc(symOf(i))}. Open the card and set the Yahoo symbol.</div>`:!q&&!c?`<div class="nq">No price yet.</div>`:''}
@@ -489,9 +524,9 @@ function renderBoard(){
       <div class="foot">
         ${stars(i.conviction)}
         ${tb!=null?`<span class="pill ${hit?'hit':''} num">${hit?`In the buy zone, buy below ${fmtP(i.buyBelow,curOfI(i))}`:`${fmtN(-tb,0)} % above buy price ${fmtP(i.buyBelow,curOfI(i))}`}</span>`:i.buyBelow?`<span class="pill num">buy below ${fmtP(i.buyBelow,curOfI(i))}</span>`:''}
-        ${chg!=null?(t=>`<span class="num ${chg>=0?'up':'dn'}" title="Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${fmtPct(t.fx)}`:''}">${fmtPct(chg)} ${retLabel(i)} since ${fmtDate(i.loggedDate)}</span>`)(totalOf(i)):''}
+        ${chg!=null?(t=>`<span class="ret num ${chg>=0?'up':'dn'}" title="Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${fmtPct(t.fx)}`:''}">${fmtPct(chg)} ${retLabel(i)} ${sinceLabel(i)}</span>`)(totalOf(i)):''}
         <span class="sp"></span>
-        ${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}
+        ${i.nextReview?`<span class="pill rv ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}
       </div>`;
     el.onclick=()=>openRead(i.id);
     el.onkeydown=e=>{ if(e.key==='Enter') openRead(i.id); };
@@ -535,7 +570,7 @@ function renderScore(){
         <div class="cell"><span>Buy price</span><b class="num ${hit?'up':''}">${i.buyBelow?fmtP(i.buyBelow,curOfI(i)):'—'}</b>${i.toBuy!=null?`<small class="num">${hit?'in zone':`−${fmtN(-i.toBuy,0)} % away`}</small>`:''}</div>
         <div class="cell"><span>Total in EUR</span><b class="num ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtPct(i.chg)}</b></div>
       </div>
-      <div class="rev"><span>logged ${fmtDate(i.loggedDate)}</span>${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}</div>`;
+      <div class="rev"><span>${isBought(i)?'bought '+fmtDate(i.boughtDate||i.loggedDate)+' at '+fmtP(i.boughtPrice,curOfI(i)):'logged '+fmtDate(i.loggedDate)}</span>${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}</div>`;
     el.onclick=()=>openRead(i.id);
     sl.appendChild(el);
   }
@@ -548,7 +583,7 @@ function renderScore(){
     <div><b class="num">${withY.length?fmtN(avg(withY,'yld'),2)+' %':'—'}</b>average yield</div>
     <div><b class="num">${rows.filter(r=>r.toBuy!=null&&r.toBuy>=0).length}</b>in the buy zone</div>
     <div><b class="num">${rows.filter(r=>r.nextReview&&r.nextReview<=today()).length}</b>reviews due</div>
-    <div><b class="num ${(avg(bought,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(bought,'chg'))}</b>bought, total return in EUR</div>
+    <div><b class="num ${(avg(bought,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(bought,'chg'))}</b>bought, total return in EUR since purchase</div>
     <div><b class="num ${(avg(passed,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(passed,'chg'))}</b>passed or sold, what you missed</div>`;
 }
 
@@ -567,8 +602,10 @@ function openRead(id){
   $('#dossier').innerHTML=`
     <div class="top">
       <div class="title"><div class="tk">${esc(i.ticker)}</div><div class="nm">${esc(i.name)}${i.sector?' · '+esc(i.sector):''}</div>
-        <div class="meta"><span style="color:${s.c};font-weight:700">${s.label}</span> &nbsp; ${stars(i.conviction)} &nbsp; logged ${fmtDate(i.loggedDate)} at ${fmtP(i.loggedPrice,i.currency)}${i.source?' · '+esc(i.source):''}</div></div>
+        <div class="meta"><span style="color:${s.c};font-weight:700">${s.label}</span> &nbsp; ${stars(i.conviction)} &nbsp; logged ${fmtDate(i.loggedDate)} at ${fmtP(i.loggedPrice,i.currency)}${isBought(i)?` · bought ${fmtDate(i.boughtDate||i.loggedDate)} at ${fmtP(i.boughtPrice,i.currency)}`:''}${i.source?' · '+esc(i.source):''}</div></div>
     </div>
+    <div class="stagebar" id="stagebar"></div>
+    <div class="buyform" id="buyform" hidden></div>
     <div class="kpis">
       <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
       ${(h=>h?`<div class="kpi"><b class="num ${h.v==='cheap'?'up':h.v==='expensive'?'dn':''}">${fmtN(h.avg,2)} %</b><span>5-yr average yield</span></div>
@@ -578,11 +615,11 @@ function openRead(id){
       <div class="kpi"><b class="num ${chg==null?'':chg>=0?'up':'dn'}">${fmtPct(chg)}</b><span>${retLabel(i)}</span></div>
       ${i.nextReview?`<div class="kpi"><b style="font-size:16px">${fmtDate(i.nextReview)}</b><span>${i.nextReview<=today()?'<span class="dn">review due</span>':'next review'}</span></div>`:''}
     </div>
-    ${(t=>t?`<div class="sec"><h4>Return since ${fmtDate(i.loggedDate)}</h4>
+    ${(t=>t?`<div class="sec"><h4>Return ${sinceLabel(i)}</h4>
       <div class="kpis">
-        <div class="kpi"><b class="num ${t.price>=0?'up':'dn'}">${fmtPct(t.price)}</b><span>price, ${fmtP(i.loggedPrice,curOfI(i))} to ${fmtP(curOf(i),curOfI(i))}</span></div>
+        <div class="kpi"><b class="num ${t.price>=0?'up':'dn'}">${fmtPct(t.price)}</b><span>price, ${fmtP(t.base.price,curOfI(i))} to ${fmtP(curOf(i),curOfI(i))}</span></div>
         <div class="kpi"><b class="num ${t.div>0?'up':''}">${fmtPct(t.div)}</b><span>${t.hasDivs?`dividends, ${fmtP(t.D,curOfI(i))} per share`:'dividends, no data yet'}</span></div>
-        ${t.foreign?`<div class="kpi"><b class="num ${t.fx>=0?'up':'dn'}">${t.inEur?fmtPct(t.fx):'—'}</b><span>${t.inEur?`currency, ${fmtN(t.f0,4)} to ${fmtN(t.f1,4)} ${t.code} per EUR`:'currency, rate for the logging day not loaded yet'}</span></div>`:''}
+        ${t.foreign?`<div class="kpi"><b class="num ${t.fx>=0?'up':'dn'}">${t.inEur?fmtPct(t.fx):'—'}</b><span>${t.inEur?`currency, ${fmtN(t.f0,4)} to ${fmtN(t.f1,4)} ${t.code} per EUR`:`currency, rate for the ${t.base.what==='bought'?'purchase':'logging'} day not loaded yet`}</span></div>`:''}
         <div class="kpi"><b class="num ${t.best>=0?'up':'dn'}">${fmtPct(t.best)}</b><span>${retLabel(i)}</span></div>
       </div></div>`:'')(totalOf(i))}
     ${(h=>h?`<div class="sec"><h4>Yield vs. its own history</h4>
@@ -597,6 +634,7 @@ function openRead(id){
     <div class="sec journal"><h4>Journal</h4><div id="noteList"></div>
       <div class="add"><input id="f_note" placeholder="Add a dated note"><button class="btn" id="btnNote">Add</button></div></div>`;
   renderNotes(i);
+  renderStagebar(i);
   $('#btnNote').onclick=()=>{
     const t=$('#f_note').value.trim(); if(!t) return;
     i.notes=i.notes||[]; i.notes.push({date:today(),text:t}); i.updatedAt=now();
@@ -604,6 +642,39 @@ function openRead(id){
   };
   $('#f_note').onkeydown=e=>{ if(e.key==='Enter') $('#btnNote').click(); };
   $('#mRead').classList.add('on');
+}
+// Stage switcher inside the dossier. Moving to Bought asks for the purchase price and date,
+// which then become the base for the return figures.
+function renderStagebar(i){
+  const bar=$('#stagebar'), bf=$('#buyform');
+  bar.innerHTML=`<span class="lbl">Stage</span>`+STATUSES.map(s=>`<button class="chip ${i.status===s.k?'on':''}" data-s="${s.k}"><i style="background:${s.c}"></i>${s.label}</button>`).join('');
+  bf.hidden=true; bf.innerHTML='';
+  $$('#stagebar .chip').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.s; if(k===i.status) return;
+    if(k==='bought'){ showBuyForm(i); return; }
+    setStage(i,k);
+  });
+}
+function showBuyForm(i){
+  const bf=$('#buyform'), c=curOf(i), cur=curOfI(i);
+  bf.hidden=false;
+  bf.innerHTML=`<label>Bought at (${esc(cur||'price')})<input id="b_price" type="number" step="any" inputmode="decimal" value="${c?Number(c.toFixed(2)):''}" placeholder="price per share"></label>
+    <label>Bought on<input id="b_date" type="date" value="${today()}"></label>
+    <button class="btn primary" id="b_go">Mark as bought</button><button class="btn quiet" id="b_cancel">Cancel</button>
+    <span class="hint">From now on the return is measured from this price and date, not from when you logged the idea.</span>`;
+  $('#b_price').focus();
+  $('#b_cancel').onclick=()=>{ bf.hidden=true; bf.innerHTML=''; };
+  $('#b_go').onclick=()=>{
+    const p=Number($('#b_price').value), d=$('#b_date').value||today();
+    if(!(p>0)){ toast('Enter the purchase price'); return; }
+    i.boughtPrice=p; i.boughtDate=d;
+    i.notes=i.notes||[]; i.notes.push({date:d,text:`Bought at ${fmtP(p,cur)}`});
+    setStage(i,'bought');
+  };
+}
+function setStage(i,k){
+  const from=stageOf(i).label; i.status=k; i.updatedAt=now();
+  persist(); openRead(i.id); toast(`${from} → ${stageOf(i).label}`);
 }
 function renderNotes(i){
   $('#noteList').innerHTML=(i.notes||[]).slice().reverse().map(n=>`<div class="note"><small>${fmtDate(n.date)}</small><div>${esc(n.text)}</div></div>`).join('')||'<p class="none" style="margin:0;color:var(--mute);font-style:italic">No notes yet.</p>';
@@ -615,7 +686,7 @@ $('#f_status').innerHTML=STATUSES.map(s=>`<option value="${s.k}">${s.label}</opt
 let conv=3;
 $$('#f_conviction span').forEach((s,i)=>s.onclick=()=>setConv(i+1));
 function setConv(n){ conv=n; $$('#f_conviction span').forEach((s,i)=>s.classList.toggle('on',i<n)); }
-const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','symbol','currentPrice','buyBelow','nextReview','source','thesis','bull','bear','kill'];
+const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','symbol','currentPrice','buyBelow','nextReview','boughtDate','boughtPrice','source','thesis','bull','bear','kill'];
 function openEdit(id){
   editingId=id;
   const i=id?data.ideas.find(x=>x.id===id):blank();
@@ -628,7 +699,7 @@ function openEdit(id){
 $('#btnSave').onclick=()=>{
   const i=editingId?data.ideas.find(x=>x.id===editingId):blank();
   const prevCur=i.currentPrice;
-  F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
+  F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow','boughtPrice'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
   i.conviction=conv;
   if(i.currentPrice!=null && i.currentPrice!==prevCur) i.currentDate=today();
   if(!i.ticker && !i.name){ toast('Give it a ticker or a name'); return; }
@@ -660,7 +731,7 @@ $('#btnClaudeGo').onclick=()=>{
     const o={...raw}; o.ticker=(o.ticker||'').toUpperCase(); o.currency=(o.currency||'EUR').toUpperCase();
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
     if(!o.id) o.id=uid();
-    ['loggedPrice','currentPrice','buyBelow'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
+    ['loggedPrice','currentPrice','buyBelow','boughtPrice'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     if(!o.loggedDate) o.loggedDate=today();
     if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
     if(typeof o.notes==='string') o.notes=[{date:today(),text:o.notes}];
