@@ -243,16 +243,16 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
     <div class="sum" id="summary"></div>
     <div class="sortbar"><label for="sortSel">Sort by</label><select id="sortSel">
       <option value="yld">Yield</option><option value="dev">Cheapest vs its history</option><option value="toBuy">Closest to buy price</option><option value="day">Today</option>
-      <option value="chg">Since logged</option><option value="conviction">Conviction</option><option value="nextReview">Next review</option>
+      <option value="chg">Total return in EUR</option><option value="conviction">Conviction</option><option value="nextReview">Next review</option>
       <option value="loggedDate">Logged</option><option value="ticker">Stock</option><option value="status">Stage</option></select>
       <button class="btn small" id="sortDir" title="Reverse order">↓</button></div>
     <div class="slist" id="slist"></div>
     <div class="tablewrap"><table id="scoreTbl"><thead><tr>
       <th data-k="ticker">Stock</th><th data-k="status">Stage</th><th data-k="yld" class="r">Yield</th><th data-k="dev" class="r">vs 5-yr avg</th>
       <th data-k="now" class="r">Price</th><th data-k="day" class="r">Today</th><th data-k="toBuy" class="r">To buy level</th>
-      <th data-k="chg" class="r">Since logged</th><th data-k="loggedDate">Logged</th><th data-k="conviction">Conviction</th><th data-k="nextReview">Review</th>
+      <th data-k="chg" class="r">Total in EUR</th><th data-k="loggedDate">Logged</th><th data-k="conviction">Conviction</th><th data-k="nextReview">Review</th>
     </tr></thead><tbody></tbody></table></div>
-    <p class="hint" style="margin-top:10px">Green dot: live quote from the automatic price update. Yellow dot: the last update for that symbol failed, so the previous price is shown. "To buy level" is how far the price has to fall to reach your buy-below. "Since logged" compares with the price when you logged the idea.</p>
+    <p class="hint" style="margin-top:10px">Green dot: live quote from the automatic price update. Yellow dot: the last update for that symbol failed, so the previous price is shown. "To buy level" is how far the price has to fall to reach your buy-below. "Total in EUR" is price change plus dividends paid since you logged the idea, converted at the exchange rate of the logging day versus today, before withholding tax.</p>
   </section>
 </main>
 <button class="fab" id="fab" title="New idea">+</button>
@@ -383,7 +383,25 @@ const quoteOf=i=>(prices.quotes||{})[symOf(i)]||null;
 const errOf=i=>(prices.errors||{})[symOf(i)]||null;
 function curOf(i){ const q=quoteOf(i); return q&&q.price>0?q.price:(i.currentPrice>0?i.currentPrice:null); }
 function dayOf(i){ const q=quoteOf(i); return q&&q.price>0&&q.prevClose>0?(q.price/q.prevClose-1)*100:null; }
-function chgOf(i){ const c=curOf(i); return i.loggedPrice>0&&c>0?(c/i.loggedPrice-1)*100:null; }
+const FX_UNIT={GBp:['GBP',100],GBX:['GBP',100],ZAc:['ZAR',100]};
+const fxCode=c=>FX_UNIT[c]||[String(c||'').toUpperCase(),1];
+function eurOf(v,cur){ const [c,u]=fxCode(cur); if(v==null) return null; if(c==='EUR') return v/u; const r=(prices.fx||{})[c]; return r?v/u/r:null; }
+function divsSince(i){ const q=quoteOf(i); if(!q||!Array.isArray(q.divs)||!i.loggedDate) return null;
+  return q.divs.filter(([d])=>d>i.loggedDate).reduce((s,[,v])=>s+v,0); }
+// Return since logged: price + dividends (ex-date after logging), converted to EUR at
+// the rate on the logging day vs. today. Gross, before withholding tax.
+function totalOf(i){
+  const P0=i.loggedPrice, P1=curOf(i); if(!(P0>0&&P1>0)) return null;
+  const cur=curOfI(i), [c]=fxCode(cur), D=divsSince(i)??0;
+  const local=(P1+D)/P0-1;
+  let fx=0, eur=local, fxOk=true, f0=null, f1=null;
+  if(c!=='EUR'){ f1=(prices.fx||{})[c]; f0=((prices.fxAt||{})[c]||{})[i.loggedDate];
+    if(f1&&f0){ fx=f0/f1-1; eur=(1+local)*(f0/f1)-1; } else fxOk=false; }
+  return {price:(P1/P0-1)*100, div:D/P0*100, D, fx:fx*100, local:local*100, eur:fxOk?eur*100:null,
+    best:(fxOk?eur:local)*100, inEur:fxOk, foreign:c!=='EUR', f0, f1, code:c, hasDivs:Array.isArray(quoteOf(i)?.divs)};
+}
+function chgOf(i){ const t=totalOf(i); return t?t.best:null; }
+const retLabel=i=>{ const t=totalOf(i); return t&&t.foreign&&!t.inEur?'total return (local currency)':'total return in EUR'; };
 function toBuyOf(i){ const c=curOf(i); return i.buyBelow>0&&c>0?(i.buyBelow/c-1)*100:null; }  // negative = has to fall
 function yldOf(i){ const q=quoteOf(i); return q&&q.yieldTTM!=null?q.yieldTTM:null; }
 function histOf(i){
@@ -408,7 +426,7 @@ const ago=iso=>{ if(!iso) return ''; const m=Math.round((Date.now()-new Date(iso
   return m<60?`${m} min ago`:m<1440?`${Math.round(m/60)} h ago`:new Date(iso).toLocaleDateString('de-DE'); };
 const fmtN=(v,d=2)=>v==null||v===''?'—':Number(v).toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:d});
 const fmtP=(v,c)=>v==null||v===''?'—':Number(v).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+(c?' '+c:'');
-const fmtPct=(v,d=1)=>v==null?'—':(v>0?'+':'')+Number(v).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d})+' %';
+const fmtPct=(v,d=1)=>v==null?'—':Math.abs(v)<0.5*10**-d?(0).toLocaleString('de-DE',{minimumFractionDigits:d})+' %':(v>0?'+':'')+Number(v).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d})+' %';
 const fmtDate=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'numeric'}):'—';
 const stars=n=>{n=n||0;return `<span class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></span>`;};
 const stageOf=i=>STATUSES.find(s=>s.k===i.status)||STATUSES[0];
@@ -461,7 +479,7 @@ function renderBoard(){
       <div class="head"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span><span class="stage">${s.label}</span></div>
       <div class="figs">
         ${y!=null?`<div class="yield num">${fmtN(y,2)}<small>% yield</small></div>`:`<div class="yield num" style="color:var(--mute)">—<small>no yield data</small></div>`}
-        <div class="price num">${c?`${liveDot(i)}${fmtP(c,curOfI(i))}`:'—'}${d!=null?`<small class="${d>=0?'up':'dn'}">${fmtPct(d)} today</small>`:''}</div>
+        <div class="price num">${c?`${liveDot(i)}${fmtP(c,curOfI(i))}`:'—'}${c&&curOfI(i)!=='EUR'&&eurOf(c,curOfI(i))!=null?`<small style="color:var(--mute)">≈ ${fmtP(eurOf(c,curOfI(i)),'EUR')}</small>`:''}${d!=null?`<small class="${d>=0?'up':'dn'}">${fmtPct(d)} today</small>`:''}</div>
         ${(h=>h?`<div class="hist"><span class="vtag ${h.v}">${h.label}</span><span class="num">5-yr average ${fmtN(h.avg,2)} %</span></div>`:'')(histOf(i))}
         ${q&&q.divTTM?`<div class="divline num"><b>${fmtP(q.divTTM,q.currency)}</b> paid per share in the last 12 months.${(h=>h&&h.fair?` At its usual yield the price would be <b>${fmtP(h.fair,q.currency)}</b>.`:'')(histOf(i))}</div>`:''}
         ${!q&&errOf(i)?`<div class="nq warn">No quote for ${esc(symOf(i))}. Open the card and set the Yahoo symbol.</div>`:!q&&!c?`<div class="nq">No price yet.</div>`:''}
@@ -471,7 +489,7 @@ function renderBoard(){
       <div class="foot">
         ${stars(i.conviction)}
         ${tb!=null?`<span class="pill ${hit?'hit':''} num">${hit?`In the buy zone, buy below ${fmtP(i.buyBelow,curOfI(i))}`:`${fmtN(-tb,0)} % above buy price ${fmtP(i.buyBelow,curOfI(i))}`}</span>`:i.buyBelow?`<span class="pill num">buy below ${fmtP(i.buyBelow,curOfI(i))}</span>`:''}
-        ${chg!=null?`<span class="num ${chg>=0?'up':'dn'}" title="since logged">${fmtPct(chg)} since ${fmtDate(i.loggedDate)}</span>`:''}
+        ${chg!=null?(t=>`<span class="num ${chg>=0?'up':'dn'}" title="Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${fmtPct(t.fx)}`:''}">${fmtPct(chg)} ${retLabel(i)} since ${fmtDate(i.loggedDate)}</span>`)(totalOf(i)):''}
         <span class="sp"></span>
         ${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}
       </div>`;
@@ -515,7 +533,7 @@ function renderScore(){
         <div class="cell"><span>Price</span><b class="num">${liveDot(i)}${fmtP(i.now,curOfI(i))}</b></div>
         <div class="cell"><span>Today</span><b class="num ${i.day==null?'':i.day>=0?'up':'dn'}">${fmtPct(i.day)}</b></div>
         <div class="cell"><span>Buy price</span><b class="num ${hit?'up':''}">${i.buyBelow?fmtP(i.buyBelow,curOfI(i)):'—'}</b>${i.toBuy!=null?`<small class="num">${hit?'in zone':`−${fmtN(-i.toBuy,0)} % away`}</small>`:''}</div>
-        <div class="cell"><span>Since logged</span><b class="num ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtPct(i.chg)}</b></div>
+        <div class="cell"><span>Total in EUR</span><b class="num ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtPct(i.chg)}</b></div>
       </div>
       <div class="rev"><span>logged ${fmtDate(i.loggedDate)}</span>${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}</div>`;
     el.onclick=()=>openRead(i.id);
@@ -530,8 +548,8 @@ function renderScore(){
     <div><b class="num">${withY.length?fmtN(avg(withY,'yld'),2)+' %':'—'}</b>average yield</div>
     <div><b class="num">${rows.filter(r=>r.toBuy!=null&&r.toBuy>=0).length}</b>in the buy zone</div>
     <div><b class="num">${rows.filter(r=>r.nextReview&&r.nextReview<=today()).length}</b>reviews due</div>
-    <div><b class="num ${(avg(bought,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(bought,'chg'))}</b>bought, since logged</div>
-    <div><b class="num ${(avg(passed,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(passed,'chg'))}</b>passed or sold, since logged</div>`;
+    <div><b class="num ${(avg(bought,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(bought,'chg'))}</b>bought, total return in EUR</div>
+    <div><b class="num ${(avg(passed,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(passed,'chg'))}</b>passed or sold, what you missed</div>`;
 }
 
 $('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
@@ -557,9 +575,16 @@ function openRead(id){
       <div class="kpi"><b class="num">${h.fair?fmtP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
       <div class="kpi"><b class="num">${c?fmtP(c,curOfI(i)):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
       <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${tb==null?(i.buyBelow?fmtN(i.buyBelow):'—'):tb>=0?'In zone':'−'+fmtN(-tb,0)+' %'}</b><span>${i.buyBelow?'to buy below '+fmtN(i.buyBelow):'no buy level'}</span></div>
-      <div class="kpi"><b class="num ${chg==null?'':chg>=0?'up':'dn'}">${fmtPct(chg)}</b><span>since logged</span></div>
+      <div class="kpi"><b class="num ${chg==null?'':chg>=0?'up':'dn'}">${fmtPct(chg)}</b><span>${retLabel(i)}</span></div>
       ${i.nextReview?`<div class="kpi"><b style="font-size:16px">${fmtDate(i.nextReview)}</b><span>${i.nextReview<=today()?'<span class="dn">review due</span>':'next review'}</span></div>`:''}
     </div>
+    ${(t=>t?`<div class="sec"><h4>Return since ${fmtDate(i.loggedDate)}</h4>
+      <div class="kpis">
+        <div class="kpi"><b class="num ${t.price>=0?'up':'dn'}">${fmtPct(t.price)}</b><span>price, ${fmtP(i.loggedPrice,curOfI(i))} to ${fmtP(curOf(i),curOfI(i))}</span></div>
+        <div class="kpi"><b class="num ${t.div>0?'up':''}">${fmtPct(t.div)}</b><span>${t.hasDivs?`dividends, ${fmtP(t.D,curOfI(i))} per share`:'dividends, no data yet'}</span></div>
+        ${t.foreign?`<div class="kpi"><b class="num ${t.fx>=0?'up':'dn'}">${t.inEur?fmtPct(t.fx):'—'}</b><span>${t.inEur?`currency, ${fmtN(t.f0,4)} to ${fmtN(t.f1,4)} ${t.code} per EUR`:'currency, rate for the logging day not loaded yet'}</span></div>`:''}
+        <div class="kpi"><b class="num ${t.best>=0?'up':'dn'}">${fmtPct(t.best)}</b><span>${retLabel(i)}</span></div>
+      </div></div>`:'')(totalOf(i))}
     ${(h=>h?`<div class="sec"><h4>Yield vs. its own history</h4>
       <p><span class="vtag ${h.v}">${h.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(h.dev),0)} % ${h.dev>=0?'above':'below'} its ${fmtN(h.yrs,1)}-year average of ${fmtN(h.avg,2)} %. ${h.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':h.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
       ${ybarHtml(i)}</div>`:'')(histOf(i))}

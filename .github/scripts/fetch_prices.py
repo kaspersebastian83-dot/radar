@@ -90,15 +90,66 @@ def yield_history(t, divs):
     }
 
 
+def fx_code(cur):
+    """Yahoo quote currency -> ISO code used for the EUR rate, plus unit factor.
+    London quotes in pence (GBp/GBX), Johannesburg in cents (ZAc)."""
+    if cur in ("GBp", "GBX"):
+        return "GBP", 100.0
+    if cur == "ZAc":
+        return "ZAR", 100.0
+    return (cur or "").upper(), 1.0
+
+
+def fetch_fx(codes, dates):
+    """Current rate and rate on each logged date, as units of currency per 1 EUR."""
+    fx, fx_at = {}, {}
+    if not codes:
+        return fx, fx_at
+    start = (min(dates) if dates else pd.Timestamp.now().normalize()) - pd.Timedelta(days=10)
+    for c in sorted(codes):
+        try:
+            t = yf.Ticker(f"EUR{c}=X")
+            h = t.history(start=start.strftime("%Y-%m-%d"), interval="1d", auto_adjust=False)["Close"].dropna()
+            if not len(h):
+                continue
+            h.index = h.index.tz_localize(None) if h.index.tz is not None else h.index
+            fx[c] = round(float(h.iloc[-1]), 6)
+            try:
+                live = num(t.fast_info.last_price, 6)
+                if live:
+                    fx[c] = live
+            except Exception:
+                pass
+            fx_at[c] = {}
+            for d in dates:
+                before = h[h.index <= d + pd.Timedelta(hours=23)]
+                if len(before):
+                    fx_at[c][d.strftime("%Y-%m-%d")] = round(float(before.iloc[-1]), 6)
+        except Exception as e:
+            print(f"FX {c} failed: {e}")
+    return fx, fx_at
+
+
 def main():
     if not IDEAS.exists():
         print("no ideas.json yet")
         return
     ideas = json.loads(IDEAS.read_text(encoding="utf-8")).get("ideas", [])
-    symbols = sorted({
-        (i.get("symbol") or i.get("ticker") or "").strip().upper()
-        for i in ideas if not i.get("deletedAt")
-    } - {""})
+    live_ideas = [i for i in ideas if not i.get("deletedAt")]
+    sym_of = lambda i: (i.get("symbol") or i.get("ticker") or "").strip().upper()
+    symbols = sorted({sym_of(i) for i in live_ideas} - {""})
+    first_log = {}  # earliest logged date per symbol: dividends since then are kept
+    log_dates = set()
+    for i in live_ideas:
+        try:
+            ld = pd.Timestamp(i.get("loggedDate"))
+        except Exception:
+            continue
+        if pd.isna(ld):
+            continue
+        log_dates.add(ld.normalize())
+        s_ = sym_of(i)
+        first_log[s_] = min(first_log.get(s_, ld), ld)
 
     try:
         prev = json.loads(PRICES.read_text(encoding="utf-8"))
@@ -133,6 +184,11 @@ def main():
                     if ttm > 0:
                         q["divTTM"] = round(ttm, 4)
                         q["yieldTTM"] = round(ttm / price * 100, 2)
+                    since = first_log.get(s)
+                    if since is not None:  # payments with ex-date after logging
+                        cut = pd.Timestamp(since).tz_localize("UTC") - pd.Timedelta(days=1)
+                        q["divs"] = [[ix.strftime("%Y-%m-%d"), round(float(v), 4)]
+                                     for ix, v in du[du.index > cut].items()]
             except Exception:
                 pass
             try:
@@ -150,10 +206,16 @@ def main():
             if s in prev_q:  # keep the last good quote, flagged as stale
                 quotes[s] = {**prev_q[s], "stale": True}
 
-    if quotes == prev_q and errors == prev.get("errors", {}):
+    codes = {fx_code(q.get("currency"))[0] for q in quotes.values()} - {"EUR", ""}
+    fx, fx_at = fetch_fx(codes, sorted(log_dates))
+    if not fx and prev.get("fx"):  # FX failed: keep the last good rates
+        fx, fx_at = prev.get("fx", {}), prev.get("fxAt", {})
+
+    if (quotes == prev_q and errors == prev.get("errors", {})
+            and fx_at == prev.get("fxAt", {}) and prev.get("fx")):
         print("nothing changed")
         return
-    out = {"updated": now, "quotes": quotes, "errors": errors}
+    out = {"updated": now, "quotes": quotes, "errors": errors, "fx": fx, "fxAt": fx_at}
     PRICES.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"wrote {len(quotes)} quotes, {len(errors)} errors")
 
