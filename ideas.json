@@ -244,6 +244,37 @@
       ],
       "createdAt": "2026-11-06T17:00:31.766Z",
       "updatedAt": "2026-11-06T17:00:31.766Z"
+    },
+    {
+      "id": "qgv0hlmw58gjma",
+      "ticker": "6367",
+      "name": "Daikin Industries",
+      "sector": "Industrials – HVAC / air conditioning (plus fluorochemicals)",
+      "source": "Claude chat 2026-11-06",
+      "status": "researching",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 21790,
+      "currency": "JPY",
+      "symbol": "6367.T",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 19500,
+      "conviction": 3,
+      "thesis": "Global #1 HVAC, 84% sales abroad. Dividend-growth compounder, not income: DPS ¥200 (FY3/22) → ¥370 (FY3/27e), ~13% CAGR, payout ~39%, 16y no cut. Activist catalyst: Elliott ~3% stake (Apr 2026) → ¥350bn buyback (~5.5% of mkt cap), ROE target 12%, higher payout pledged. Buy below ¥19,500 = ~20x FY3/27e EPS ¥957, 1.9% yield on ¥370 / 2.0% on ~¥390 consensus next year.",
+      "bull": "H1 FY3/27: sales +17.4% to ¥2.91tn, OP +9.8% record; FY OP guide raised to ¥455bn, DPS ¥360→¥370. P/E ~22x vs 5y median ~25x; price in lower half of 52w range (17,380–26,440), ATH 31,330 (2023). Structural demand: heat pumps, heat, data-center chillers, India. Absorbed ~¥41bn US tariff hit via pricing/costs. Held +1.5% on the -6% Nikkei day (6 Nov).",
+      "bear": "Yield only 1.7%, ~23x fwd P/E for an 8.4% OP margin, so a re-rating needs margin expansion that's still unproven. Guide assumes ¥155/$, so weak yen flatters earnings. US residential weak (rates); data-center moratoria fears hit the growth leg. Chemicals OP -28% last FY; PFAS regulation/liability tail. Equity ratio 55.9%→51.0%. Tax: JP 15.315% WHT, DE credits 15%, so ~0.3% lost; the full 15% is lost on dividends inside the Sparerpauschbetrag.",
+      "kill": "I'm wrong if OP margin stays ≤8.5% through FY3/28 despite pricing, the buyback/payout pledges stall after Elliott's pressure fades, DPS growth drops below ~5%/yr, or PFAS liabilities turn material.",
+      "nextReview": "2027-02-10",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "2026-11-06: Logged at ¥21,790 (TSE close 6 Nov, investing.com + Yahoo). Q2 beat, guidance and DPS raised; stock held up in the AI-driven Nikkei crash (-6%). Watch: Q3 results 9 Feb 2027, FY results + new capital policy in May 2027, Elliott follow-up."
+        }
+      ],
+      "createdAt": "2026-11-06T17:13:04.594Z",
+      "updatedAt": "2026-11-06T17:13:04.594Z"
     }
   ]
 }
