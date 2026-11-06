@@ -11,7 +11,6 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 23.4,
       "currency": "EUR",
-      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 19.5,
@@ -41,7 +40,6 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 86.5,
       "currency": "USD",
-      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 70,
@@ -71,7 +69,6 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 25.46,
       "currency": "EUR",
-      "symbol": "ENI.MI",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 19.5,
@@ -92,7 +89,8 @@
         }
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
-      "updatedAt": "2026-11-06T11:50:00.000Z"
+      "updatedAt": "2026-11-06T11:50:00.000Z",
+      "symbol": "ENI.MI"
     },
     {
       "id": "ko-20261105",
@@ -104,7 +102,6 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 95.45,
       "currency": "USD",
-      "symbol": "KO",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 70,
@@ -125,7 +122,8 @@
         }
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
-      "updatedAt": "2026-11-06T11:50:00.000Z"
+      "updatedAt": "2026-11-06T11:50:00.000Z",
+      "symbol": "KO"
     },
     {
       "id": "qmtgi1mw4z1ufj",
@@ -234,8 +232,6 @@
       "bear": "FFO includes asset-sale gains (Maine hydro, Isagen) so true payout is tighter than 72%; unit count +3.4%/yr dilution treadmill; bond-proxy rate sensitivity; sponsor fees/incentive distributions to BAM; El Niño hydrology in Colombia; US tax-credit rollbacks; Q3 revenue miss; IFRS net losses. Tax: ~7.5% effective WHT as LP, after simplification 25% Canadian WHT (15% creditable, 10% reclaim by hand); unit→share exchange may be booked as a taxable sale by Trade Republic.",
       "kill": "I'm wrong if: distribution growth drops below 5% or is cut; FFO payout ratio excluding asset-sale gains exceeds 85%; the simplification fails on 30 Nov and the dual structure persists; credit rating falls below BBB; unit count grows >5%/yr while FFO/unit growth falls below 7%.",
       "nextReview": "2027-02-15",
-      "boughtDate": "",
-      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-06",
@@ -243,7 +239,9 @@
         }
       ],
       "createdAt": "2026-11-06T17:00:31.766Z",
-      "updatedAt": "2026-11-06T17:00:31.766Z"
+      "updatedAt": "2026-11-06T17:00:31.766Z",
+      "boughtDate": "",
+      "boughtPrice": null
     },
     {
       "id": "qgv0hlmw58gjma",
@@ -265,8 +263,6 @@
       "bear": "Yield only 1.7%, ~23x fwd P/E for an 8.4% OP margin, so a re-rating needs margin expansion that's still unproven. Guide assumes ¥155/$, so weak yen flatters earnings. US residential weak (rates); data-center moratoria fears hit the growth leg. Chemicals OP -28% last FY; PFAS regulation/liability tail. Equity ratio 55.9%→51.0%. Tax: JP 15.315% WHT, DE credits 15%, so ~0.3% lost; the full 15% is lost on dividends inside the Sparerpauschbetrag.",
       "kill": "I'm wrong if OP margin stays ≤8.5% through FY3/28 despite pricing, the buyback/payout pledges stall after Elliott's pressure fades, DPS growth drops below ~5%/yr, or PFAS liabilities turn material.",
       "nextReview": "2027-02-10",
-      "boughtDate": "",
-      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-06",
@@ -274,7 +270,9 @@
         }
       ],
       "createdAt": "2026-11-06T17:13:04.594Z",
-      "updatedAt": "2026-11-06T17:13:04.594Z"
+      "updatedAt": "2026-11-06T17:13:04.594Z",
+      "boughtDate": "",
+      "boughtPrice": null
     }
   ]
 }
