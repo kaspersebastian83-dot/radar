@@ -249,6 +249,71 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
   .idea .foot{padding-top:8px;gap:8px;font-size:12px}
   .idea .foot .pill{padding:1px 7px;font-size:11.5px}
 }
+/* ---------- buy score (v2 layout) ---------- */
+:root{--t-buy:var(--teal);--t-close:var(--research);--t-wait:var(--ochre);--t-exp:var(--coral);--t-none:var(--mute)}
+.idea .main{display:flex;align-items:center;gap:14px}
+.ring{position:relative;width:56px;height:56px;flex-shrink:0}
+.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring .bg{stroke:var(--line2)}.ring .fg{stroke:var(--tc)}
+.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--tc);letter-spacing:-.02em}
+.ring.big{width:84px;height:84px}.ring.big b{font-size:30px}
+.why{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.why .tier,.scorebox .tier{font-size:14.5px;font-weight:800;color:var(--tc)}
+.why span{font-size:12.5px;color:var(--ink2);line-height:1.35}
+.idea .main .price{flex-shrink:0}
+.runway{display:flex;flex-direction:column;gap:5px}
+.runway .rt{position:relative;height:12px}
+.runway .tr{position:absolute;left:0;right:0;top:4px;height:4px;border-radius:2px;background:var(--line)}
+.runway .zn{position:absolute;left:0;top:4px;height:4px;border-radius:2px 0 0 2px;background:var(--teal);opacity:.7}
+.runway .bt{position:absolute;top:0;width:2px;height:12px;background:var(--ink);margin-left:-1px;border-radius:1px}
+.runway .nw{position:absolute;top:0;width:12px;height:12px;border-radius:50%;background:var(--tc);border:2px solid var(--panel);box-shadow:0 0 0 1px var(--tc);margin-left:-6px}
+.runway .lb{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--mute);font-weight:600}
+.runway .lb b{color:var(--ink);font-weight:700}
+.idea .foot .yl b{color:var(--ink);font-weight:700}
+.chip.sort{border-color:var(--ink2);color:var(--ink);font-weight:700;padding:5px 12px}
+.chip.sort svg{flex-shrink:0}
+.csep{flex:0 0 1px;background:var(--line);margin:4px 2px}
+.sc{display:inline-flex;min-width:32px;justify-content:center;padding:2px 8px;border-radius:999px;font-weight:800;font-size:13px;color:var(--tc);background:color-mix(in srgb,var(--tc) 15%,transparent)}
+/* dossier score panel */
+.scorebox{display:flex;align-items:center;gap:16px;background:var(--panel2);border-radius:var(--r);padding:14px 16px}
+.scorebox .bars{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.scorebox .why1{font-size:12.5px;color:var(--ink2);margin-top:-4px}
+.sbar{display:grid;grid-template-columns:92px 1fr 44px;align-items:center;gap:8px;font-size:12.5px}
+.sbar>span{color:var(--mute);font-weight:600}
+.sbar i{display:block;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.sbar em{display:block;height:6px}
+.sbar b{text-align:right;font-weight:700}
+/* collapsible bull / bear / kill */
+.folds{display:flex;flex-direction:column;gap:8px}
+details.cs{border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px}
+details.cs summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:baseline;font-size:14px}
+details.cs summary::-webkit-details-marker{display:none}
+details.cs summary::after{content:"▾";margin-left:auto;color:var(--mute);font-size:12px}
+details.cs[open] summary::after{content:"▴"}
+details.cs summary b{white-space:nowrap;font-weight:800}
+details.cs summary .peek{color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+details.cs[open] summary .peek{display:none}
+details.cs p{margin:8px 0 2px;line-height:1.55;white-space:pre-wrap}
+details.cs.bull summary b{color:var(--teal)}details.cs.bear summary b{color:var(--coral)}
+details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs.kill summary b{color:var(--coral)}
+/* sort sheet */
+.sortopts{display:flex;flex-direction:column;gap:2px;margin-bottom:18px}
+.sortopts button{display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;background:transparent;padding:12px;border-radius:var(--r2);text-align:left;font-weight:600;min-height:44px}
+.sortopts button small{color:var(--mute);font-size:12px;font-weight:500;text-align:right}
+.sortopts button.on{background:var(--panel2);font-weight:800}
+.explain{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--ink2)}
+.explain h4{margin:0;color:var(--ink);font-size:15px}
+.explain p{margin:0;line-height:1.5}
+.tiers{display:flex;flex-wrap:wrap;gap:6px}
+.tiers span{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;color:var(--tc);background:color-mix(in srgb,var(--tc) 15%,transparent)}
+@media(max-width:700px){
+  .idea .main{gap:12px}
+  .idea .main .price{font-size:15px}
+  .idea .main .price small{display:block;margin:3px 0 0}
+  .runway .lb{font-size:10.5px}
+  .scorebox{padding:12px;gap:12px}.ring.big{width:72px;height:72px}.ring.big b{font-size:26px}
+  .sbar{grid-template-columns:80px 1fr 40px;font-size:12px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -271,13 +336,13 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
   <section id="viewScore" hidden>
     <div class="sum" id="summary"></div>
     <div class="sortbar"><label for="sortSel">Sort by</label><select id="sortSel">
-      <option value="yld">Yield</option><option value="dev">Cheapest vs its history</option><option value="toBuy">Closest to buy price</option><option value="day">Today</option>
+      <option value="score">Buy score</option><option value="yld">Yield</option><option value="dev">Cheapest vs its history</option><option value="toBuy">Closest to buy price</option><option value="day">Today</option>
       <option value="chg">Total return in EUR</option><option value="conviction">Conviction</option><option value="nextReview">Next review</option>
       <option value="loggedDate">Logged</option><option value="ticker">Stock</option><option value="status">Stage</option></select>
       <button class="btn small" id="sortDir" title="Reverse order">↓</button></div>
     <div class="slist" id="slist"></div>
     <div class="tablewrap"><table id="scoreTbl"><thead><tr>
-      <th data-k="ticker">Stock</th><th data-k="status">Stage</th><th data-k="yld" class="r">Yield</th><th data-k="dev" class="r">vs 5-yr avg</th>
+      <th data-k="ticker">Stock</th><th data-k="status">Stage</th><th data-k="score" class="r">Buy score</th><th data-k="yld" class="r">Yield</th><th data-k="dev" class="r">vs 5-yr avg</th>
       <th data-k="now" class="r">Price</th><th data-k="day" class="r">Today</th><th data-k="toBuy" class="r">To buy level</th>
       <th data-k="chg" class="r">Total in EUR</th><th data-k="loggedDate">Logged</th><th data-k="conviction">Conviction</th><th data-k="nextReview">Review</th>
     </tr></thead><tbody></tbody></table></div>
@@ -319,6 +384,24 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
   <div class="foot2">
     <button class="btn danger quiet" id="btnDelete">Delete idea</button><span class="sp"></span>
     <button class="btn" data-close>Cancel</button><button class="btn primary" id="btnSave">Save</button>
+  </div>
+</div></div>
+
+<!-- sort sheet -->
+<div class="modal" id="mSort"><div class="sheet" style="max-width:520px">
+  <h3>Sort ideas by<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <div class="sortopts" id="sortOpts"></div>
+  <div class="explain">
+    <h4>How the Buy score works</h4>
+    <p>0 to 100. It only measures how cheap the stock is <b>against your own thesis</b>. Conviction stays separate (the stars).</p>
+    <div class="sbar"><span>50 points</span><i><em style="width:100%;background:var(--teal)"></em></i><b></b></div>
+    <p style="margin-top:-6px">Distance to your buy-below price. Full points at or under it, zero at 25 % above.</p>
+    <div class="sbar"><span>30 points</span><i><em style="width:60%;background:var(--research)"></em></i><b></b></div>
+    <p style="margin-top:-6px">Yield vs. its own 5-year average. Full points at 15 % above average, zero at 25 % below.</p>
+    <div class="sbar"><span>20 points</span><i><em style="width:40%;background:var(--ochre)"></em></i><b></b></div>
+    <p style="margin-top:-6px">Position in the 52-week range. Full points at the low, zero at the high.</p>
+    <div class="tiers"><span style="--tc:var(--t-buy)">75+ Buy zone</span><span style="--tc:var(--t-close)">55–74 Getting close</span><span style="--tc:var(--t-wait)">35–54 Wait</span><span style="--tc:var(--t-exp)">under 35 Expensive</span></div>
+    <p class="hint">If one input is missing (no buy price, no dividend history), its points are spread over the others. Bought positions are scored the same way, so you can see when it is a good moment to add.</p>
   </div>
 </div></div>
 
@@ -369,7 +452,7 @@ const STATUSES = [
   {k:'bought',label:'Bought',c:'var(--bought)'},
   {k:'out',label:'Passed / Sold',c:'var(--out)'},
 ];
-const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1';
+const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const today=()=>new Date().toISOString().slice(0,10);
 const now=()=>new Date().toISOString();
@@ -379,8 +462,9 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 // ---------- state ----------
 let data = load();
 let sync = JSON.parse(localStorage.getItem(LS_SYNC)||'null') || {repo:'',branch:'main',path:'ideas.json',token:''};
-let editingId=null, readingId=null, view='board', sortKey='yld', sortDir=-1;
+let editingId=null, readingId=null, view='board', sortKey='score', sortDir=-1;
 let filter='all'; try{ filter=localStorage.getItem(LS_FILTER)||'all'; }catch{}
+let boardSort='score'; try{ boardSort=localStorage.getItem(LS_SORT)||'score'; }catch{}
 let prices={quotes:{},errors:{}};
 try{ const p=JSON.parse(localStorage.getItem(LS_PRICES)); if(p&&p.quotes) prices=p; }catch{}
 
@@ -482,6 +566,63 @@ function gaugeHtml(i,mode="mini"){
     <span class="track"></span>${zone}${buy}<span class="now" style="left:${(p*100).toFixed(1)}%"></span></div>`;
 }
 
+// ---------- buy score ----------
+// 0–100: how cheap the stock is against the card's own thesis.
+// 50 pts distance to buy-below (full at/below it, zero at +25 %), 30 pts yield vs. 5-yr average
+// (full at +15 %, zero at −25 %), 20 pts position in the 52-week range (full at the low).
+// Missing inputs: their weight is spread over the available ones.
+const TIERS=[[75,'Buy zone','var(--t-buy)'],[55,'Getting close','var(--t-close)'],[35,'Wait','var(--t-wait)'],[0,'Expensive','var(--t-exp)']];
+const PART={buy:{label:'to buy price',c:'var(--teal)'},yld:{label:'yield vs 5-yr',c:'var(--research)'},rng:{label:'52w range',c:'var(--ochre)'}};
+const lin=(v,a,b)=>Math.min(1,Math.max(0,(v-a)/(b-a)));
+function scoreOf(i){
+  const parts=[], c=curOf(i);
+  if(i.buyBelow>0&&c>0){ const above=(c/i.buyBelow-1)*100; parts.push({k:'buy',w:50,f:1-lin(above,0,25),above}); }
+  const h=histOf(i); if(h) parts.push({k:'yld',w:30,f:lin(h.dev,-25,15),dev:h.dev});
+  const p=posOf(i); if(p!=null) parts.push({k:'rng',w:20,f:1-p,pos:p});
+  if(!parts.length) return null;
+  const W=parts.reduce((s,x)=>s+x.w,0);
+  parts.forEach(x=>{ x.max=x.w*100/W; x.pts=x.f*x.max; });
+  const score=Math.round(parts.reduce((s,x)=>s+x.pts,0));
+  const t=TIERS.find(t=>score>=t[0]);
+  return {score,parts,tier:t[1],c:t[2]};
+}
+function whyOf(i,s){
+  const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng');
+  if(i.status==='bought') out.push('Holding');
+  out.push(b?(b.above<=0?'in the buy zone':`${fmtN(b.above,0)} % above buy`):'no buy price set');
+  if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
+  if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
+  return out.join(' · ');
+}
+function ringHtml(s,big){
+  const sz=big?84:56, r=big?36:24, sw=big?7:5, C=2*Math.PI*r, m=sz/2;
+  return `<div class="ring ${big?'big':''}" style="--tc:${s?s.c:'var(--t-none)'}" role="img" aria-label="Buy score ${s?s.score+' of 100':'not available'}">
+    <svg viewBox="0 0 ${sz} ${sz}" width="100%" height="100%" aria-hidden="true"><circle class="bg" cx="${m}" cy="${m}" r="${r}" fill="none" stroke-width="${sw}"/>${s?`<circle class="fg" cx="${m}" cy="${m}" r="${r}" fill="none" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${(C*s.score/100).toFixed(1)} ${C.toFixed(1)}"/>`:''}</svg><b class="num">${s?s.score:'—'}</b></div>`;
+}
+const pct=v=>(v*100).toFixed(1)+'%';
+function runwayHtml(i,s){
+  const q=quoteOf(i), p=posOf(i); if(p==null) return '';
+  const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
+  return `<div class="runway" style="--tc:${s?s.c:'var(--ink)'}" title="52-week range, your buy price and today's price">
+    <div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div>
+    <div class="lb num"><span>52w low ${fmtN(q.yearLow)}</span>${i.buyBelow>0?`<b>buy &lt; ${fmtN(i.buyBelow)}</b>`:''}<span>high ${fmtN(q.yearHigh)}</span></div></div>`;
+}
+const SORTS=[
+  {k:'score',label:'Best buy right now',sub:'Buy score, high to low',f:i=>scoreOf(i)?.score,dir:-1},
+  {k:'toBuy',label:'Nearest to my buy price',sub:'% above buy, low to high',f:toBuyOf,dir:-1},
+  {k:'dev',label:'Cheapest vs its own history',sub:'yield vs 5-yr average',f:i=>histOf(i)?.dev,dir:-1},
+  {k:'yld',label:'Highest yield',sub:'last 12 months',f:yldOf,dir:-1},
+  {k:'move',label:'Biggest mover today',sub:'up or down',f:i=>{const d=dayOf(i);return d==null?null:Math.abs(d);},dir:-1},
+  {k:'review',label:'Review due soonest',sub:'next review date',f:i=>i.nextReview||null,dir:1},
+  {k:'stage',label:'Stage, then yield',sub:'the old order',f:null},
+];
+const sortOf=()=>SORTS.find(s=>s.k===boardSort)||SORTS[0];
+function openSort(){
+  $('#sortOpts').innerHTML=SORTS.map(s=>`<button class="${s.k===boardSort?'on':''}" data-k="${s.k}"><span>${s.label}</span><small>${s.sub}</small></button>`).join('');
+  $$('#sortOpts button').forEach(b=>b.onclick=()=>{ boardSort=b.dataset.k; try{localStorage.setItem(LS_SORT,boardSort);}catch{} closeAll(); render(); });
+  $('#mSort').classList.add('on');
+}
+
 // ---------- rendering ----------
 function render(){ renderChips(); view==='board'?renderBoard():renderScore(); renderPxInfo(); }
 function renderPxInfo(){
@@ -494,11 +635,18 @@ function renderPxInfo(){
 function renderChips(){
   const ideas=live(); const counts=Object.fromEntries(STATUSES.map(s=>[s.k,ideas.filter(i=>i.status===s.k).length]));
   const all=[{k:'all',label:'All',c:'var(--ink)'},...STATUSES];
-  $('#chips').innerHTML=all.map(s=>{ const n=s.k==='all'?ideas.length:counts[s.k];
+  $('#chips').innerHTML=`<button class="chip sort" id="btnSort" aria-label="Sort: ${sortOf().label}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>${sortOf().label}</button><span class="csep"></span>`+all.map(s=>{ const n=s.k==='all'?ideas.length:counts[s.k];
     return `<button class="chip ${filter===s.k?'on':''} ${n?'':'zero'}" data-f="${s.k}">${s.k==='all'?'':`<i style="background:${s.c}"></i>`}${s.label} <b>${n}</b></button>`; }).join('');
-  $$('#chips .chip').forEach(b=>b.onclick=()=>{ filter=b.dataset.f; try{localStorage.setItem(LS_FILTER,filter);}catch{} if(view!=='board') switchView('board'); else render(); });
+  $('#btnSort').onclick=openSort;
+  $$('#chips .chip[data-f]').forEach(b=>b.onclick=()=>{ filter=b.dataset.f; try{localStorage.setItem(LS_FILTER,filter);}catch{} if(view!=='board') switchView('board'); else render(); });
 }
-function sortIdeas(a){ // stage order, then yield desc, then updated
+function sortIdeas(a){
+  const s=sortOf();
+  if(s.f){ // chosen key (missing values last), then Buy score, then ticker
+    const sc=i=>scoreOf(i)?.score??-1;
+    return a.map(i=>[i,s.f(i)]).sort(([x,vx],[y,vy])=>((vx==null)-(vy==null))||(vx==null?0:(vx>vy?1:vx<vy?-1:0)*s.dir)||(sc(y)-sc(x))||String(x.ticker).localeCompare(String(y.ticker))).map(([i])=>i);
+  }
+  // stage order, then yield desc, then updated
   const order=Object.fromEntries(STATUSES.map((s,n)=>[s.k,n]));
   return a.sort((x,y)=>(order[x.status]-order[y.status])||((yldOf(y)??-1)-(yldOf(x)??-1))||(y.updatedAt||'').localeCompare(x.updatedAt||''));
 }
@@ -507,23 +655,23 @@ function renderBoard(){
   const ideas=sortIdeas(live().filter(i=>filter==='all'||i.status===filter));
   if(!ideas.length){ g.innerHTML=`<div class="empty"><b>${live().length?'Nothing in this stage':'No ideas yet'}</b>${live().length?'Pick another stage above.':'Discuss a stock with Claude, then paste the card with "Import from Claude", or add one with +.'}</div>`; return; }
   for(const i of ideas){
-    const s=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), tb=toBuyOf(i), chg=chgOf(i);
-    const due=i.nextReview&&i.nextReview<=today(), hit=tb!=null&&tb>=0;
-    const el=document.createElement('article'); el.className='idea'+(hit?' hit':''); el.style.setProperty('--stage',s.c); el.tabIndex=0;
+    const s=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), chg=chgOf(i), h=histOf(i), sc=scoreOf(i);
+    const due=i.nextReview&&i.nextReview<=today();
+    const el=document.createElement('article'); el.className='idea'; el.style.setProperty('--stage',s.c); el.tabIndex=0;
     el.innerHTML=`
       <div class="head"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span><span class="stage">${s.label}</span></div>
-      <div class="figs">
-        ${y!=null?`<div class="yield num">${fmtN(y,2)}<small>% yield</small></div>`:`<div class="yield num" style="color:var(--mute)">—<small>no yield data</small></div>`}
+      <div class="main" style="--tc:${sc?sc.c:'var(--t-none)'}">
+        ${ringHtml(sc)}
+        <div class="why">${sc?`<b class="tier">${sc.tier}</b><span>${esc(whyOf(i,sc))}</span>`
+          :!q&&errOf(i)?`<b class="tier">No quote</b><span class="dn">No quote for ${esc(symOf(i))}. Open the card and set the Yahoo symbol.</span>`
+          :`<b class="tier">No score yet</b><span>${c?'Set a buy-below price to score it.':'Waiting for the first price.'}</span>`}</div>
         <div class="price num">${c?`${liveDot(i)}${fmtP(c,curOfI(i))}`:'—'}${c&&curOfI(i)!=='EUR'&&eurOf(c,curOfI(i))!=null?`<small class="fx" style="color:var(--mute)">≈ ${fmtP(eurOf(c,curOfI(i)),'EUR')}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
-        ${(h=>h?`<div class="hist"><span class="vtag ${h.v}">${h.label}</span><span class="num">5-yr average ${fmtN(h.avg,2)} %</span></div>`:'')(histOf(i))}
-        ${q&&q.divTTM?`<div class="divline num"><b>${fmtP(q.divTTM,q.currency)}</b> paid per share in the last 12 months.${(h=>h&&h.fair?` At its usual yield the price would be <b>${fmtP(h.fair,q.currency)}</b>.`:'')(histOf(i))}</div>`:''}
-        ${!q&&errOf(i)?`<div class="nq warn">No quote for ${esc(symOf(i))}. Open the card and set the Yahoo symbol.</div>`:!q&&!c?`<div class="nq">No price yet.</div>`:''}
       </div>
-      ${gaugeHtml(i)}
+      ${runwayHtml(i,sc)}
       <p class="thesis">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>
       <div class="foot">
+        <span class="yl num">${y!=null?`<b>${fmtN(y,2)} %</b> yield${h?` · usual ${fmtN(h.avg,2)} %`:''}`:'no yield data'}</span>
         ${stars(i.conviction)}
-        ${tb!=null?`<span class="pill ${hit?'hit':''} num">${hit?`In the buy zone, buy below ${fmtP(i.buyBelow,curOfI(i))}`:`${fmtN(-tb,0)} % above buy price ${fmtP(i.buyBelow,curOfI(i))}`}</span>`:i.buyBelow?`<span class="pill num">buy below ${fmtP(i.buyBelow,curOfI(i))}</span>`:''}
         ${chg!=null?(t=>`<span class="ret num ${chg>=0?'up':'dn'}" title="Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${fmtPct(t.fx)}`:''}">${fmtPct(chg)} ${retLabel(i)} ${sinceLabel(i)}</span>`)(totalOf(i)):''}
         <span class="sp"></span>
         ${i.nextReview?`<span class="pill rv ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}
@@ -535,13 +683,15 @@ function renderBoard(){
 }
 
 function renderScore(){
-  const rows=live().map(i=>{const h=histOf(i);return {...i,chg:chgOf(i),now:curOf(i),day:dayOf(i),yld:yldOf(i),toBuy:toBuyOf(i),h,dev:h?h.dev:null};});
+  const rows=live().map(i=>{const h=histOf(i),s=scoreOf(i);return {...i,chg:chgOf(i),now:curOf(i),day:dayOf(i),yld:yldOf(i),toBuy:toBuyOf(i),h,dev:h?h.dev:null,sc:s,score:s?s.score:null};});
+  const scHtml=r=>r.sc?`<span class="sc num" style="--tc:${r.sc.c}" title="${r.sc.tier}">${r.sc.score}</span>`:'—';
   rows.sort((a,b)=>{const x=a[sortKey]??(sortDir<0?-1e9:1e9),y=b[sortKey]??(sortDir<0?-1e9:1e9); return (x>y?1:x<y?-1:0)*sortDir;});
   const tb=$('#scoreTbl tbody'); tb.innerHTML='';
   for(const i of rows){
     const tr=document.createElement('tr'); const due=i.nextReview&&i.nextReview<=today(); const hit=i.toBuy!=null&&i.toBuy>=0;
     tr.innerHTML=`<td><span class="tk">${esc(i.ticker)}</span><span class="nm">${esc(i.name)}</span></td>
       <td><span class="pill" style="color:${stageOf(i).c}">${stageOf(i).label}</span></td>
+      <td class="r">${scHtml(i)}${i.sc?` <span class="nm">${i.sc.tier}</span>`:''}</td>
       <td class="r num" style="font-weight:800">${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</td>
       <td class="r num">${i.h?`<span class="vtag ${i.h.v}">${i.h.v==='fair'?'usual':i.h.v}</span> <span class="nm">avg ${fmtN(i.h.avg,2)} %</span>`:'—'}</td>
       <td class="r num">${liveDot(i)}${fmtP(i.now,curOfI(i))}${!quoteOf(i)&&errOf(i)?' <span class="dn" title="no quote">!</span>':''}</td>
@@ -561,7 +711,7 @@ function renderScore(){
     const el=document.createElement('article'); el.className='srow'; el.style.setProperty('--stage',s.c);
     el.innerHTML=`<div class="top">
         <div class="who"><span class="tk">${esc(i.ticker)}</span><span class="nm">${esc(i.name)}</span>
-          <div class="sub"><span style="color:${s.c};font-weight:700">${s.label}</span>${stars(i.conviction)}</div></div>
+          <div class="sub">${scHtml(i)}<span style="color:${s.c};font-weight:700">${s.label}</span>${stars(i.conviction)}</div></div>
         <div class="y num"><b>${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</b><span>${i.h?`avg ${fmtN(i.h.avg,2)} %`:'yield'}</span></div></div>
       ${i.h?`<div style="margin-top:8px"><span class="vtag ${i.h.v}">${i.h.label}</span></div>`:''}
       <div class="cells">
@@ -587,7 +737,7 @@ function renderScore(){
     <div><b class="num ${(avg(passed,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(passed,'chg'))}</b>passed or sold, what you missed</div>`;
 }
 
-$('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
+$('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['score','toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
 function switchView(v){ view=v; $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
@@ -599,6 +749,8 @@ function openRead(id){
   readingId=id; const i=data.ideas.find(x=>x.id===id); if(!i) return;
   const s=stageOf(i), q=quoteOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), tb=toBuyOf(i), chg=chgOf(i);
   const sec=(t,v,cls='')=>`<div class="sec ${cls}"><h4>${t}</h4><p class="${v?'':'none'}">${v?esc(v):'Nothing written yet.'}</p></div>`;
+  const wide=window.matchMedia('(min-width:701px)').matches;
+  const fold=(t,v,cls)=>`<details class="cs ${cls}" ${wide?'open':''}><summary><b>${t}</b><span class="peek">${v?esc(v):'Nothing written yet.'}</span></summary><p>${v?esc(v):'Nothing written yet.'}</p></details>`;
   $('#dossier').innerHTML=`
     <div class="top">
       <div class="title"><div class="tk">${esc(i.ticker)}</div><div class="nm">${esc(i.name)}${i.sector?' · '+esc(i.sector):''}</div>
@@ -606,6 +758,9 @@ function openRead(id){
     </div>
     <div class="stagebar" id="stagebar"></div>
     <div class="buyform" id="buyform" hidden></div>
+    ${(s=>s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(whyOf(i,s))}</span>
+      ${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${PART[k].label}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'n/a'}</b></div>`;}).join('')}
+      </div></div>`:'')(scoreOf(i))}
     <div class="kpis">
       <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
       ${(h=>h?`<div class="kpi"><b class="num ${h.v==='cheap'?'up':h.v==='expensive'?'dn':''}">${fmtN(h.avg,2)} %</b><span>5-yr average yield</span></div>
@@ -625,12 +780,11 @@ function openRead(id){
     ${(h=>h?`<div class="sec"><h4>Yield vs. its own history</h4>
       <p><span class="vtag ${h.v}">${h.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(h.dev),0)} % ${h.dev>=0?'above':'below'} its ${fmtN(h.yrs,1)}-year average of ${fmtN(h.avg,2)} %. ${h.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':h.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
       ${ybarHtml(i)}</div>`:'')(histOf(i))}
-    ${gaugeHtml(i,'full')}
+    ${posOf(i)!=null?`<div class="sec"><h4>52-week range</h4>${runwayHtml(i,scoreOf(i))}</div>`:''}
     ${q?`<div class="quote">${liveDot(i)}${esc(symOf(i))} ${fmtP(q.price,q.currency)}${q.divTTM?`, ${fmtN(q.divTTM)} ${esc(q.currency)} dividends in the last 12 months`:''}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${i.currency&&q.currency&&i.currency!==q.currency?` <span class="warn">Quote is in ${esc(q.currency)}, the card in ${esc(i.currency)}.</span>`:''}</div>`
        :errOf(i)?`<div class="quote"><span class="warn">No quote for ${esc(symOf(i))}.</span> Set the Yahoo Finance symbol in Edit, e.g. ENI.MI (Milan), SAP.DE (Xetra), NESN.SW (Zurich), ULVR.L (London); US stocks just the ticker.</div>`:''}
     ${sec('Thesis',i.thesis)}
-    <div class="two">${sec('Bull case',i.bull,'bull')}${sec('Bear case',i.bear,'bear')}</div>
-    ${sec("I'm wrong if",i.kill,'kill')}
+    <div class="folds">${fold('Bull case',i.bull,'bull')}${fold('Bear case',i.bear,'bear')}${fold("I'm wrong if",i.kill,'kill')}</div>
     <div class="sec journal"><h4>Journal</h4><div id="noteList"></div>
       <div class="add"><input id="f_note" placeholder="Add a dated note"><button class="btn" id="btnNote">Add</button></div></div>`;
   renderNotes(i);
