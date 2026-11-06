@@ -166,8 +166,6 @@ td .tk{font-weight:800}
 .srow .cell small{font-size:12px;color:var(--ink2);font-weight:600;margin-left:4px}
 .srow .rev{margin-top:10px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute)}td .nm{color:var(--mute);font-size:12.5px;margin-left:6px}
 .hint{font-size:12.5px;color:var(--mute)}
-#btnEur{font-weight:800;min-width:34px}
-#btnEur.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
 
 /* sheet */
@@ -436,6 +434,62 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .log .rel li{margin:2px 0}
 .log .rel.unseen h4 .v{color:var(--teal)}
 @media(max-width:700px){.brand .ver{display:none}}
+/* ---------- v3: one row per stock, grouped by tier ---------- */
+.bar,main{max-width:760px}
+body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
+.subbar{display:flex;align-items:center;gap:8px;padding:0 20px 10px;max-width:760px;margin:0 auto;font-size:13px;color:var(--ink2)}
+.subbar .sp{flex:1}
+#subTxt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#btnSort,#btnTable{padding:5px 12px;font-size:13px}
+#btnTable.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+@media(max-width:719px){#btnTable{display:none!important}}
+@media(max-width:700px){.subbar{padding:0 14px 8px}}
+.grp{margin:0 0 18px}
+.ghd{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700;color:var(--ink2);padding:0 4px 6px}
+.ghd span:last-child{color:var(--mute);font-weight:600}
+.rows{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.row2{display:flex;align-items:center;gap:12px;width:100%;border:0;border-top:1px solid var(--line2);background:transparent;padding:10px 14px;text-align:left;min-height:62px;color:var(--ink);font-weight:500}
+.row2:first-child{border-top:0}
+.row2:hover{background:var(--panel2)}
+.rsc{flex:none;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;letter-spacing:-.02em;color:color-mix(in srgb,var(--tc) 72%,var(--ink));background:color-mix(in srgb,var(--tc) 15%,transparent)}
+.rsc.txt{font-size:11px;letter-spacing:0}
+.rmid{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.r1{display:flex;align-items:baseline;gap:7px;min-width:0}
+.r1 .tk{font-weight:800;font-size:16px;letter-spacing:-.01em;flex:none}
+.r1 .nm{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.r1 .w{font-size:13px;color:var(--ink2);flex:none;font-variant-numeric:tabular-nums}
+.r1 .w.over{color:var(--coral);font-weight:700}
+.r2{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.r2 b{font-weight:700}
+.r2 .ar{font-size:10px;vertical-align:1px}
+.rflag{flex:none;color:var(--coral);align-self:center;display:inline-flex}
+.own{flex:none;align-self:center;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--teal-soft);color:var(--teal)}
+.own.out{background:var(--panel2);color:var(--mute)}
+.rpx{flex:none;text-align:right;display:flex;flex-direction:column;gap:1px;font-variant-numeric:tabular-nums}
+.rpx b{font-weight:800;font-size:15px;white-space:nowrap}
+.rpx small{font-size:12px;color:var(--mute);white-space:nowrap}
+.rempty{padding:13px 16px;font-size:13px;color:var(--mute)}
+.list .empty{display:block}
+/* sort and filter sheet */
+.shd{margin:0 0 6px;font-size:12.5px;font-weight:700;color:var(--mute)}
+.fopts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.fopts .chip{cursor:pointer}
+/* detail sheets: the row's full card on top */
+.sheet .card2{cursor:default;border:0;padding:0;background:transparent}
+.sheet .card2:hover{border:0}.sheet .card2:active{transform:none}
+.sheet .card2 .c2th{display:none}
+.sheet .c2biz{display:none}
+.dmeta{color:var(--mute);font-size:12.5px;margin-top:-6px}
+/* menu */
+.msec{margin:0 0 20px}
+.msec>h4{margin:0 0 8px;font-size:15px;font-weight:800}
+.msec .row{margin:8px 0}
+.msec .pstrip{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.capl{flex-direction:row;align-items:center;justify-content:space-between;margin:10px 0 6px;font-size:13.5px;color:var(--ink)}
+.capl span{display:flex;align-items:center;gap:6px}
+.capl input{width:72px;text-align:right;padding:6px 9px}
+details.syncset{border-top:1px solid var(--line);padding-top:14px}
+details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bottom:8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -443,17 +497,20 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 <header>
   <div class="bar">
     <div class="brand"><i></i><span>Radar</span><button class="ver num" id="verBtn" title="What's new"></button></div>
-    <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="score"><span class="lg">Scorecard</span><span class="sm">Score</span></button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button></div>
+    <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button></div>
     <span class="sp"></span>
-    <button class="btn small quiet num" id="btnEur" title="Show foreign prices in euros">€</button>
-    <button class="status" id="sync" title="Prices and sync"><i></i><span>local</span></button>
-    <button class="btn small quiet" id="btnMenu" title="Data and sync">⋯</button>
+    <button class="btn small quiet" id="btnMenu" title="Menu" aria-label="Menu">⋯</button>
   </div>
-  <div class="chips" id="chips"></div>
+  <div class="subbar">
+    <span id="subTxt"></span><span class="sp"></span>
+    <button class="status" id="sync" title="Prices and sync"><i></i><span>local</span></button>
+    <button class="btn small" id="btnTable" title="Show the ideas as a sortable table">Table</button>
+    <button class="btn small" id="btnSort" title="Sort and filter"></button>
+  </div>
 </header>
 
 <main>
-  <section id="viewBoard"><div class="grid" id="grid"></div></section>
+  <section id="viewBoard"><div class="list" id="grid"></div></section>
   <section id="viewScore" hidden>
     <div class="sum" id="summary"></div>
     <div class="sortbar"><label for="sortSel">Sort by</label><select id="sortSel">
@@ -470,15 +527,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
     <p class="hint" style="margin-top:10px">Green dot: live quote from the automatic price update. Yellow dot: the last update for that symbol failed, so the previous price is shown. "To buy level" is how far the price has to fall to reach your buy-below. "Total in EUR" is price change plus dividends since you logged the idea (for Bought cards: since the purchase), converted at the exchange rate of that day versus today, before withholding tax.</p>
   </section>
   <section id="viewPort" hidden>
-    <div class="pstrip" id="pStrip"></div>
-    <div class="pbar">
-      <button class="btn small" id="btnDepot">Update from Trade Republic PDF</button>
-      <span class="privacy" id="pAsOf"></span><span class="sp"></span>
-      <label for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max per stock<input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</label>
-      <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
-    </div>
-    <div id="portBody"></div>
-    <p class="hint" style="margin-top:18px">The Add score works like the Buy score on the Ideas board: 50 points for the distance to your add-below price, 30 for yield vs. its 5-year average, 20 for the position in the 52-week range. Without your own add level, a matching Radar card's buy-below is used; with no level at all a stock can reach "Getting close" but never the add zone. Stocks above your max weight are listed as full, however cheap they get. An unchecked red flag in the business holds a stock at Hold. Share counts and values come from the statement you import and stay in this browser; only the list of holdings and your add levels are saved to GitHub.</p>
+    <div class="list" id="portBody"></div>
   </section>
 </main>
 <button class="fab" id="fab" title="Add" aria-label="Add: import from Claude or write an idea by hand">+</button>
@@ -521,7 +570,10 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 
 <!-- sort sheet -->
 <div class="modal" id="mSort"><div class="sheet" style="max-width:520px">
-  <h3>Sort ideas by<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <h3>Sort and filter<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <h4 class="shd">Show</h4>
+  <div class="fopts" id="filterOpts"></div>
+  <h4 class="shd">Sort by</h4>
   <div class="sortopts" id="sortOpts"></div>
   <div class="explain">
     <h4>How the Buy score works</h4>
@@ -570,25 +622,34 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 </div></div>
 
 <div class="modal" id="mMenu"><div class="sheet">
-  <h3>Data and sync<span class="sp"></span><button class="btn small quiet" data-close>✕</button></h3>
+  <h3>Menu<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
   <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnLog">What's new</button></div>
-  <div class="row" style="margin-bottom:18px">
-    <button class="btn" id="btnExport">Export JSON</button>
-    <button class="btn" id="btnImport">Import JSON (merge)</button>
-    <input type="file" id="fileIn" accept="application/json" hidden>
+  <div class="msec">
+    <h4>Portfolio</h4>
+    <div class="pstrip" id="pStrip"></div>
+    <p class="hint" id="depotStatus">No statement imported on this device.</p>
+    <div class="row">
+      <button class="btn primary" id="btnDepot">Update from Trade Republic PDF</button>
+      <button class="btn quiet" id="btnDepotForget">Forget statement</button>
+      <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
+    </div>
+    <label class="capl" for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max weight per stock<span><input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</span></label>
+    <p class="hint"><span id="pAsOf"></span> The Add score works like the Buy score: 50 points for the distance to your add level, 30 for yield vs. its 5-year average, 20 for the 52-week range. Without an add level (your own, or the buy-below of a Radar card on the same symbol) a stock can't reach the add zone, so it is listed under "No add level yet". Stocks above your max weight are listed as full. An unchecked red flag holds a stock at Hold.</p>
   </div>
-  <h4 style="margin:0 0 6px">Live prices</h4>
-  <p class="hint" id="pxStatus">No price file loaded yet.</p>
-  <div class="row" style="margin-bottom:18px">
-    <button class="btn" id="btnPxRefresh">Refresh prices now</button>
-    <span class="hint">Starts the price update on GitHub. Takes about a minute.</span>
+  <div class="msec">
+    <h4>Live prices</h4>
+    <p class="hint" id="pxStatus">No price file loaded yet.</p>
+    <div class="row"><button class="btn" id="btnPxRefresh">Refresh prices now</button><span class="hint">Starts the price update on GitHub, about a minute.</span></div>
   </div>
-  <h4 style="margin:0 0 6px">Portfolio statement</h4>
-  <p class="hint" id="depotStatus">No statement imported on this device.</p>
-  <div class="row" style="margin-bottom:18px">
-    <button class="btn" id="btnDepotForget">Forget statement on this device</button>
+  <div class="msec">
+    <h4>Backup</h4>
+    <div class="row">
+      <button class="btn" id="btnExport">Export JSON</button>
+      <button class="btn" id="btnImport">Import JSON (merge)</button>
+      <input type="file" id="fileIn" accept="application/json" hidden>
+    </div>
   </div>
-  <h4 style="margin:0 0 6px">GitHub sync</h4>
+  <details class="msec syncset"><summary>GitHub sync settings</summary>
   <p class="hint">Keeps <code>ideas.json</code> and <code>portfolio.json</code> in your repo so every device sees the same cards and add levels. Share counts are never synced. The token is stored only in this browser.</p>
   <div class="form">
     <label class="w2">Owner / repo<input id="s_repo" placeholder="username/radar"></label>
@@ -600,6 +661,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
     <button class="btn" id="btnSyncNow">Sync now</button><span class="sp"></span>
     <button class="btn quiet" id="btnSyncClear">Clear</button><button class="btn primary" id="btnSyncSave">Save settings</button>
   </div>
+  </details>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -616,8 +678,17 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='2.5.0';
+const VERSION='3.0.0';
 const CHANGELOG=[
+  {v:'3.0.0',d:'2026-11-06',t:'Easy to read on the phone',items:[
+    'Two tabs, two questions: Ideas (is anything at my entry price?) and Portfolio (is anything at my add price?).',
+    'One slim row per stock instead of a big card: score, ticker, how far it is to your level and the yield (▲ above its usual, ▼ below), price in € with the local price small. A small red flag next to the ticker when the business has one. All 7 ideas fit on one screen.',
+    'Rows are grouped by tier: Buy zone (or Add zone) on top, then Getting close, Wait, Expensive. If the top group says "Nothing at your price yet", there is nothing to do today. A "Review due" group appears on top only when a review date has passed.',
+    'Portfolio: holdings without an add level now have their own group "No add level yet" instead of looking like "Getting close". Their row shows yield vs. its usual level, or "near 52w low/high". Full positions, Hold, and funds and bonds sit at the bottom.',
+    'Tap a row for everything: the full card on top (52-week bar, yield, return, review, today\'s move, stars), then the details as before. Open red flags now come right after the card, with "Checked, it\'s fine" next to each one.',
+    'Sort and stage filter live behind the ↕ button. Return since logging shows in the row once it is older than a month or moved 5 %.',
+    'The Scorecard tab is gone. Its table is still there on a computer: Ideas → Table. The € button is gone too, rows always show € first.',
+    'Statement import, max weight, depot value and the dividend estimate moved into ⋯ (Portfolio). GitHub sync settings fold away in there.']},
   {v:'2.5.0',d:'2026-11-06',t:'Portfolio cards like the idea cards',items:[
     'Holdings now use the same card as ideas: score tile, one line with the tier and how far it is to your add level, the 52-week bar with your add level on it, the Yield / Return / Review box, the business line and two lines of thesis. Weight and value sit under the name.',
     'Each holding can have its own thesis, bull and bear case, "I\'m wrong if", review date and journal, like an idea. Holdings with a Radar card show that card\'s texts, so nothing is written twice.',
@@ -734,7 +805,8 @@ function eurOf(v,cur){ const [c,u]=fxCode(cur); if(v==null) return null; if(c===
 // When on, foreign prices and levels are shown in EUR: today's rate for live prices and levels,
 // the rate on that day for logged/bought prices. Scores, buy/add levels and stored data stay in
 // the listing currency, so a currency move never changes a score.
-let eurView=false; try{ eurView=localStorage.getItem(LS_EUR)==='1'; }catch{}
+// v3.0.0: the toggle is gone. Lists show € first with the local price small; detail sheets use the local currency.
+const eurView=false;
 function fxRate(c,date){ const r=date?((prices.fxAt||{})[c]||{})[date]:null; return r||(prices.fx||{})[c]||null; }
 function inView(v,cur,date){
   if(!eurView||v==null||v==='') return null;
@@ -1008,38 +1080,53 @@ function runwayHtml(i,s){
     <div class="lb num"><span>52w low ${mN(q.yearLow,curOfI(i))}</span>${i.buyBelow>0?`<b>buy &lt; ${mN(i.buyBelow,curOfI(i))}</b>`:''}<span>high ${mN(q.yearHigh,curOfI(i))}</span></div></div>`;
 }
 const SORTS=[
-  {k:'score',label:'Best buy right now',sub:'Buy score, high to low',f:i=>scoreOf(i)?.score,dir:-1},
-  {k:'toBuy',label:'Nearest to my buy price',sub:'% above buy, low to high',f:toBuyOf,dir:-1},
-  {k:'dev',label:'Cheapest vs its own history',sub:'yield vs 5-yr average',f:i=>histOf(i)?.dev,dir:-1},
-  {k:'yld',label:'Highest yield',sub:'last 12 months',f:yldOf,dir:-1},
-  {k:'move',label:'Biggest mover today',sub:'up or down',f:i=>{const d=dayOf(i);return d==null?null:Math.abs(d);},dir:-1},
-  {k:'review',label:'Review due soonest',sub:'next review date',f:i=>i.nextReview||null,dir:1},
-  {k:'stage',label:'Stage, then yield',sub:'the old order',f:null},
+  {k:'score',label:'Best buy right now',short:'Best buy',sub:'grouped by tier',f:i=>scoreOf(i)?.score,dir:-1},
+  {k:'toBuy',label:'Nearest to my buy price',short:'Nearest buy',sub:'% above buy, low to high',f:toBuyOf,dir:-1},
+  {k:'dev',label:'Cheapest vs its own history',short:'Cheapest vs history',sub:'yield vs 5-yr average',f:i=>histOf(i)?.dev,dir:-1},
+  {k:'yld',label:'Highest yield',short:'Yield',sub:'last 12 months',f:yldOf,dir:-1},
+  {k:'move',label:'Biggest mover today',short:'Movers',sub:'up or down',f:i=>{const d=dayOf(i);return d==null?null:Math.abs(d);},dir:-1},
+  {k:'review',label:'Review due soonest',short:'Review',sub:'next review date',f:i=>i.nextReview||null,dir:1},
+  {k:'stage',label:'Stage, then yield',short:'Stage',sub:'the old order',f:null},
 ];
 const sortOf=()=>SORTS.find(s=>s.k===boardSort)||SORTS[0];
 function openSort(){
+  const ideas=live(), n=k=>k==='all'?ideas.length:ideas.filter(i=>i.status===k).length;
+  $('#filterOpts').innerHTML=[{k:'all',label:'All',c:'var(--ink)'},...STATUSES].filter(s=>s.k==='all'||n(s.k)||filter===s.k)
+    .map(s=>`<button class="chip ${filter===s.k?'on':''}" data-f="${s.k}">${s.k==='all'?'':`<i style="background:${s.c}"></i>`}${s.label} <b>${n(s.k)}</b></button>`).join('');
+  $$('#filterOpts .chip').forEach(b=>b.onclick=()=>{ filter=b.dataset.f; try{localStorage.setItem(LS_FILTER,filter);}catch{} closeAll(); render(); });
   $('#sortOpts').innerHTML=SORTS.map(s=>`<button class="${s.k===boardSort?'on':''}" data-k="${s.k}"><span>${s.label}</span><small>${s.sub}</small></button>`).join('');
   $$('#sortOpts button').forEach(b=>b.onclick=()=>{ boardSort=b.dataset.k; try{localStorage.setItem(LS_SORT,boardSort);}catch{} closeAll(); render(); });
   $('#mSort').classList.add('on');
 }
+$('#btnSort').onclick=openSort;
 
 // ---------- rendering ----------
-function render(){ renderChips(); view==='board'?renderBoard():view==='score'?renderScore():renderPort(); renderPxInfo(); renderBadge(); }
+const LS_TABLE='radar.table.v1';
+let tableMode=false; try{ tableMode=localStorage.getItem(LS_TABLE)==='1'; }catch{}
+const mqWide=window.matchMedia('(min-width:720px)');
+const showTable=()=>view==='board'&&tableMode&&mqWide.matches;
+function render(){ view==='port'?renderPort():showTable()?renderScore():renderBoard(); renderSub(); renderPxInfo(); renderBadge(); }
+// line under the tabs: what you're looking at, price age, sort
+function renderSub(){
+  let t;
+  if(view==='port'){ const H=holdings(), T=depotTotal();
+    t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtEur(T)}`:''} · ${depot?'statement '+fmtDay(depot.asOf):'no statement yet'}`; }
+  else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
+    t=showTable()?'':`${n} idea${n===1?'':'s'}${st?' · '+st.label:''}`; }
+  $('#subTxt').textContent=t;
+  $('#btnSort').hidden=view!=='board'||showTable();
+  $('#btnSort').innerHTML=`↕ ${sortOf().short}${filter!=='all'?' · '+esc(STATUSES.find(s=>s.k===filter)?.label||''):''}`;
+  $('#btnTable').hidden=view!=='board';
+  $('#btnTable').classList.toggle('on',tableMode);
+}
+$('#btnTable').onclick=()=>{ tableMode=!tableMode; try{localStorage.setItem(LS_TABLE,tableMode?'1':'0');}catch{} switchView('board'); };
+mqWide.addEventListener?.('change',()=>switchView(view));
 function renderPxInfo(){
   const n=Object.keys(prices.quotes||{}).length, e=Object.keys(prices.errors||{});
   renderStatus();
   $('#pxStatus').innerHTML=n||e.length
     ? `Last price change ${ago(prices.updated)}, ${n} quote${n===1?'':'s'}.`+(e.length?`<br><span class="dn">No quote for ${e.map(esc).join(', ')}.</span> Set the Yahoo symbol on those cards, e.g. ENI.MI, SAP.DE, NESN.SW.`:'')
     : 'No price file loaded yet. It appears after the first run of the GitHub Action.';
-}
-function renderChips(){
-  const ideas=live(); const counts=Object.fromEntries(STATUSES.map(s=>[s.k,ideas.filter(i=>i.status===s.k).length]));
-  const all=[{k:'all',label:'All',c:'var(--ink)'},...STATUSES];
-  $('#chips').innerHTML=`<button class="chip sort" id="btnSort" aria-label="Sort: ${sortOf().label}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg>${sortOf().label}</button><span class="csep"></span>`+all.map(s=>{ const n=s.k==='all'?ideas.length:counts[s.k];
-    if(!n&&s.k!=='all'&&filter!==s.k) return '';  // empty stages appear once they hold a card
-    return `<button class="chip ${filter===s.k?'on':''} ${n?'':'zero'}" data-f="${s.k}">${s.k==='all'?'':`<i style="background:${s.c}"></i>`}${s.label} <b>${n}</b></button>`; }).join('');
-  $('#btnSort').onclick=openSort;
-  $$('#chips .chip[data-f]').forEach(b=>b.onclick=()=>{ filter=b.dataset.f; try{localStorage.setItem(LS_FILTER,filter);}catch{} if(view!=='board') switchView('board'); else render(); });
 }
 function sortIdeas(a){
   const s=sortOf();
@@ -1051,11 +1138,61 @@ function sortIdeas(a){
   const order=Object.fromEntries(STATUSES.map((s,n)=>[s.k,n]));
   return a.sort((x,y)=>(order[x.status]-order[y.status])||((yldOf(y)??-1)-(yldOf(x)??-1))||(y.updatedAt||'').localeCompare(x.updatedAt||''));
 }
+// ---------- v3 list: one row per stock, grouped by tier ----------
+const FLAG=`<span class="rflag" title="Red flag in the business, open for details" aria-label="red flag"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 2a1 1 0 0 1 1 1v1h12.4a1 1 0 0 1 .8 1.6L16.6 9l2.6 3.4a1 1 0 0 1-.8 1.6H6v7a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1z"/></svg></span>`;
+const yTxt=(y,h)=>y==null?'':`${fmtN(y,1)} %${h?(h.v==='cheap'?' <span class="ar up">▲</span>':h.v==='expensive'?' <span class="ar dn">▼</span>':''):''}`;
+const lvl=v=>fmtN(v,v>=1000?0:2);
+const daysSince=d=>d?(Date.now()-new Date(d+'T00:00:00'))/864e5:0;
+// price column: € first, the listing price small underneath
+function pxCol(c,cur){
+  if(!(c>0)) return {main:'—',sub:''};
+  const [code]=fxCode(cur);
+  if(code==='EUR'&&cur==='EUR') return {main:fmtP(c)+' €',sub:''};
+  const e=eurOf(c,cur), loc=`${fmtN(c,c>=1000?0:2)} ${esc(cur)}`;
+  return e!=null?{main:fmtP(e)+' €',sub:loc}:{main:loc,sub:''};
+}
+function rowEl({tc,tile,txt,tk,nm,extra='',line2,px,onOpen}){
+  const el=document.createElement('button'); el.className='row2'; el.type='button';
+  el.style.setProperty('--tc',tc||'var(--t-none)');
+  el.innerHTML=`<span class="rsc ${txt?'txt':''} num">${tile}</span>
+    <span class="rmid"><span class="r1"><span class="tk">${esc(tk)||'?'}</span>${extra}<span class="nm">${esc(nm||'')}</span></span><span class="r2">${line2}</span></span>
+    <span class="rpx"><b>${px.main}</b>${px.sub?`<small>${px.sub}</small>`:''}</span>`;
+  el.onclick=onOpen; return el;
+}
+function groupEl(title,list,empty){
+  const sec=document.createElement('section'); sec.className='grp';
+  sec.innerHTML=`<div class="ghd"><span>${title}</span><span>${list.length}</span></div>`;
+  const box=document.createElement('div'); box.className='rows';
+  if(list.length) list.forEach(el=>box.appendChild(el)); else box.innerHTML=`<div class="rempty">${empty||''}</div>`;
+  sec.appendChild(box); return sec;
+}
+const reviewDue=o=>!!(o.nextReview&&o.nextReview<=today());
+function ideaRow(i,due){
+  const sc=scoreOf(i), c=curOf(i), cur=curOfI(i), q=quoteOf(i), h=histOf(i), y=yldOf(i);
+  const bp=sc?.parts.find(x=>x.k==='buy'), rp=sc?.parts.find(x=>x.k==='rng'), biz=sc?sc.biz:bizOf(symOf(i));
+  const bits=[];
+  if(due) bits.push('<b class="dn">review due</b>');
+  if(!c) bits.push(!q&&errOf(i)?`no quote for ${esc(symOf(i))}`:'waiting for the first price');
+  else if(bp) bits.push(bp.above<=0?`<b class="up">at your price</b> · below ${lvl(i.buyBelow)}`:`${fmtN(bp.above,0)} % above ${lvl(i.buyBelow)}`);
+  else bits.push(rp&&rp.pos<=.15?'no buy price · near 52w low':rp&&rp.pos>=.85?'no buy price · near 52w high':'no buy price');
+  if(y!=null) bits.push(yTxt(y,h));
+  const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
+  if(t&&(daysSince(t.base.date)>30||Math.abs(t.best)>=5)) bits.push(`<span class="${t.best>=0?'up':'dn'}">${fmtPct(t.best,0)}</span>`);
+  const extra=(biz&&biz.red.length?FLAG:'')+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?'<span class="own out">passed</span>':'');
+  return rowEl({tc:sc?sc.c:'var(--t-none)',tile:sc?sc.score:'–',tk:i.ticker,nm:i.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openRead(i.id)});
+}
 function renderBoard(){
   const g=$('#grid'); g.innerHTML='';
   const ideas=sortIdeas(live().filter(i=>filter==='all'||i.status===filter));
-  if(!ideas.length){ g.innerHTML=`<div class="empty"><b>${live().length?'Nothing in this stage':'No ideas yet'}</b>${live().length?'Pick another stage above.':'Discuss a stock with Claude, then paste the card with "Import from Claude", or add one with +.'}</div>`; return; }
-  for(const i of ideas) g.appendChild(cardEl(i));
+  if(!ideas.length){ g.innerHTML=`<div class="empty"><b>${live().length?'Nothing in this stage':'No ideas yet'}</b>${live().length?'Pick another stage under ↕.':'Discuss a stock with Claude, then paste the card with "Import from Claude", or add one with +.'}</div>`; return; }
+  if(boardSort!=='score'){ g.appendChild(groupEl(sortOf().label,ideas.map(i=>ideaRow(i,reviewDue(i)&&i.status!=='out')))); return; }
+  const due=ideas.filter(i=>i.status!=='out'&&reviewDue(i)), rest=ideas.filter(i=>!due.includes(i));
+  const act=rest.filter(i=>i.status!=='out'), tierOf=i=>scoreOf(i)?.tier||null;
+  if(due.length) g.appendChild(groupEl('Review due',due.map(i=>ideaRow(i,true))));
+  g.appendChild(groupEl('Buy zone',act.filter(i=>tierOf(i)==='Buy zone').map(i=>ideaRow(i)),'Nothing at your price yet.'));
+  for(const t of ['Getting close','Wait','Expensive']){ const l=act.filter(i=>tierOf(i)===t); if(l.length) g.appendChild(groupEl(t,l.map(i=>ideaRow(i)))); }
+  const none=act.filter(i=>!tierOf(i)); if(none.length) g.appendChild(groupEl('No price yet',none.map(i=>ideaRow(i))));
+  const out=rest.filter(i=>i.status==='out'); if(out.length) g.appendChild(groupEl('Passed or sold',out.map(i=>ideaRow(i))));
 }
 // Idea card (v2.3.0). Every fact of the old card is here once: score + tier + distance to buy in one
 // line, range bar with its ends, then yield / return / review, then two lines of thesis.
@@ -1065,7 +1202,7 @@ function c2barHtml(i,what){
   return `<div class="c2bar" title="52-week range${b!=null?`, your ${what} level (line)`:''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`;
 }
 const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
-function cardEl(i){
+function cardEl(i,inSheet){
   const st=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), h=histOf(i), sc=scoreOf(i), cur=curOfI(i), t=totalOf(i);
   const due=i.nextReview&&i.nextReview<=today();
   const tc=sc?sc.c:'var(--t-none)';
@@ -1106,6 +1243,7 @@ function cardEl(i){
     </div>
     ${(b=>b?`<div class="c2biz" title="Business trend, tap the card for details">${bizLine(b)}</div>`:'')(sc?sc.biz:bizOf(symOf(i)))}
     <p class="c2th">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>`;
+  if(inSheet){ el.removeAttribute('tabindex'); return el; }
   el.onclick=()=>openRead(i.id);
   el.onkeydown=e=>{ if(e.key==='Enter') openRead(i.id); };
   return el;
@@ -1171,9 +1309,10 @@ function renderScore(){
 $('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['score','toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
-function switchView(v){ view=v; try{localStorage.setItem(LS_VIEW,v);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
-  $('#viewBoard').hidden=v!=='board'; $('#viewScore').hidden=v!=='score'; $('#viewPort').hidden=v!=='port';
-  $('#chips').style.display=v==='board'?'':'none'; $('#fab').style.display=''; render(); }
+function switchView(v){ view=v==='port'?'port':'board'; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
+  const tbl=showTable();
+  $('#viewBoard').hidden=view!=='board'||tbl; $('#viewScore').hidden=!tbl; $('#viewPort').hidden=view!=='port';
+  document.body.classList.toggle('wide',tbl); render(); }
 $$('.seg button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
 // ---------- reading mode ----------
@@ -1183,24 +1322,19 @@ function openRead(id){
   const sec=(t,v,cls='')=>`<div class="sec ${cls}"><h4>${t}</h4><p class="${v?'':'none'}">${v?esc(v):'Nothing written yet.'}</p></div>`;
   const wide=window.matchMedia('(min-width:701px)').matches;
   const fold=(t,v,cls)=>`<details class="cs ${cls}" ${wide?'open':''}><summary><b>${t}</b><span class="peek">${v?esc(v):'Nothing written yet.'}</span></summary><p>${v?esc(v):'Nothing written yet.'}</p></details>`;
+  const bz=symOf(i)?bizOf(symOf(i)):null, flagFirst=bz&&bz.st==='red';
   $('#dossier').innerHTML=`
-    <div class="top">
-      <div class="title"><div class="tk">${esc(i.ticker)}</div><div class="nm">${esc(i.name)}${i.sector?' · '+esc(i.sector):''}</div>
-        <div class="meta"><span style="color:${s.c};font-weight:700">${s.label}</span> &nbsp; ${stars(i.conviction)} &nbsp; logged ${fmtDate(i.loggedDate)} at ${mP(i.loggedPrice,i.currency,i.loggedDate)}${isBought(i)?` · bought ${fmtDate(i.boughtDate||i.loggedDate)} at ${mP(i.boughtPrice,i.currency,i.boughtDate||i.loggedDate)}`:''}${i.source?' · '+esc(i.source):''}</div></div>
-    </div>
+    ${cardEl(i,true).outerHTML}
+    <div class="dmeta">${i.sector?esc(i.sector)+' · ':''}logged ${fmtDate(i.loggedDate)} at ${mP(i.loggedPrice,i.currency,i.loggedDate)}${isBought(i)?` · bought ${fmtDate(i.boughtDate||i.loggedDate)} at ${mP(i.boughtPrice,i.currency,i.boughtDate||i.loggedDate)}`:''}${i.source?' · '+esc(i.source):''}</div>
     <div class="stagebar" id="stagebar"></div>
     <div class="buyform" id="buyform" hidden></div>
+    ${flagFirst?bizHtml(symOf(i),i,'idea'):''}
     ${(s=>s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(whyOf(i,s))}</span>
       ${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${PART[k].label}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'n/a'}</b></div>`;}).join('')}
       </div></div>`:'')(scoreOf(i))}
     <div class="kpis">
-      <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
-      ${(h=>h?`<div class="kpi"><b class="num ${h.v==='cheap'?'up':h.v==='expensive'?'dn':''}">${fmtN(h.avg,2)} %</b><span>5-yr average yield</span></div>
-      <div class="kpi"><b class="num">${h.fair?mP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
-      <div class="kpi"><b class="num">${c?mP(c,curOfI(i)):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
       <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${tb==null?(i.buyBelow?mN(i.buyBelow,curOfI(i)):'—'):tb>=0?'In zone':'−'+fmtN(-tb,0)+' %'}</b><span>${i.buyBelow?'to buy below '+mN(i.buyBelow,curOfI(i)):'no buy level'}</span></div>
-      <div class="kpi"><b class="num ${chg==null?'':chg>=0?'up':'dn'}">${fmtPct(chg)}</b><span>${retLabel(i)}</span></div>
-      ${i.nextReview?`<div class="kpi"><b style="font-size:16px">${fmtDate(i.nextReview)}</b><span>${i.nextReview<=today()?'<span class="dn">review due</span>':'next review'}</span></div>`:''}
+      ${(h=>h?`<div class="kpi"><b class="num">${h.fair?mP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
     </div>
     ${(t=>t?`<div class="sec"><h4>Return ${sinceLabel(i)}</h4>
       <div class="kpis">
@@ -1209,7 +1343,7 @@ function openRead(id){
         ${t.foreign?`<div class="kpi"><b class="num ${t.fx>=0?'up':'dn'}">${t.inEur?fmtPct(t.fx):'—'}</b><span>${t.inEur?`currency, ${fmtN(t.f0,4)} to ${fmtN(t.f1,4)} ${t.code} per EUR`:`currency, rate for the ${t.base.what==='bought'?'purchase':'logging'} day not loaded yet`}</span></div>`:''}
         <div class="kpi"><b class="num ${t.best>=0?'up':'dn'}">${fmtPct(t.best)}</b><span>${retLabel(i)}</span></div>
       </div></div>`:'')(totalOf(i))}
-    ${symOf(i)?bizHtml(symOf(i),i,'idea'):''}
+    ${symOf(i)&&!flagFirst?bizHtml(symOf(i),i,'idea'):''}
     ${(h=>h?`<div class="sec"><h4>Yield vs. its own history</h4>
       <p><span class="vtag ${h.v}">${h.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(h.dev),0)} % ${h.dev>=0?'above':'below'} its ${fmtN(h.yrs,1)}-year average of ${fmtN(h.avg,2)} %. ${h.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':h.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
       ${ybarHtml(i)}</div>`:'')(histOf(i))}
@@ -1335,11 +1469,6 @@ $('#btnClaudeGo').onclick=()=>{
 };
 
 // ---------- export / import file ----------
-const syncEur=()=>{ const b=$('#btnEur'); b.classList.toggle('on',eurView);
-  b.title=eurView?'Showing foreign prices in euros. Tap for local currency':'Show foreign prices in euros'; };
-$('#btnEur').onclick=()=>{ eurView=!eurView; try{localStorage.setItem(LS_EUR,eurView?'1':'0');}catch{}
-  syncEur(); render(); toast(eurView?'Prices in €':'Prices in local currency'); };
-syncEur();
 $('#btnMenu').onclick=()=>{ $('#s_repo').value=sync.repo; $('#s_branch').value=sync.branch; $('#s_path').value=sync.path; $('#s_token').value=sync.token; $('#mMenu').classList.add('on'); };
 $('#btnExport').onclick=()=>{
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -1562,35 +1691,63 @@ function holdCard(r){
   return el;
 }
 
+// One row per holding (v3.0.0). Line 2 answers "can I add?": distance to the add level, or what's
+// stopping it (no level, full, red flag), then the yield.
+function holdRow(r,due){
+  const {h,x,s,w,y,mm}=r, c=curOf(x), cur=curOfI(x), q=quoteOf(x), hi=histOf(x), a=addOf(h), fund=isFund(h);
+  const bp=s?.parts.find(z=>z.k==='buy'), p=posOf(x), bits=[];
+  if(due) bits.push('<b class="dn">review due</b>');
+  if(mm!=null) bits.push(`<b class="dn">quote ${fmtPct(mm*100,0)} off statement</b>`);
+  if(!hSym(h)) bits.push('set the Yahoo symbol');
+  else if(!q&&errOf(x)) bits.push(`no quote for ${esc(hSym(h))}`);
+  else if(!q) bits.push('waiting for the first price');
+  else if(fund&&!s) bits.push(h.kind==='bond'?'bond fund':'fund');
+  else if(s&&s.full) bits.push(`full · max ${fmtN(capOf(h),1)} %`);
+  else{
+    if(a&&bp) bits.push(bp.above<=0?`<b class="up">at your add level</b> ${lvl(a.v)}`:`${fmtN(bp.above,0)} % above ${lvl(a.v)}`);
+    else if(p!=null&&(p<=.15||p>=.85)) bits.push(p<=.15?'near 52w low':'near 52w high');
+  }
+  if(y!=null) bits.push(yTxt(y,hi)+(!a&&!fund&&hi&&!(s&&s.full)?` · usual ${fmtN(hi.avg,1)} %`:''));
+  if(!bits.length) bits.push('no dividend');
+  const biz=fund?null:(s?s.biz:bizOf(hSym(h)));
+  const over=!fund&&w!=null&&w>capOf(h);
+  const extra=(w!=null?`<span class="w ${over?'over':''}" title="share of the depot">${fmtN(w,1)} %</span>`:'')+(biz&&biz.red.length?FLAG:'');
+  const grey=!s||s.full||!a;
+  return rowEl({tc:grey?'var(--t-none)':s.c,tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
+    tk:h.short||h.symbol,nm:h.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
+}
 function renderPort(){
   const rows=portRows(), body=$('#portBody'), T=depotTotal();
   $('#capIn').value=capDefault();
-  $('#pAsOf').innerHTML=depot?`🔒 Statement of ${fmtDate(depot.asOf)} · amounts stay on this device`:'🔒 No statement on this device yet. Amounts stay local.';
+  $('#pAsOf').textContent=depot?`Statement of ${fmtDate(depot.asOf)}; share counts and buy prices stay on this device.`:'Share counts and buy prices stay on this device.';
   const S=rows.filter(r=>r.inDepot);
-  const addZ=S.filter(r=>r.s&&r.s.zone), close=S.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score>=55), full=S.filter(r=>r.s&&r.s.full);
+  const addZ=S.filter(r=>r.s&&r.s.zone), close=S.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score>=55&&addOf(r.h)), full=S.filter(r=>r.s&&r.s.full);
   const withV=S.filter(r=>r.v), divEur=withV.reduce((a,r)=>a+(r.y!=null?r.v.eur*r.y/100:0),0);
   const anyLive=withV.some(r=>r.v.live);
   $('#pStrip').innerHTML=`
-    <div><b class="num">${T!=null?fmtEur(T):'—'}</b>${T!=null?(anyLive?'depot, at live prices':'depot, statement values'):'import a statement'}</div>
+    <div><b class="num">${T!=null?fmtEur(T):'—'}</b>${T!=null?(anyLive?'depot, at live prices':'depot, statement values'):'no statement yet'}</div>
     <div class="t" style="--tc:var(--t-buy)"><b class="num">${addZ.length}</b>in the add zone</div>
     <div class="t" style="--tc:var(--t-close)"><b class="num">${close.length}</b>getting close</div>
     <div><b class="num">${full.length}</b>full (above ${fmtN(capDefault(),1)} %)</div>
-    ${T?`<div><b class="num">${fmtN(divEur/T*100,2)} %</b>≈ ${fmtEur(divEur)} a year in dividends, before tax</div>`:''}`;
+    ${T?`<div><b class="num">${fmtEur(divEur)}</b>dividends a year (${fmtN(divEur/T*100,2)} %), before tax</div>`:''}`;
   body.innerHTML='';
-  if(!rows.length){ body.innerHTML=`<div class="grid"><div class="empty"><b>No holdings yet</b>Tap "Update from Trade Republic PDF" and pick the Vermögensübersicht. Share counts stay on this device.</div></div>`; return; }
-  const by=(a)=>a.sort((p,q)=>((q.s?.score??-1)-(p.s?.score??-1))||((q.w??0)-(p.w??0)));
+  if(!rows.length){ body.innerHTML=`<div class="empty"><b>No holdings yet</b>Open ⋯ and tap "Update from Trade Republic PDF". Share counts stay on this device.</div>`; return; }
+  const by=a=>a.sort((p,q)=>((q.s?.score??-1)-(p.s?.score??-1))||((q.s?.raw??-1)-(p.s?.raw??-1))||((q.w??0)-(p.w??0)));
+  const src=r=>textSrc(r.h), due=S.filter(r=>reviewDue(src(r))), rest=S.filter(r=>!due.includes(r));
+  const stock=r=>!isFund(r.h), lev=r=>!!addOf(r.h);
   const groups=[
-    ['Worth a look','score 55 or more and room left under your max weight',by(S.filter(r=>r.s&&!r.s.full&&r.s.score>=55))],
-    ['Holding','fine where they are',by(S.filter(r=>!isFund(r.h)&&!(r.s&&(r.s.full||r.s.score>=55))))],
-    ['Full','above your max weight, so not flagged however cheap',by(S.filter(r=>r.s&&r.s.full))],
-    ['Funds and bonds','shown for weight and yield, not scored',S.filter(r=>isFund(r.h)&&!r.s).sort((p,q)=>(q.w??0)-(p.w??0))],
-    ['Not in your last statement','sold? Open and remove, or import a newer statement',rows.filter(r=>!r.inDepot)],
+    ['Review due',due,null,true],
+    ['Add zone',by(rest.filter(r=>r.s&&r.s.zone)),'Nothing at your add level.'],
+    ['Getting close',by(rest.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score>=55&&lev(r)))],
+    ['No add level yet',by(rest.filter(r=>stock(r)&&r.s&&!r.s.full&&!lev(r)))],
+    ['Hold',by(rest.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score<55&&lev(r)))],
+    ['Full',by(rest.filter(r=>r.s&&r.s.full))],
+    ['Funds and bonds',rest.filter(r=>isFund(r.h)&&!r.s).sort((p,q)=>(q.w??0)-(p.w??0))],
+    ['Needs a symbol or quote',rest.filter(r=>stock(r)&&!r.s)],
+    ['Not in your last statement',rows.filter(r=>!r.inDepot)],
   ];
-  for(const [t,sub,list] of groups){ if(!list.length) continue;
-    const sec=document.createElement('section'); sec.className='psec';
-    sec.innerHTML=`<h2>${t} <small>${list.length}</small></h2><p>${sub}</p>`;
-    const g=document.createElement('div'); g.className='grid'; list.forEach(r=>g.appendChild(holdCard(r)));
-    sec.appendChild(g); body.appendChild(sec); }
+  for(const [t,list,empty,isDue] of groups){ if(!list.length&&!empty) continue;
+    body.appendChild(groupEl(t,list.map(r=>holdRow(r,isDue)),empty)); }
 }
 $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.target.value=capDefault(); return; }
   port.settings={...(port.settings||{}),maxWeight:v,updatedAt:now()}; persistPort(); toast(`Max per stock: ${fmtN(v,1)} %`); };
@@ -1603,21 +1760,21 @@ function openHold(id){
   const lbl={buy:'to add level',yld:PART.yld.label,rng:PART.rng.label};
   const wide=window.matchMedia('(min-width:701px)').matches;
   const fold=(t,v,cls)=>`<details class="cs ${cls}" ${wide?'open':''}><summary><b>${t}</b><span class="peek">${v?esc(v):'Nothing written yet.'}</span></summary><p>${v?esc(v):'Nothing written yet.'}</p></details>`;
+  const bz=!fund&&hSym(h)?bizOf(hSym(h)):null, flagFirst=bz&&bz.st==='red';
+  const card=holdCard({h,x,s,v,w,y,mm}); card.removeAttribute('tabindex'); card.onclick=null; card.onkeydown=null;
   $('#holdBody').innerHTML=`
-    <div class="top"><div class="title"><div class="tk">${esc(h.short||h.symbol)}</div><div class="nm">${esc(h.name)}${h.sector?' · '+esc(h.sector):''}</div>
-      <div class="meta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}${idea?` · <a href="#" id="hIdea" class="lnk">↗ Radar card (${esc(stageOf(idea).label)})</a>`:''}</div></div></div>
+    ${card.outerHTML}
+    <div class="dmeta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)}${h.sector?' · '+esc(h.sector):''} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}${idea?` · <a href="#" id="hIdea" class="lnk">↗ Radar card (${esc(stageOf(idea).label)})</a>`:''}</div>
+    ${flagFirst?bizHtml(hSym(h),h,'hold'):''}
     ${s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(hWhy(h,s))}</span>
       ${['buy','yld','rng'].map(k=>{const z=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${z?(z.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${z?`${Math.round(z.pts)}/${Math.round(z.max)}`:'n/a'}</b></div>`;}).join('')}
       </div></div>`:''}
     ${mm!=null?`<div class="warnbox">The live quote for ${esc(hSym(h))} converts to ${fmtP(v.unit,'EUR')}, the statement says ${fmtP(p.priceEur,'EUR')}. That is ${fmtPct(mm*100,0)} apart, so the Yahoo symbol is probably the wrong line or share class.</div>`:''}
-    <div class="kpis">
-      <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
-      ${hi?`<div class="kpi"><b class="num ${hi.v==='cheap'?'up':hi.v==='expensive'?'dn':''}">${fmtN(hi.avg,2)} %</b><span>5-yr average yield</span></div><div class="kpi"><b class="num">${hi.fair?mP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
-      <div class="kpi"><b class="num">${c?mP(c,cur):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
-      ${fund&&!(h.addBelow>0)?'':`<div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':mN(a.v,cur)):'—'}</b><span>${a?`to add below ${mN(a.v,cur)}${a.src==='radar'?' (Radar)':''}`:'no add level'}</span></div>`}
-      <div class="kpi"><b class="num ${rt?(rt.pct>=0?'up':'dn'):''}">${rt?fmtPct(rt.pct):'—'}</b><span>${rt?`return in €, bought at ${fmtP(rt.cost,'EUR')} avg`:'return: set your buy price below'}</span></div>
-      ${src.nextReview?`<div class="kpi"><b style="font-size:16px">${fmtDate(src.nextReview)}</b><span>${src.nextReview<=today()?'<span class="dn">review due</span>':'next review'}</span></div>`:''}
-    </div>
+    ${fund&&!(h.addBelow>0)&&!hi?'':`<div class="kpis">
+      ${fund&&!(h.addBelow>0)?'':`<div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':mN(a.v,cur)):'—'}</b><span>${a?`to add below ${mN(a.v,cur)}${a.src==='radar'?' (Radar)':''}`:'no add level, set one in the settings below'}</span></div>`}
+      ${hi?`<div class="kpi"><b class="num">${hi.fair?mP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
+      ${rt?`<div class="kpi"><b class="num">${fmtP(rt.cost,'EUR')}</b><span>your average buy price</span></div>`:''}
+    </div>`}
     <div class="sec"><h4>Position</h4><div class="kpis">
       <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
       <div class="kpi"><b class="num ${!fund&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${fund?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
@@ -1625,7 +1782,7 @@ function openHold(id){
       ${rt&&rt.gain!=null?`<div class="kpi"><b class="num ${rt.gain>=0?'up':'dn'}">${rt.gain>=0?'+':'−'}${fmtEur(Math.abs(rt.gain))}</b><span>gain in €, price only</span></div>`:''}
       ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
     </div></div>
-    ${!fund&&hSym(h)?bizHtml(hSym(h),h,'hold'):''}
+    ${!fund&&hSym(h)&&!flagFirst?bizHtml(hSym(h),h,'hold'):''}
     ${hi?`<div class="sec"><h4>Yield vs. its own history</h4>
       <p><span class="vtag ${hi.v}">${hi.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(hi.dev),0)} % ${hi.dev>=0?'above':'below'} its ${fmtN(hi.yrs,1)}-year average of ${fmtN(hi.avg,2)} %. ${hi.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':hi.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
       ${ybarHtml(x)}</div>`:''}
@@ -1738,12 +1895,14 @@ $('#pdfIn').onchange=async e=>{
   }
   const sum=isins.reduce((s,k)=>s+r.pos[k].valueEur,0);
   const ok=(r.count==null||r.count===isins.length)&&(r.brokerage==null||Math.abs(sum-r.brokerage)<1);
+  closeAll(); view='port';
   if(added) persistPort(); else render();
+  switchView('port');
   toast(`${isins.length} positions as of ${fmtDate(depot.asOf)}${added?`, ${added} new (set their symbol)`:''}${ok?'':' – totals do not add up, check'}`);
 };
 $('#btnDepotForget').onclick=()=>{ if(!confirm('Remove the imported share counts from this browser?')) return;
   depot=null; try{ localStorage.removeItem(LS_DEPOT); }catch{} renderDepotStatus(); render(); toast('Statement removed from this device'); };
-function renderDepotStatus(){ $('#depotStatus').textContent=depot?`Statement of ${fmtDate(depot.asOf)}, ${Object.keys(depot.pos).length} positions, imported ${ago(depot.importedAt)}. Stored only in this browser, never synced.`:'No statement imported on this device. Import it in the Portfolio tab; share counts stay in this browser.'; }
+function renderDepotStatus(){ $('#depotStatus').textContent=depot?`Statement of ${fmtDate(depot.asOf)}, ${Object.keys(depot.pos).length} positions, imported ${ago(depot.importedAt)}. Stored only in this browser, never synced.`:'No statement on this device yet. Import the Vermögensübersicht PDF; share counts stay in this browser.'; }
 $('#btnMenu').addEventListener('click',renderDepotStatus);
 
 // ---------- portfolio.json sync (same repo and folder as ideas.json) ----------
@@ -1815,7 +1974,8 @@ let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ pull(); pullP(); loadPrices(); } });
 
 let v0='board'; try{ v0=localStorage.getItem(LS_VIEW)||'board'; }catch{}
-switchView(['board','score','port'].includes(v0)?v0:'board');
+if(v0==='score'){ tableMode=true; try{localStorage.setItem(LS_TABLE,'1');}catch{} }   // the old Scorecard tab lives on as the desktop table
+switchView(v0);
 pull();
 pullP();
 loadPrices();
