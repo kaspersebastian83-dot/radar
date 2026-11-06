@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}   # "Refresh prices" button in the app, or Actions tab → Run workflow
   push:                   # new or changed cards get a price right away
     branches: [main]
-    paths: [ideas.json]
+    paths: [ideas.json, .github/scripts/fetch_prices.py, .github/workflows/prices.yml]
 
 permissions:
   contents: write

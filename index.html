@@ -88,6 +88,18 @@ main{max-width:1240px;margin:0 auto;padding:6px 20px 96px}
 .idea .price small{display:block;font-size:12px;font-weight:600;margin-top:3px}
 .idea .divline{grid-column:1/-1;font-size:12.5px;color:var(--ink2)}
 .idea .divline b{color:var(--ink);font-weight:700}
+.hist{grid-column:1/-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin-top:4px}
+.vtag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.vtag.cheap{background:var(--teal-soft);color:var(--teal)}
+.vtag.expensive{background:var(--coral-soft);color:var(--coral)}
+.vtag.fair{background:var(--panel2);color:var(--ink2)}
+.gauge .buy.edge-l::after{left:0;transform:none}.gauge .buy.edge-r::after{left:auto;right:0;transform:none}
+.ybar{position:relative;height:6px;border-radius:3px;background:var(--line2);margin:30px 0 24px}
+.ybar .avg{position:absolute;top:-5px;width:2px;height:16px;background:var(--ink2)}
+.ybar .avg::after{content:attr(data-l);position:absolute;top:17px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.ybar .cur{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:var(--ochre);border:3px solid var(--panel);box-shadow:0 0 0 1.5px var(--ochre);transform:translateX(-50%)}
+.ybar .lo,.ybar .hi{position:absolute;top:-19px;font-size:11px;color:var(--mute);font-weight:600}
+.ybar .lo{left:0}.ybar .hi{right:0}
 .idea .nq{font-size:13px;color:var(--mute);grid-column:1/-1}
 .idea .nq.warn{color:var(--coral)}
 /* 52-week gauge */
@@ -230,13 +242,13 @@ textarea{min-height:68px;resize:vertical;line-height:1.45}
   <section id="viewScore" hidden>
     <div class="sum" id="summary"></div>
     <div class="sortbar"><label for="sortSel">Sort by</label><select id="sortSel">
-      <option value="yld">Yield</option><option value="toBuy">Closest to buy price</option><option value="day">Today</option>
+      <option value="yld">Yield</option><option value="dev">Cheapest vs its history</option><option value="toBuy">Closest to buy price</option><option value="day">Today</option>
       <option value="chg">Since logged</option><option value="conviction">Conviction</option><option value="nextReview">Next review</option>
       <option value="loggedDate">Logged</option><option value="ticker">Stock</option><option value="status">Stage</option></select>
       <button class="btn small" id="sortDir" title="Reverse order">↓</button></div>
     <div class="slist" id="slist"></div>
     <div class="tablewrap"><table id="scoreTbl"><thead><tr>
-      <th data-k="ticker">Stock</th><th data-k="status">Stage</th><th data-k="yld" class="r">Yield</th>
+      <th data-k="ticker">Stock</th><th data-k="status">Stage</th><th data-k="yld" class="r">Yield</th><th data-k="dev" class="r">vs 5-yr avg</th>
       <th data-k="now" class="r">Price</th><th data-k="day" class="r">Today</th><th data-k="toBuy" class="r">To buy level</th>
       <th data-k="chg" class="r">Since logged</th><th data-k="loggedDate">Logged</th><th data-k="conviction">Conviction</th><th data-k="nextReview">Review</th>
     </tr></thead><tbody></tbody></table></div>
@@ -374,6 +386,22 @@ function dayOf(i){ const q=quoteOf(i); return q&&q.price>0&&q.prevClose>0?(q.pri
 function chgOf(i){ const c=curOf(i); return i.loggedPrice>0&&c>0?(c/i.loggedPrice-1)*100:null; }
 function toBuyOf(i){ const c=curOf(i); return i.buyBelow>0&&c>0?(i.buyBelow/c-1)*100:null; }  // negative = has to fall
 function yldOf(i){ const q=quoteOf(i); return q&&q.yieldTTM!=null?q.yieldTTM:null; }
+function histOf(i){
+  const q=quoteOf(i); if(!q||q.avgYield5y==null||q.yieldTTM==null||!(q.avgYield5y>0)) return null;
+  const dev=(q.yieldTTM/q.avgYield5y-1)*100;   // positive = yields more than usual = cheaper
+  const fair=q.divTTM>0?q.divTTM/(q.avgYield5y/100):null;
+  const v=dev>=10?'cheap':dev<=-10?'expensive':'fair';
+  return {avg:q.avgYield5y,lo:q.yieldLow5y,hi:q.yieldHigh5y,yrs:q.yieldYears,dev,fair,v,
+    label:v==='cheap'?'Cheap vs its history':v==='expensive'?'Expensive vs its history':'Around its usual yield'};
+}
+function ybarHtml(i){
+  const h=histOf(i), q=quoteOf(i); if(!h||!(h.hi>h.lo)) return '';
+  const lo=Math.min(h.lo,q.yieldTTM), hi=Math.max(h.hi,q.yieldTTM), sp=hi-lo, x=v=>((v-lo)/sp*100).toFixed(1);
+  return `<div class="ybar" title="Dividend yield over the last ${fmtN(h.yrs,1)} years">
+    <span class="lo">${fmtN(lo,2)} %</span><span class="hi">${fmtN(hi,2)} %</span>
+    <span class="avg" style="left:${x(h.avg)}%" data-l="5-yr average ${fmtN(h.avg,2)} %"></span>
+    <span class="cur" style="left:${x(q.yieldTTM)}%"></span></div>`;
+}
 function posOf(i){ const q=quoteOf(i),c=curOf(i); if(!q||!(q.yearHigh>q.yearLow)||!c) return null; return Math.min(1,Math.max(0,(c-q.yearLow)/(q.yearHigh-q.yearLow))); }
 const curOfI=i=>quoteOf(i)?.currency||i.currency||'';
 const ago=iso=>{ if(!iso) return ''; const m=Math.round((Date.now()-new Date(iso))/60000);
@@ -393,7 +421,7 @@ function gaugeHtml(i,mode="mini"){
   let buy='', zone='';
   if(i.buyBelow>0){
     const b=Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/span));
-    buy=`<span class="buy" style="left:${(b*100).toFixed(1)}%" data-l="buy ${fmtP(i.buyBelow)}"></span>`;
+    buy=`<span class="buy ${b<.15?'edge-l':b>.85?'edge-r':''}" style="left:${(b*100).toFixed(1)}%" data-l="buy ${fmtP(i.buyBelow)}"></span>`;
     zone=`<span class="zone" style="left:0;width:${(b*100).toFixed(1)}%"></span>`;
   }
   return `<div class="gauge ${mode}" title="52-week range">
@@ -434,14 +462,15 @@ function renderBoard(){
       <div class="figs">
         ${y!=null?`<div class="yield num">${fmtN(y,2)}<small>% yield</small></div>`:`<div class="yield num" style="color:var(--mute)">—<small>no yield data</small></div>`}
         <div class="price num">${c?`${liveDot(i)}${fmtP(c,curOfI(i))}`:'—'}${d!=null?`<small class="${d>=0?'up':'dn'}">${fmtPct(d)} today</small>`:''}</div>
-        ${q&&q.divTTM?`<div class="divline num"><b>${fmtN(q.divTTM)} ${esc(q.currency)}</b> paid per share in the last 12 months</div>`:''}
+        ${(h=>h?`<div class="hist"><span class="vtag ${h.v}">${h.label}</span><span class="num">5-yr average ${fmtN(h.avg,2)} %</span></div>`:'')(histOf(i))}
+        ${q&&q.divTTM?`<div class="divline num"><b>${fmtP(q.divTTM,q.currency)}</b> paid per share in the last 12 months.${(h=>h&&h.fair?` At its usual yield the price would be <b>${fmtP(h.fair,q.currency)}</b>.`:'')(histOf(i))}</div>`:''}
         ${!q&&errOf(i)?`<div class="nq warn">No quote for ${esc(symOf(i))}. Open the card and set the Yahoo symbol.</div>`:!q&&!c?`<div class="nq">No price yet.</div>`:''}
       </div>
       ${gaugeHtml(i)}
       <p class="thesis">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>
       <div class="foot">
         ${stars(i.conviction)}
-        ${tb!=null?`<span class="pill ${hit?'hit':''} num">${hit?`In the buy zone, buy below ${fmtP(i.buyBelow,i.currency)}`:`${fmtN(-tb,0)} % above buy price ${fmtP(i.buyBelow,i.currency)}`}</span>`:i.buyBelow?`<span class="pill num">buy below ${fmtP(i.buyBelow,i.currency)}</span>`:''}
+        ${tb!=null?`<span class="pill ${hit?'hit':''} num">${hit?`In the buy zone, buy below ${fmtP(i.buyBelow,curOfI(i))}`:`${fmtN(-tb,0)} % above buy price ${fmtP(i.buyBelow,curOfI(i))}`}</span>`:i.buyBelow?`<span class="pill num">buy below ${fmtP(i.buyBelow,curOfI(i))}</span>`:''}
         ${chg!=null?`<span class="num ${chg>=0?'up':'dn'}" title="since logged">${fmtPct(chg)} since ${fmtDate(i.loggedDate)}</span>`:''}
         <span class="sp"></span>
         ${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}
@@ -453,7 +482,7 @@ function renderBoard(){
 }
 
 function renderScore(){
-  const rows=live().map(i=>({...i,chg:chgOf(i),now:curOf(i),day:dayOf(i),yld:yldOf(i),toBuy:toBuyOf(i)}));
+  const rows=live().map(i=>{const h=histOf(i);return {...i,chg:chgOf(i),now:curOf(i),day:dayOf(i),yld:yldOf(i),toBuy:toBuyOf(i),h,dev:h?h.dev:null};});
   rows.sort((a,b)=>{const x=a[sortKey]??(sortDir<0?-1e9:1e9),y=b[sortKey]??(sortDir<0?-1e9:1e9); return (x>y?1:x<y?-1:0)*sortDir;});
   const tb=$('#scoreTbl tbody'); tb.innerHTML='';
   for(const i of rows){
@@ -461,9 +490,10 @@ function renderScore(){
     tr.innerHTML=`<td><span class="tk">${esc(i.ticker)}</span><span class="nm">${esc(i.name)}</span></td>
       <td><span class="pill" style="color:${stageOf(i).c}">${stageOf(i).label}</span></td>
       <td class="r num" style="font-weight:800">${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</td>
+      <td class="r num">${i.h?`<span class="vtag ${i.h.v}">${i.h.v==='fair'?'usual':i.h.v}</span> <span class="nm">avg ${fmtN(i.h.avg,2)} %</span>`:'—'}</td>
       <td class="r num">${liveDot(i)}${fmtP(i.now,curOfI(i))}${!quoteOf(i)&&errOf(i)?' <span class="dn" title="no quote">!</span>':''}</td>
       <td class="r num ${i.day==null?'':i.day>=0?'up':'dn'}">${fmtPct(i.day)}</td>
-      <td class="r num">${i.toBuy==null?(i.buyBelow?fmtP(i.buyBelow,i.currency):'—'):hit?`<span class="pill hit">in zone</span> <span class="nm">${fmtP(i.buyBelow,i.currency)}</span>`:`−${fmtN(-i.toBuy,0)} % <span class="nm">to ${fmtP(i.buyBelow,i.currency)}</span>`}</td>
+      <td class="r num">${i.toBuy==null?(i.buyBelow?fmtP(i.buyBelow,curOfI(i)):'—'):hit?`<span class="pill hit">in zone</span> <span class="nm">${fmtP(i.buyBelow,curOfI(i))}</span>`:`−${fmtN(-i.toBuy,0)} % <span class="nm">to ${fmtP(i.buyBelow,curOfI(i))}</span>`}</td>
       <td class="r num ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtPct(i.chg)}</td>
       <td>${fmtDate(i.loggedDate)}</td>
       <td>${stars(i.conviction)}</td>
@@ -479,11 +509,12 @@ function renderScore(){
     el.innerHTML=`<div class="top">
         <div class="who"><span class="tk">${esc(i.ticker)}</span><span class="nm">${esc(i.name)}</span>
           <div class="sub"><span style="color:${s.c};font-weight:700">${s.label}</span>${stars(i.conviction)}</div></div>
-        <div class="y num"><b>${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</b><span>yield</span></div></div>
+        <div class="y num"><b>${i.yld!=null?fmtN(i.yld,2)+' %':'—'}</b><span>${i.h?`avg ${fmtN(i.h.avg,2)} %`:'yield'}</span></div></div>
+      ${i.h?`<div style="margin-top:8px"><span class="vtag ${i.h.v}">${i.h.label}</span></div>`:''}
       <div class="cells">
         <div class="cell"><span>Price</span><b class="num">${liveDot(i)}${fmtP(i.now,curOfI(i))}</b></div>
         <div class="cell"><span>Today</span><b class="num ${i.day==null?'':i.day>=0?'up':'dn'}">${fmtPct(i.day)}</b></div>
-        <div class="cell"><span>Buy price</span><b class="num ${hit?'up':''}">${i.buyBelow?fmtP(i.buyBelow,i.currency):'—'}</b>${i.toBuy!=null?`<small class="num">${hit?'in zone':`−${fmtN(-i.toBuy,0)} % away`}</small>`:''}</div>
+        <div class="cell"><span>Buy price</span><b class="num ${hit?'up':''}">${i.buyBelow?fmtP(i.buyBelow,curOfI(i)):'—'}</b>${i.toBuy!=null?`<small class="num">${hit?'in zone':`−${fmtN(-i.toBuy,0)} % away`}</small>`:''}</div>
         <div class="cell"><span>Since logged</span><b class="num ${i.chg==null?'':i.chg>=0?'up':'dn'}">${fmtPct(i.chg)}</b></div>
       </div>
       <div class="rev"><span>logged ${fmtDate(i.loggedDate)}</span>${i.nextReview?`<span class="pill ${due?'due':''}">${due?'Review due':'Review '+fmtDate(i.nextReview)}</span>`:''}</div>`;
@@ -503,7 +534,7 @@ function renderScore(){
     <div><b class="num ${(avg(passed,'chg')??0)>=0?'up':'dn'}">${fmtPct(avg(passed,'chg'))}</b>passed or sold, since logged</div>`;
 }
 
-$('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['toBuy','yld','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
+$('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
 function switchView(v){ view=v; $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
@@ -522,11 +553,16 @@ function openRead(id){
     </div>
     <div class="kpis">
       <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
+      ${(h=>h?`<div class="kpi"><b class="num ${h.v==='cheap'?'up':h.v==='expensive'?'dn':''}">${fmtN(h.avg,2)} %</b><span>5-yr average yield</span></div>
+      <div class="kpi"><b class="num">${h.fair?fmtP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
       <div class="kpi"><b class="num">${c?fmtP(c,curOfI(i)):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
       <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${tb==null?(i.buyBelow?fmtN(i.buyBelow):'—'):tb>=0?'In zone':'−'+fmtN(-tb,0)+' %'}</b><span>${i.buyBelow?'to buy below '+fmtN(i.buyBelow):'no buy level'}</span></div>
       <div class="kpi"><b class="num ${chg==null?'':chg>=0?'up':'dn'}">${fmtPct(chg)}</b><span>since logged</span></div>
       ${i.nextReview?`<div class="kpi"><b style="font-size:16px">${fmtDate(i.nextReview)}</b><span>${i.nextReview<=today()?'<span class="dn">review due</span>':'next review'}</span></div>`:''}
     </div>
+    ${(h=>h?`<div class="sec"><h4>Yield vs. its own history</h4>
+      <p><span class="vtag ${h.v}">${h.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(h.dev),0)} % ${h.dev>=0?'above':'below'} its ${fmtN(h.yrs,1)}-year average of ${fmtN(h.avg,2)} %. ${h.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':h.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
+      ${ybarHtml(i)}</div>`:'')(histOf(i))}
     ${gaugeHtml(i,'full')}
     ${q?`<div class="quote">${liveDot(i)}${esc(symOf(i))} ${fmtP(q.price,q.currency)}${q.divTTM?`, ${fmtN(q.divTTM)} ${esc(q.currency)} dividends in the last 12 months`:''}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${i.currency&&q.currency&&i.currency!==q.currency?` <span class="warn">Quote is in ${esc(q.currency)}, the card in ${esc(i.currency)}.</span>`:''}</div>`
        :errOf(i)?`<div class="quote"><span class="warn">No quote for ${esc(symOf(i))}.</span> Set the Yahoo Finance symbol in Edit, e.g. ENI.MI (Milan), SAP.DE (Xetra), NESN.SW (Zurich), ULVR.L (London); US stocks just the ticker.</div>`:''}

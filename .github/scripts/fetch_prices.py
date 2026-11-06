@@ -24,6 +24,51 @@ def num(v, nd=4):
         return None
 
 
+def utc(idx):
+    return idx.tz_convert("UTC") if idx.tz is not None else idx.tz_localize("UTC")
+
+
+def yield_history(t, divs):
+    """Average trailing-12-month dividend yield over the last 5 years.
+
+    Sampled at each month end: dividends paid in the 365 days before that date
+    divided by that day's close. Close is split-adjusted but NOT dividend-
+    adjusted (auto_adjust=False), matching how dividends are reported.
+    Special dividends count like any other payment, so a one-off payout
+    inflates the year it falls in.
+    """
+    if divs is None or not len(divs):
+        return None
+    h = t.history(period="6y", interval="1d", auto_adjust=False, actions=False)
+    if h is None or h.empty or "Close" not in h:
+        return None
+    close = h["Close"].dropna()
+    close.index = utc(close.index)
+    d = divs.copy()
+    d.index = utc(d.index)
+    try:
+        monthly = close.resample("ME").last().dropna()
+    except ValueError:  # older pandas
+        monthly = close.resample("M").last().dropna()
+    end = monthly.index.max()
+    monthly = monthly[monthly.index > end - pd.DateOffset(years=5)]
+    first_div = d.index.min()
+    ys = []
+    for dt, px in monthly.items():
+        if px <= 0 or dt - pd.Timedelta(days=365) < first_div - pd.Timedelta(days=45):
+            continue  # not a full dividend year of history yet
+        ttm = float(d[(d.index > dt - pd.Timedelta(days=365)) & (d.index <= dt)].sum())
+        ys.append(ttm / float(px) * 100)
+    if len(ys) < 36:  # need at least 3 years for a meaningful average
+        return None
+    return {
+        "avgYield5y": round(sum(ys) / len(ys), 2),
+        "yieldLow5y": round(min(ys), 2),
+        "yieldHigh5y": round(max(ys), 2),
+        "yieldYears": round(len(ys) / 12, 1),
+    }
+
+
 def main():
     if not IDEAS.exists():
         print("no ideas.json yet")
@@ -56,6 +101,7 @@ def main():
                 "yearHigh": num(fi.year_high),
                 "yearLow": num(fi.year_low),
             }
+            d = None
             try:
                 d = t.dividends
                 if len(d):
@@ -66,6 +112,12 @@ def main():
                         q["yieldTTM"] = round(ttm / price * 100, 2)
             except Exception:
                 pass
+            try:
+                yh = yield_history(t, d)
+                if yh:
+                    q.update(yh)
+            except Exception as e:
+                print(f"{s}: yield history failed: {e}")
             old = prev_q.get(s, {})
             same = {k: v for k, v in old.items() if k != "time"} == q
             q["time"] = old.get("time") if same and old.get("time") else now
