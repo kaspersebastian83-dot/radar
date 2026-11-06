@@ -11,7 +11,6 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 23.4,
       "currency": "EUR",
-      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 19.5,
@@ -41,7 +40,6 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 86.5,
       "currency": "USD",
-      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 70,
@@ -71,7 +69,6 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 25.46,
       "currency": "EUR",
-      "symbol": "ENI.MI",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 19.5,
@@ -92,7 +89,8 @@
         }
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
-      "updatedAt": "2026-11-06T11:50:00.000Z"
+      "updatedAt": "2026-11-06T11:50:00.000Z",
+      "symbol": "ENI.MI"
     },
     {
       "id": "ko-20261105",
@@ -114,6 +112,8 @@
       "bear": "~28x earnings for ~10% EPS growth, yield ~2.2% at the low end of its own range; 2027 refranchising headwind will flatter nothing; sugar taxes and tariff/aluminium costs; IRS transfer-pricing case with a potential $6 bn+ liability still on appeal.",
       "kill": "Global unit case volume negative for two consecutive quarters; dividend growth below 3% a year or payout ratio above 85%; operating margin falls back below 30%; adverse final IRS ruling funded by debt that pushes net leverage above 2.5x.",
       "nextReview": "2027-02-15",
+      "boughtDate": "",
+      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-05",
@@ -148,6 +148,8 @@
       "bear": "~3.9% yield sits below the 10y gilt (~5.1%) while the BoE is hiking again. Net debt £48.6bn and rising ~£4bn per half, gearing heading to 65%. The 2024 £7bn rights issue at 645p rebased the dividend, and another raise is possible. DPS grows only with CPIH and is diluted by scrip. UK bill-affordability politics and US rate cases. Mega-project overrun risk. Near 30-year highs. 0.5% UK stamp duty on purchase.",
       "kill": "I'm wrong if: the dividend grows below UK CPIH in any year or is rebased; any new equity raise beyond scrip; regulatory gearing above 70% or any credit-rating downgrade; the 8–10% EPS CAGR framework (to FY31) is cut; UK Electricity Transmission RoE reported below 8% in two consecutive years.",
       "nextReview": "2027-05-14",
+      "boughtDate": "",
+      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-06",
@@ -177,6 +179,8 @@
       "bear": "External-growth model: total AFFO grows ~10% but per-share only 3–4% because of constant share issuance; same-store rent growth of 1.1% is below inflation. Pivot into loans, preferred equity and a private fund adds credit risk (provisions up to $14.2m from $11.6m). Retail tenant concentration (dollar stores, pharmacies, convenience). Analysts cooling: Scotiabank downgrade to Sector Perform ($59 PT), Stifel PT cut to $63.75. Highly rate-sensitive; 52-week range $53–68.",
       "kill": "I'm wrong if: AFFO per share growth falls below 2% for a full year; occupancy drops below 97.5%; net debt/EBITDAre rises above 6.0x; credit-loss provisions on loans/preferred equity exceed $25m in a single quarter; or the monthly dividend is frozen for more than 12 months.",
       "nextReview": "2027-03-01",
+      "boughtDate": "",
+      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-06",
@@ -207,6 +211,8 @@
       "bear": "Bought at a 12-month high after +15% since October; P&C reinsurance pricing is softening (Jan renewals volume −8%) and 2026 earnings benefit from below-average cat losses; analyst average target €554 is below the price (RBC 530, UBS 515); one mega-cat or casualty reserve charge can cost 10–15% quickly; dividend growth will slow to EPS growth (high single digits), the 20% hikes are over.",
       "kill": "I'm wrong if: the dividend is cut or frozen; Solvency II falls below 200%; P&C reinsurance combined ratio exceeds 95% for two consecutive years; group ROE drops below 14% for a full year; or 2027 net profit guidance comes in below €6.3bn without a major cat event explaining it.",
       "nextReview": "2027-03-01",
+      "boughtDate": "",
+      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-06",
@@ -280,6 +286,99 @@
       "createdAt": "2026-11-06T17:13:04.594Z",
       "updatedAt": "2026-11-06T20:06:31.854Z",
       "deletedAt": "2026-11-06T20:06:31.854Z"
+    },
+    {
+      "id": "4tn8crmw5fl079",
+      "ticker": "ZTS",
+      "name": "Zoetis",
+      "sector": "Healthcare – animal health",
+      "source": "Claude chat 2026-11-06",
+      "status": "researching",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 82.11,
+      "currency": "USD",
+      "symbol": "ZTS",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 82,
+      "conviction": 3,
+      "thesis": "World #1 animal-health company (~$9.3B sales 2026e), priced like a melting ice cube: ~13x EPS, ~6.9% FCF yield after -34% YTD. The cash engine is intact: FCF/share 3.51 -> 5.05 -> 5.14 (2023-25), payout ~35% of earnings, buybacks ~4%/yr, net debt ~1.9x EBITDA. Buy below $82 = 25% off a ~$110 base: 17x 2026e adj. EPS $6.30 = $107; FCF $5.61/sh growing 3% at an 8% hurdle = $116. At $82 the market implies ~1% FCF growth forever. Yield 2.6% vs ~1% historically.",
+      "bull": "Livestock (+8% in Q3) and diagnostics are growing; Q3 2026 beat ($1.75 adj. EPS vs $1.51 expected), FY adj. EPS guide raised to $6.25-6.35, some 2027 approvals pulled into Q4 2026. If U.S. companion animal merely stabilises: 18-20x on ~$6.5 = $115-130 plus a growing 2.6% yield.",
+      "bear": "U.S. segment -6% in Q3 (pet owners cutting vet visits, competitive pressure in dermatology, i.e. its Apoquel/Cytopoint franchise). 2026 organic revenue -1 to -2%, adj. net income -5 to -7%, management cautious on 2027 (stock -8% on results day). Bear value: $5.25 EPS x 12 = ~$63 (52w low $68.77). Tax: US 15% withheld, fully credited in DE via W-8BEN, no loss.",
+      "kill": "I'm wrong if 2027 guidance has adj. EPS below $5.75, or U.S. companion animal is still shrinking in H2 2027 - then it's erosion, not a pause.",
+      "nextReview": "2027-02-16",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "Logged at the Nov 5 close $82.11 (~EUR 73.7); traded ~$80 on Nov 6. Expected Buy score ~95 once prices load."
+        }
+      ],
+      "createdAt": "2026-11-06T20:32:30.021Z",
+      "updatedAt": "2026-11-06T20:32:30.021Z"
+    },
+    {
+      "id": "0yl3edmw5fl079",
+      "ticker": "WKL",
+      "name": "Wolters Kluwer",
+      "sector": "Industrials – professional information & software",
+      "source": "Claude chat 2026-11-06",
+      "status": "researching",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 90.11,
+      "currency": "EUR",
+      "symbol": "WKL.AS",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 88,
+      "conviction": 3,
+      "thesis": "Expert software + content for health (UpToDate), tax & accounting, legal, compliance; 85% recurring, cloud software +15% organic. Shares -45% in 2025 on AI-disruption fear, ~15x earnings vs ~22x usual. The numbers keep compounding: 9M 2026 organic +6%, adj. operating profit +10% cc, FCF/share 4.96 -> 5.62 -> 5.88 (2023-25), net debt 2.0x EBITDA, dividend EUR 2.52 (+8%). Buy below EUR 88 = 25% off a ~EUR 117 base: 20x 2026e adj. EPS ~EUR 5.60 = EUR 112; adj. FCF EUR 1.30-1.35B = ~EUR 5.95/sh growing 3% at an 8% hurdle = EUR 123. At EUR 90 the market implies ~1.3% growth forever. Yield 2.8% vs ~1.9% in 2025.",
+      "bull": "GenAI on proprietary content (~70% of digital revenue already AI-powered) lifts pricing and retention instead of replacing the product; EUR 500M buyback in 2026. Re-rating to 20x = EUR 112+ plus a ~8%-growing dividend.",
+      "bear": "LLMs commoditise tax/legal research and clinical answers -> growth slips to 0-2%, 12x on ~EUR 5.3 = ~EUR 64 (2026 low was ~EUR 54). Stock already rallied +33% in a month - don't chase above ~EUR 95. New CEO since Feb 2026, product spend rising to 12-13% of revenue. Tax: NL 15% withheld, fully credited in DE, nothing to reclaim.",
+      "kill": "I'm wrong if organic growth drops below 4% in two reports in a row, or recurring cloud software growth falls below 10%.",
+      "nextReview": "2027-02-24",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "Logged at the Nov 6 Euronext close ~EUR 90.11 (-2.5% from EUR 92.42; data names sold off). Expected Buy score ~80; the 52w high rolls down from ~EUR 114 over the next weeks, which costs a few points."
+        }
+      ],
+      "createdAt": "2026-11-06T20:32:30.021Z",
+      "updatedAt": "2026-11-06T20:32:30.021Z"
+    },
+    {
+      "id": "gxanqmmw5fl079",
+      "ticker": "VICI",
+      "name": "VICI Properties",
+      "sector": "Real estate – gaming/experiential REIT",
+      "source": "Claude chat 2026-11-06",
+      "status": "researching",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 25.21,
+      "currency": "USD",
+      "symbol": "VICI",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 22.5,
+      "conviction": 2,
+      "thesis": "Triple-net landlord of Caesars Palace, MGM Grand, the Venetian and ~90 more; 100% occupancy, ~40-yr leases, ~2% escalators, about half CPI-linked. 2026 AFFO $2.47-2.48/sh, dividend $1.84 (7.3%), payout ~75%, 9 straight raises, net debt 4.8x EBITDA, first $2B buyback. Buy below $22.50 = 25% off a ~$30 base: 12x 2027e AFFO ~$2.56 = $31; dividend growing 2.5% at an 8% hurdle = $34; haircut for Caesars. NOT in the buy zone today (was $22.73 two weeks ago); by my estimate the score crosses 75 around $24.70.",
+      "bull": "Rent is contractual and covered; AFFO/sh still +4%; buying back stock at ~10x AFFO is accretive; any clean Caesars outcome re-rates to 13-14x = $33-36.",
+      "bear": "Caesars (~38% of rent; regional + Joliet lease ~$740M/yr) is being bought by Fertitta, got downgraded, VICI booked a $313M credit-loss allowance and openly weighs fixing or selling that lease. A 25% cut on it = -$0.17 AFFO/sh -> 9x on $2.30 = ~$21. Refinancing gets dearer (new notes at 5.42%). Tax: US 15% withheld, credited in DE; the whole payout is taxed as dividend income.",
+      "kill": "I'm wrong if the Caesars regional rent is cut by more than 30%, or 2027 AFFO per share falls.",
+      "nextReview": "2027-03-02",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "Logged at the Nov 5 close $25.21 (~EUR 22.6). Expected Buy score ~69 (Getting close)."
+        }
+      ],
+      "createdAt": "2026-11-06T20:32:30.021Z",
+      "updatedAt": "2026-11-06T20:32:30.021Z"
     }
   ]
 }
