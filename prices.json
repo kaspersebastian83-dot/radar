@@ -1,0 +1,26 @@
+{
+  "updated": "2026-11-06T11:40:31+00:00",
+  "quotes": {
+    "ENI.MI": {
+      "price": 25.015,
+      "prevClose": 25.46,
+      "currency": "EUR",
+      "yearHigh": 27.76,
+      "yearLow": 15.554,
+      "divTTM": 1.06,
+      "yieldTTM": 4.24,
+      "time": "2026-11-06T11:40:31+00:00"
+    },
+    "KO": {
+      "price": 95.73,
+      "prevClose": 95.45,
+      "currency": "USD",
+      "yearHigh": 97.39,
+      "yearLow": 67.27,
+      "divTTM": 2.1,
+      "yieldTTM": 2.19,
+      "time": "2026-11-06T11:40:31+00:00"
+    }
+  },
+  "errors": {}
+}
