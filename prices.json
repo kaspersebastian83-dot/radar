@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-06T14:33:48+00:00",
+  "updated": "2026-11-06T14:41:52+00:00",
   "quotes": {
     "ENI.MI": {
       "price": 24.86,
@@ -18,7 +18,7 @@
       "time": "2026-11-06T14:33:48+00:00"
     },
     "KO": {
-      "price": 93.84,
+      "price": 93.745,
       "prevClose": 95.65,
       "currency": "USD",
       "yearHigh": 97.39,
@@ -31,10 +31,26 @@
       "yieldLow5y": 2.23,
       "yieldHigh5y": 3.25,
       "yieldYears": 5.0,
-      "time": "2026-11-06T14:33:48+00:00"
+      "time": "2026-11-06T14:41:52+00:00"
+    },
+    "MUV2.DE": {
+      "price": 569.4,
+      "prevClose": 596.0,
+      "currency": "EUR",
+      "yearHigh": 602.8,
+      "yearLow": 437.4,
+      "divTTM": 24.0,
+      "yieldTTM": 4.21,
+      "divs": [],
+      "payFreq": 1,
+      "avgYield5y": 3.65,
+      "yieldLow5y": 2.49,
+      "yieldHigh5y": 5.39,
+      "yieldYears": 5.0,
+      "time": "2026-11-06T14:41:52+00:00"
     },
     "NG.L": {
-      "price": 1238.5,
+      "price": 1237.869,
       "prevClose": 1284.0,
       "currency": "GBp",
       "yearHigh": 1428.5,
@@ -47,10 +63,10 @@
       "yieldLow5y": 3.4,
       "yieldHigh5y": 6.43,
       "yieldYears": 5.0,
-      "time": "2026-11-06T14:33:48+00:00"
+      "time": "2026-11-06T14:41:52+00:00"
     },
     "O": {
-      "price": 58.53,
+      "price": 58.595,
       "prevClose": 58.87,
       "currency": "USD",
       "yearHigh": 67.94,
@@ -63,22 +79,22 @@
       "yieldLow5y": 3.85,
       "yieldHigh5y": 6.41,
       "yieldYears": 5.0,
-      "time": "2026-11-06T14:33:48+00:00"
+      "time": "2026-11-06T14:41:52+00:00"
     }
   },
   "errors": {},
   "fx": {
-    "GBP": 0.83406,
-    "USD": 1.114082
+    "GBP": 0.83403,
+    "USD": 1.114951
   },
   "fxAt": {
     "GBP": {
       "2026-11-05": 0.83361,
-      "2026-11-06": 0.83406
+      "2026-11-06": 0.83403
     },
     "USD": {
       "2026-11-05": 1.123495,
-      "2026-11-06": 1.114082
+      "2026-11-06": 1.114951
     }
   }
 }
