@@ -213,6 +213,37 @@
       ],
       "createdAt": "2026-11-06T14:41:26.016Z",
       "updatedAt": "2026-11-06T14:41:26.016Z"
+    },
+    {
+      "id": "owcuehmw580eqe",
+      "ticker": "BEP",
+      "name": "Brookfield Renewable Partners (→ BEP Inc. after simplification)",
+      "sector": "Utilities – renewable power / yieldco (hydro, wind, solar, storage, nuclear)",
+      "source": "Claude chat 2026-11-06",
+      "status": "researching",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 30.64,
+      "currency": "USD",
+      "symbol": "BEP",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 28.5,
+      "conviction": 3,
+      "thesis": "Global renewable platform with contracted, inflation-linked cash flows: 10% FFO/unit CAGR and 6% distribution CAGR since 2012, LTM FFO $2.18/unit, distribution $1.57 (5.1% yield, ~72% payout). 85.7 GW advanced pipeline (~$1.0bn FFO net), hyperscaler demand, $5.1bn liquidity. Simplification into one Canadian corp (BEP Inc., vote 30 Nov 2026) should widen the buyer base; BEP units trade ~2% below BEPC for the same future share.",
+      "bull": "5.1% yield + 5–9% distribution growth gives ~10%/yr without re-rating; 14x FFO is below own history after a rate-driven sell-off from $38; Boralex, Aypa storage and Westinghouse nuclear add growth; Microsoft 10.5 GW framework; index inclusion after simplification.",
+      "bear": "FFO includes asset-sale gains (Maine hydro, Isagen) so true payout is tighter than 72%; unit count +3.4%/yr dilution treadmill; bond-proxy rate sensitivity; sponsor fees/incentive distributions to BAM; El Niño hydrology in Colombia; US tax-credit rollbacks; Q3 revenue miss; IFRS net losses. Tax: ~7.5% effective WHT as LP, after simplification 25% Canadian WHT (15% creditable, 10% reclaim by hand); unit→share exchange may be booked as a taxable sale by Trade Republic.",
+      "kill": "I'm wrong if: distribution growth drops below 5% or is cut; FFO payout ratio excluding asset-sale gains exceeds 85%; the simplification fails on 30 Nov and the dual structure persists; credit rating falls below BBB; unit count grows >5%/yr while FFO/unit growth falls below 7%.",
+      "nextReview": "2027-02-15",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "2026-11-06: Logged at $30.64 (NYSE close 5 Nov). BEPC $31.27. Watch: BEP unitholder vote 30 Nov 2026 (proxy deadline 25 Nov), closing expected Q4 2026. Decide then: buy BEP Inc. as clean Canadian corp vs. BEP units now for the ~2% discount."
+        }
+      ],
+      "createdAt": "2026-11-06T17:00:31.766Z",
+      "updatedAt": "2026-11-06T17:00:31.766Z"
     }
   ]
 }
