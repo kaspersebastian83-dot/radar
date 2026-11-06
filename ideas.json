@@ -184,6 +184,35 @@
       ],
       "createdAt": "2026-11-06T14:33:27.273Z",
       "updatedAt": "2026-11-06T14:33:27.273Z"
+    },
+    {
+      "id": "3qjea0mw531j3z",
+      "ticker": "MUV2",
+      "name": "Münchener Rück (Munich Re)",
+      "sector": "Financials – reinsurance / insurance",
+      "source": "Claude chat 2026-11-06",
+      "status": "watchlist",
+      "loggedDate": "2026-11-06",
+      "loggedPrice": 592.2,
+      "currency": "EUR",
+      "symbol": "MUV2.DE",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 535,
+      "conviction": 4,
+      "thesis": "World's largest reinsurer with a 298% solvency ratio, 18% ROE and a stated policy of paying out >80% of profit via dividend plus buyback. Dividend €24 (~4.05% at €592), only ~47% of earnings, grown from €9.80 to €24 in six years and never cut since the 1960s. German stock: zero withholding-tax friction for me. Ambition 2030 targets >8% EPS growth from less cyclical segments (Life & Health Re, ERGO, Specialty).",
+      "bull": "Record 2025 (€6.1bn), 2026 guidance raised to €6.6bn after Q3 beat; €2.25bn buyback shrinks share count ~3%/yr; P/E ~11 for an 18% ROE business; diversification away from P&C cat reinsurance lowers earnings volatility; capital return is structural with solvency ~300%.",
+      "bear": "Bought at a 12-month high after +15% since October; P&C reinsurance pricing is softening (Jan renewals volume −8%) and 2026 earnings benefit from below-average cat losses; analyst average target €554 is below the price (RBC 530, UBS 515); one mega-cat or casualty reserve charge can cost 10–15% quickly; dividend growth will slow to EPS growth (high single digits), the 20% hikes are over.",
+      "kill": "I'm wrong if: the dividend is cut or frozen; Solvency II falls below 200%; P&C reinsurance combined ratio exceeds 95% for two consecutive years; group ROE drops below 14% for a full year; or 2027 net profit guidance comes in below €6.3bn without a major cat event explaining it.",
+      "nextReview": "2027-03-01",
+      "notes": [
+        {
+          "date": "2026-11-06",
+          "text": "Logged at ~€592 (close 2026-11-05, Tradegate; Xetra within a euro) after the Q3 pre-release raised 2026 guidance to €6.6bn. Final Q3 on 12 Nov 2026. Buy-below €535 = 4.5% yield / ~10.5x 2026 EPS. Next review after FY2026 results and the 2026 dividend proposal (late Feb 2027)."
+        }
+      ],
+      "createdAt": "2026-11-06T14:41:26.016Z",
+      "updatedAt": "2026-11-06T14:41:26.016Z"
     }
   ]
 }
