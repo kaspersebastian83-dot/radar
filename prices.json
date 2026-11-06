@@ -1,8 +1,8 @@
 {
-  "updated": "2026-11-06T14:10:49+00:00",
+  "updated": "2026-11-06T14:33:48+00:00",
   "quotes": {
     "ENI.MI": {
-      "price": 24.905,
+      "price": 24.86,
       "prevClose": 25.46,
       "currency": "EUR",
       "yearHigh": 27.76,
@@ -15,54 +15,70 @@
       "yieldLow5y": 3.91,
       "yieldHigh5y": 9.9,
       "yieldYears": 5.0,
-      "time": "2026-11-06T14:10:49+00:00"
+      "time": "2026-11-06T14:33:48+00:00"
     },
     "KO": {
-      "price": 95.73,
-      "prevClose": 95.45,
+      "price": 93.84,
+      "prevClose": 95.65,
       "currency": "USD",
       "yearHigh": 97.39,
       "yearLow": 67.27,
       "divTTM": 2.1,
-      "yieldTTM": 2.19,
+      "yieldTTM": 2.24,
       "divs": [],
       "payFreq": 4,
       "avgYield5y": 2.82,
-      "yieldLow5y": 2.19,
+      "yieldLow5y": 2.23,
       "yieldHigh5y": 3.25,
       "yieldYears": 5.0,
-      "time": "2026-11-06T14:10:49+00:00"
+      "time": "2026-11-06T14:33:48+00:00"
     },
     "NG.L": {
-      "price": 1242.5,
+      "price": 1238.5,
       "prevClose": 1284.0,
       "currency": "GBp",
       "yearHigh": 1428.5,
       "yearLow": 1096.5,
       "divTTM": 48.49,
-      "yieldTTM": 3.9,
+      "yieldTTM": 3.92,
       "divs": [],
       "payFreq": 2,
       "avgYield5y": 4.66,
       "yieldLow5y": 3.4,
       "yieldHigh5y": 6.43,
       "yieldYears": 5.0,
-      "time": "2026-11-06T14:10:49+00:00"
+      "time": "2026-11-06T14:33:48+00:00"
+    },
+    "O": {
+      "price": 58.53,
+      "prevClose": 58.87,
+      "currency": "USD",
+      "yearHigh": 67.94,
+      "yearLow": 53.15,
+      "divTTM": 3.25,
+      "yieldTTM": 5.55,
+      "divs": [],
+      "payFreq": 12,
+      "avgYield5y": 5.16,
+      "yieldLow5y": 3.85,
+      "yieldHigh5y": 6.41,
+      "yieldYears": 5.0,
+      "time": "2026-11-06T14:33:48+00:00"
     }
   },
   "errors": {},
   "fx": {
-    "GBP": 0.83424,
-    "USD": 1.11433
+    "GBP": 0.83406,
+    "USD": 1.114082
   },
   "fxAt": {
     "GBP": {
       "2026-11-05": 0.83361,
-      "2026-11-06": 0.83425
+      "2026-11-06": 0.83406
     },
     "USD": {
       "2026-11-05": 1.123495,
-      "2026-11-06": 1.11433
+      "2026-11-06": 1.114082
     }
   }
 }
