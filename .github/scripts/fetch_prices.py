@@ -1,4 +1,4 @@
-"""Fetch quotes for every card in ideas.json and write prices.json.
+"""Fetch quotes for every card in ideas.json and every holding in portfolio.json, write prices.json.
 
 Runs in GitHub Actions. Symbols are Yahoo Finance symbols: the card's `symbol`
 field if set, otherwise its `ticker` (e.g. KO, ENI.MI, SAP.DE, NESN.SW).
@@ -13,6 +13,7 @@ import pandas as pd
 import yfinance as yf
 
 IDEAS = pathlib.Path("ideas.json")
+PORT = pathlib.Path("portfolio.json")  # holdings: symbols and add levels only, never share counts
 PRICES = pathlib.Path("prices.json")
 
 
@@ -131,13 +132,21 @@ def fetch_fx(codes, dates):
 
 
 def main():
-    if not IDEAS.exists():
-        print("no ideas.json yet")
+    if not IDEAS.exists() and not PORT.exists():
+        print("no ideas.json or portfolio.json yet")
         return
-    ideas = json.loads(IDEAS.read_text(encoding="utf-8")).get("ideas", [])
+    ideas = json.loads(IDEAS.read_text(encoding="utf-8")).get("ideas", []) if IDEAS.exists() else []
     live_ideas = [i for i in ideas if not i.get("deletedAt")]
+    holdings = []
+    if PORT.exists():
+        try:
+            holdings = [h for h in json.loads(PORT.read_text(encoding="utf-8")).get("holdings", [])
+                        if not h.get("deletedAt")]
+        except Exception as e:
+            print(f"portfolio.json unreadable: {e}")
     sym_of = lambda i: (i.get("symbol") or i.get("ticker") or "").strip().upper()
-    symbols = sorted({sym_of(i) for i in live_ideas} - {""})
+    symbols = sorted(({sym_of(i) for i in live_ideas}
+                      | {(h.get("symbol") or "").strip().upper() for h in holdings}) - {""})
     first_log = {}  # earliest logged date per symbol: dividends since then are kept
     log_dates = set()
     for i in live_ideas:

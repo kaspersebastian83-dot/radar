@@ -45,6 +45,18 @@ Radar → Researching → Watchlist → Bought → Passed / Sold
 - **Scorecard** shows every idea with logged price vs. current price (live quote, or typed in by hand as fallback), day change and trailing dividend yield. Passed ideas show what you missed, Bought ideas show how it went.
 - Cards with an overdue review date are flagged.
 
+## Portfolio tab
+
+Separate from the idea tracking: what you actually own, and whether any of it is a good moment to add.
+
+- `portfolio.json` (in the repo, public): one entry per holding with ISIN, Yahoo symbol, type (stock / fund / bond fund), optional `addBelow` and `maxWeight`, optional `idea` (Radar ticker it links to), note. **No share counts, no values.**
+- Share counts come from the Trade Republic *Vermögensübersicht* PDF: Portfolio → "Update from Trade Republic PDF". It's parsed in the browser (pdf.js) and kept in that browser's localStorage only. Import it once per device; re-import when you've bought or sold.
+- **Add score** = the Buy score with `addBelow` in place of `buyBelow` (50 / 30 / 20). Without an own add level, a Radar card on the same symbol lends its buy-below. Without any level a stock tops out at "Getting close", never "Add zone".
+- **Max weight** (default 7 %, editable in the tab, overridable per holding): a stock above it is listed as *Full* and not flagged, however cheap. Funds are shown for weight and yield, not scored unless you give them an add level.
+- A live quote more than 20 % off the statement price is flagged: usually the wrong Yahoo symbol.
+- The badge on the Portfolio tab counts holdings in the add zone.
+- Claude can update add levels with an Import from Claude block: `{"holdings":[{"symbol":"ALV.DE","addBelow":420}]}` (matched by id, ISIN or symbol).
+
 ## Import from Claude
 
 At the end of a stock discussion, ask Claude for "a Radar card" and paste the JSON into `Import from Claude`. Format (all fields optional except `ticker` or `name`):

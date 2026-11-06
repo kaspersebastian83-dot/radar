@@ -314,6 +314,40 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
   .scorebox{padding:12px;gap:12px}.ring.big{width:72px;height:72px}.ring.big b{font-size:26px}
   .sbar{grid-template-columns:80px 1fr 40px;font-size:12px}
 }
+/* ---------- portfolio view ---------- */
+.badge{display:inline-flex;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--teal);color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center;vertical-align:1px}
+.badge[hidden]{display:none}
+.pstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:4px 0 12px}
+.pstrip>div{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:10px 14px;line-height:1.3;font-size:12.5px;color:var(--ink2)}
+.pstrip b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.pstrip .t b{color:var(--tc)}
+.pbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:12.5px;color:var(--mute)}
+.pbar .sp{flex:1}
+.pbar label{flex-direction:row;align-items:center;gap:6px;font-size:12.5px}
+.pbar input{width:64px;padding:5px 8px;border-radius:999px;text-align:right}
+.psec h2{font-size:15px;font-weight:800;margin:22px 0 2px;display:flex;gap:8px;align-items:baseline}
+.psec h2 small{font-weight:600;color:var(--mute);font-size:13px}
+.psec>p{margin:0 0 10px;font-size:12.5px;color:var(--mute)}
+.grid>*{min-width:0}
+.hold .head .tk{font-size:16px}
+.hold .main{gap:12px}
+.hold .ring{width:48px;height:48px}.hold .ring b{font-size:17px}
+.wt{display:inline-flex;align-items:center;gap:6px}
+.wt i{display:inline-block;width:46px;height:5px;border-radius:3px;background:var(--line2);overflow:hidden}
+.wt em{display:block;height:5px;background:var(--ink2)}
+.wt.over em{background:var(--coral)}.wt.over{color:var(--coral)}
+.wt small{color:var(--mute);font-size:11.5px}
+.idea .foot .val{color:var(--ink2);font-weight:600}
+.lnk{color:var(--research);font-weight:700}
+.hold.fund .why .tier{color:var(--ink2)}
+.warnbox{background:var(--coral-soft);color:var(--coral);border-radius:var(--r2);padding:10px 12px;font-size:13px;font-weight:600}
+.privacy{font-size:12px;color:var(--mute);display:flex;gap:6px;align-items:center}
+@media(max-width:700px){
+  .pstrip{grid-template-columns:1fr 1fr;gap:8px}.pstrip b{font-size:19px}
+  .pbar .privacy{flex-basis:100%;order:3}
+  .hold .ring{width:44px;height:44px}.hold .ring b{font-size:16px}
+  .hold .foot .val{display:inline}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -321,7 +355,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 <header>
   <div class="bar">
     <div class="brand"><i></i><span>Radar</span></div>
-    <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="score">Scorecard</button></div>
+    <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="score"><span class="lg">Scorecard</span><span class="sm">Score</span></button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button></div>
     <span class="sp"></span>
     <span class="status" id="pxInfo"></span>
     <span class="status" id="sync"><i></i><span>local</span></span>
@@ -347,6 +381,17 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
       <th data-k="chg" class="r">Total in EUR</th><th data-k="loggedDate">Logged</th><th data-k="conviction">Conviction</th><th data-k="nextReview">Review</th>
     </tr></thead><tbody></tbody></table></div>
     <p class="hint" style="margin-top:10px">Green dot: live quote from the automatic price update. Yellow dot: the last update for that symbol failed, so the previous price is shown. "To buy level" is how far the price has to fall to reach your buy-below. "Total in EUR" is price change plus dividends since you logged the idea (for Bought cards: since the purchase), converted at the exchange rate of that day versus today, before withholding tax.</p>
+  </section>
+  <section id="viewPort" hidden>
+    <div class="pstrip" id="pStrip"></div>
+    <div class="pbar">
+      <button class="btn small" id="btnDepot">Update from Trade Republic PDF</button>
+      <span class="privacy" id="pAsOf"></span><span class="sp"></span>
+      <label for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max per stock<input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</label>
+      <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
+    </div>
+    <div id="portBody"></div>
+    <p class="hint" style="margin-top:18px">The Add score works like the Buy score on the Ideas board: 50 points for the distance to your add-below price, 30 for yield vs. its 5-year average, 20 for the position in the 52-week range. Without your own add level, a matching Radar card's buy-below is used; with no level at all a stock can reach "Getting close" but never the add zone. Stocks above your max weight are listed as full, however cheap they get. Share counts and values come from the statement you import and stay in this browser; only the list of holdings and your add levels are saved to GitHub.</p>
   </section>
 </main>
 <button class="fab" id="fab" title="New idea">+</button>
@@ -405,6 +450,12 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
   </div>
 </div></div>
 
+<!-- holding sheet -->
+<div class="modal" id="mHold"><div class="sheet">
+  <h3><span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <div class="dossier" id="holdBody"></div>
+</div></div>
+
 <!-- import from claude -->
 <div class="modal" id="mClaude"><div class="sheet">
   <h3>Import from Claude<span class="sp"></span><button class="btn small quiet" data-close>✕</button></h3>
@@ -427,8 +478,13 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
     <button class="btn" id="btnPxRefresh">Refresh prices now</button>
     <span class="hint">Starts the price update on GitHub. Takes about a minute.</span>
   </div>
+  <h4 style="margin:0 0 6px">Portfolio statement</h4>
+  <p class="hint" id="depotStatus">No statement imported on this device.</p>
+  <div class="row" style="margin-bottom:18px">
+    <button class="btn" id="btnDepotForget">Forget statement on this device</button>
+  </div>
   <h4 style="margin:0 0 6px">GitHub sync</h4>
-  <p class="hint">Keeps <code>ideas.json</code> in your repo so every device sees the same cards. The token is stored only in this browser.</p>
+  <p class="hint">Keeps <code>ideas.json</code> and <code>portfolio.json</code> in your repo so every device sees the same cards and add levels. Share counts are never synced. The token is stored only in this browser.</p>
   <div class="form">
     <label class="w2">Owner / repo<input id="s_repo" placeholder="username/radar"></label>
     <label>Branch<input id="s_branch" placeholder="main"></label>
@@ -452,7 +508,7 @@ const STATUSES = [
   {k:'bought',label:'Bought',c:'var(--bought)'},
   {k:'out',label:'Passed / Sold',c:'var(--out)'},
 ];
-const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1';
+const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1', LS_VIEW='radar.view.v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const today=()=>new Date().toISOString().slice(0,10);
 const now=()=>new Date().toISOString();
@@ -624,7 +680,7 @@ function openSort(){
 }
 
 // ---------- rendering ----------
-function render(){ renderChips(); view==='board'?renderBoard():renderScore(); renderPxInfo(); }
+function render(){ renderChips(); view==='board'?renderBoard():view==='score'?renderScore():renderPort(); renderPxInfo(); renderBadge(); }
 function renderPxInfo(){
   const n=Object.keys(prices.quotes||{}).length, e=Object.keys(prices.errors||{});
   $('#pxInfo').innerHTML=n?`<span>prices ${ago(prices.updated)}</span>`:'';
@@ -740,8 +796,9 @@ function renderScore(){
 $('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['score','toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
-function switchView(v){ view=v; $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
-  $('#viewBoard').hidden=v!=='board'; $('#viewScore').hidden=v!=='score'; $('#chips').style.display=v==='board'?'':'none'; render(); }
+function switchView(v){ view=v; try{localStorage.setItem(LS_VIEW,v);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  $('#viewBoard').hidden=v!=='board'; $('#viewScore').hidden=v!=='score'; $('#viewPort').hidden=v!=='port';
+  $('#chips').style.display=v==='board'?'':'none'; $('#fab').style.display=v==='port'?'none':''; render(); }
 $$('.seg button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
 // ---------- reading mode ----------
@@ -878,6 +935,8 @@ $('#btnClaudeGo').onclick=()=>{
   let txt=$('#claudeJson').value.trim();
   txt=txt.replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
   let obj; try{ obj=JSON.parse(txt); }catch{ toast('That is not valid JSON'); return; }
+  if(obj&&!Array.isArray(obj)&&Array.isArray(obj.holdings)){ // portfolio update: add levels, symbols, notes
+    const n=importHoldings(obj.holdings); closeAll(); persistPort(); toast(`Updated ${n} holding${n===1?'':'s'}`); return; }
   const arr=Array.isArray(obj)?obj:(obj.ideas||[obj]);
   let n=0;
   for(const raw of arr){
@@ -910,9 +969,9 @@ $('#fileIn').onchange=async e=>{
 
 // ---------- github sync ----------
 $('#btnSyncSave').onclick=()=>{ sync={repo:$('#s_repo').value.trim(),branch:$('#s_branch').value.trim()||'main',path:$('#s_path').value.trim()||'ideas.json',token:$('#s_token').value.trim()};
-  localStorage.setItem(LS_SYNC,JSON.stringify(sync)); closeAll(); pull(); loadPrices(); };
+  localStorage.setItem(LS_SYNC,JSON.stringify(sync)); closeAll(); pull(); pullP(); loadPrices(); };
 $('#btnSyncClear').onclick=()=>{ localStorage.removeItem(LS_SYNC); sync={repo:'',branch:'main',path:'ideas.json',token:''}; closeAll(); setSync('','local'); };
-$('#btnSyncNow').onclick=()=>{ closeAll(); pull(true); loadPrices(); };
+$('#btnSyncNow').onclick=()=>{ closeAll(); pull(true); pullP(); loadPrices(); };
 
 const cfg=()=>sync.repo&&sync.token;
 const api=()=>`https://api.github.com/repos/${sync.repo}/contents/${sync.path}`;
@@ -977,12 +1036,304 @@ $('#btnPxRefresh').onclick=async()=>{
   }catch(e){ toast('Could not start the update'); }
 };
 
+// ================= portfolio =================
+// portfolio.json (repo, public): which stocks, Yahoo symbol, add-below level, notes. Never share counts.
+// Depot (localStorage only): shares and values from the Trade Republic statement PDF, per ISIN.
+const LS_PORT='radar.portfolio.v1', LS_DEPOT='radar.depot.v1';
+const KINDS=[{k:'stock',label:'Stock'},{k:'fund',label:'Fund / ETF'},{k:'bond',label:'Bond fund'}];
+const HTIERS=[[75,'Add zone','var(--t-buy)'],[55,'Getting close','var(--t-close)'],[35,'Hold','var(--t-wait)'],[0,'Pricey','var(--t-exp)']];
+const PRIVATE_KEYS=['shares','value','valueEur','priceEur','qty','amount'];
+let port=loadPort(), depot=null, portSha=null, holdId=null;
+try{ const d=JSON.parse(localStorage.getItem(LS_DEPOT)); if(d&&d.pos) depot=d; }catch{}
+function loadPort(){ try{ const d=JSON.parse(localStorage.getItem(LS_PORT)); if(d&&Array.isArray(d.holdings)) return d; }catch{} return {version:1,settings:{maxWeight:7},holdings:[]}; }
+function savePortLocal(){ try{ localStorage.setItem(LS_PORT,JSON.stringify(port)); }catch{} }
+function persistPort(){ savePortLocal(); render(); schedulePushP(); }
+const holdings=()=>port.holdings.filter(h=>!h.deletedAt);
+const capDefault=()=>Number(port.settings?.maxWeight)>0?Number(port.settings.maxWeight):7;
+const capOf=h=>h.maxWeight>0?h.maxWeight:capDefault();
+const isFund=h=>h.kind==='fund'||h.kind==='bond';
+const hSym=h=>String(h.symbol||'').trim().toUpperCase();
+function ideaOf(h){ const s=hSym(h), t=String(h.idea||'').trim().toUpperCase();
+  return live().find(i=>t?String(i.ticker||'').toUpperCase()===t:(s&&symOf(i)===s))||null; }
+// Add level: your own, else the buy-below of a Radar card on the same symbol.
+function addOf(h){ if(h.addBelow>0) return {v:h.addBelow,src:'own'};
+  const i=ideaOf(h); if(i&&i.buyBelow>0&&symOf(i)===hSym(h)) return {v:i.buyBelow,src:'radar'}; return null; }
+// Shape the shared helpers (quoteOf, curOf, scoreOf, runwayHtml …) understand.
+const px=h=>({ticker:h.short,symbol:h.symbol,buyBelow:addOf(h)?.v??null,currency:h.currency,currentPrice:null});
+const posOf_=h=>depot&&h.isin?depot.pos[h.isin]||null:null;
+function valueOf(h){ const p=posOf_(h); if(!p) return null; const x=px(h), c=curOf(x), e=c?eurOf(c,curOfI(x)):null;
+  return e?{eur:p.shares*e,live:true,unit:e}:{eur:p.valueEur,live:false,unit:p.priceEur}; }
+function depotTotal(){ if(!depot) return null; const H=holdings(), seen=new Set();
+  let t=depot.cash||0; for(const h of H){ const v=valueOf(h); if(v){ t+=v.eur; seen.add(h.isin); } }
+  for(const [isin,p] of Object.entries(depot.pos)) if(!seen.has(isin)) t+=p.valueEur||0;
+  return t; }
+function weightOf(h,T){ const v=valueOf(h); T=T??depotTotal(); return v&&T?v.eur/T*100:null; }
+// Live price vs. statement price more than 20 % apart: the Yahoo symbol is probably the wrong line.
+function mismatchOf(h){ const p=posOf_(h), v=valueOf(h); return p&&v&&v.live&&p.priceEur>0&&Math.abs(v.unit/p.priceEur-1)>.2?v.unit/p.priceEur-1:null; }
+function hScore(h,T){
+  if(!hSym(h)) return null;
+  if(isFund(h)&&!(h.addBelow>0)) return null;   // funds are shown, not scored, unless you give them an add level
+  const s=scoreOf(px(h)); if(!s) return null;
+  // "Add zone" needs a price level you set: yield and 52-week range alone top out at "Getting close".
+  let t=HTIERS.find(t=>s.score>=t[0]); const capped=!addOf(h)&&t===HTIERS[0]; if(capped) t=HTIERS[1];
+  const w=weightOf(h,T);
+  const full=!isFund(h)&&w!=null&&w>capOf(h);
+  return {...s,tier:full?'Full':t[1],c:full?'var(--t-none)':t[2],rawTier:t[1],rawC:t[2],full,w,capped,zone:!full&&t===HTIERS[0]};
+}
+function hWhy(h,s){
+  const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng'), a=addOf(h);
+  if(s.full) out.push(`would be ${s.rawTier.toLowerCase()} (${s.score}), but already ${fmtN(s.w,1)} % of the depot`);
+  out.push(b?(b.above<=0?'at or below your add level':`${fmtN(b.above,0)} % above add level`)+(a&&a.src==='radar'?' (from Radar card)':''):s.capped?'set an add level to reach the add zone':'no add level yet');
+  if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
+  if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
+  return out.join(' · ');
+}
+function wtHtml(h,w){ if(w==null) return ''; const cap=capOf(h), f=isFund(h), over=!f&&w>cap;
+  return `<span class="wt num ${over?'over':''}" title="${f?'Share of the depot':`Share of the depot, your max is ${fmtN(cap,1)} %`}"><i><em style="width:${Math.min(100,w/(f?25:cap)*100).toFixed(0)}%"></em></i>${fmtN(w,1)} %${f?'':`<small> / ${fmtN(cap,1)}</small>`}</span>`; }
+const fmtEur=v=>v==null?'—':'€ '+Math.round(v).toLocaleString('de-DE');
+const fmtK=v=>v==null?'—':v>=10000?'€ '+(v/1000).toLocaleString('de-DE',{maximumFractionDigits:1})+'k':fmtEur(v);
+
+function portRows(){
+  const T=depotTotal();
+  return holdings().map(h=>{ const s=hScore(h,T), x=px(h);
+    return {h,x,s,v:valueOf(h),w:weightOf(h,T),y:yldOf(x),inDepot:!depot||!!posOf_(h),mm:mismatchOf(h)}; });
+}
+function renderBadge(){ const b=$('#portBadge'); if(!b) return;
+  const n=portRows().filter(r=>r.inDepot&&r.s&&r.s.zone).length;
+  b.hidden=!n; b.textContent=n; }
+
+function holdCard(r){
+  const {h,x,s,v,w,y,mm}=r, c=curOf(x), d=dayOf(x), q=quoteOf(x), hi=histOf(x), idea=ideaOf(h), cur=curOfI(x);
+  const el=document.createElement('article'); el.className='idea hold'+(s?'':' fund'); el.tabIndex=0;
+  el.style.setProperty('--stage',s?s.c:'var(--line)');
+  const why=s?`<b class="tier">${s.tier}</b><span>${esc(hWhy(h,s))}</span>`
+    :!hSym(h)?`<b class="tier">No symbol</b><span class="dn">Open it and set the Yahoo symbol.</span>`
+    :!q&&errOf(x)?`<b class="tier">No quote</b><span class="dn">No quote for ${esc(hSym(h))}. Check the Yahoo symbol.</span>`
+    :!q?`<b class="tier">Waiting for price</b><span>The next price update picks it up.</span>`
+    :isFund(h)?`<b class="tier">${h.kind==='bond'?'Bond fund':'Fund'}</b><span>${posOf(x)!=null?`${fmtN(posOf(x)*100,0)} % up its 52-week range`:'not scored'}</span>`
+    :`<b class="tier">No score yet</b><span>Not enough price history.</span>`;
+  el.innerHTML=`
+    <div class="head"><span class="tk">${esc(h.short||h.symbol)||'?'}</span><span class="nm">${esc(h.name)}</span>${idea?`<span class="stage lnk" title="Has a Radar card">↗ Radar</span>`:''}</div>
+    <div class="main" style="--tc:${s?s.c:'var(--t-none)'}">
+      ${s?ringHtml(s):''}
+      <div class="why">${why}</div>
+      <div class="price num">${c?`${liveDot(x)}${fmtP(c,cur)}`:'—'}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
+    </div>
+    ${s?runwayHtml(x,s):''}
+    ${mm!=null?`<div class="warnbox">Quote is ${fmtPct(mm*100,0)} off the statement price. Probably the wrong Yahoo symbol.</div>`:''}
+    <div class="foot">
+      <span class="yl num">${y!=null?`<b>${fmtN(y,2)} %</b> yield${hi?` · usual ${fmtN(hi.avg,2)} %`:''}`:isFund(h)&&q?'no distributions':'no yield data'}</span>
+      <span class="sp"></span>
+      ${v?`<span class="val num" title="${v.live?'shares × live price':'value on the statement'}">${fmtK(v.eur)}</span>`:''}
+      ${wtHtml(h,w)}
+    </div>`;
+  el.onclick=()=>openHold(h.id);
+  el.onkeydown=e=>{ if(e.key==='Enter') openHold(h.id); };
+  return el;
+}
+
+function renderPort(){
+  const rows=portRows(), body=$('#portBody'), T=depotTotal();
+  $('#capIn').value=capDefault();
+  $('#pAsOf').innerHTML=depot?`🔒 Statement of ${fmtDate(depot.asOf)} · amounts stay on this device`:'🔒 No statement on this device yet. Amounts stay local.';
+  const S=rows.filter(r=>r.inDepot);
+  const addZ=S.filter(r=>r.s&&r.s.zone), close=S.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score>=55), full=S.filter(r=>r.s&&r.s.full);
+  const withV=S.filter(r=>r.v), divEur=withV.reduce((a,r)=>a+(r.y!=null?r.v.eur*r.y/100:0),0);
+  const anyLive=withV.some(r=>r.v.live);
+  $('#pStrip').innerHTML=`
+    <div><b class="num">${T!=null?fmtEur(T):'—'}</b>${T!=null?(anyLive?'depot, at live prices':'depot, statement values'):'import a statement'}</div>
+    <div class="t" style="--tc:var(--t-buy)"><b class="num">${addZ.length}</b>in the add zone</div>
+    <div class="t" style="--tc:var(--t-close)"><b class="num">${close.length}</b>getting close</div>
+    <div><b class="num">${full.length}</b>full (above ${fmtN(capDefault(),1)} %)</div>
+    ${T?`<div><b class="num">${fmtN(divEur/T*100,2)} %</b>≈ ${fmtEur(divEur)} a year in dividends, before tax</div>`:''}`;
+  body.innerHTML='';
+  if(!rows.length){ body.innerHTML=`<div class="grid"><div class="empty"><b>No holdings yet</b>Tap "Update from Trade Republic PDF" and pick the Vermögensübersicht. Share counts stay on this device.</div></div>`; return; }
+  const by=(a)=>a.sort((p,q)=>((q.s?.score??-1)-(p.s?.score??-1))||((q.w??0)-(p.w??0)));
+  const groups=[
+    ['Worth a look','score 55 or more and room left under your max weight',by(S.filter(r=>r.s&&!r.s.full&&r.s.score>=55))],
+    ['Holding','fine where they are',by(S.filter(r=>!isFund(r.h)&&!(r.s&&(r.s.full||r.s.score>=55))))],
+    ['Full','above your max weight, so not flagged however cheap',by(S.filter(r=>r.s&&r.s.full))],
+    ['Funds and bonds','shown for weight and yield, not scored',S.filter(r=>isFund(r.h)&&!r.s).sort((p,q)=>(q.w??0)-(p.w??0))],
+    ['Not in your last statement','sold? Open and remove, or import a newer statement',rows.filter(r=>!r.inDepot)],
+  ];
+  for(const [t,sub,list] of groups){ if(!list.length) continue;
+    const sec=document.createElement('section'); sec.className='psec';
+    sec.innerHTML=`<h2>${t} <small>${list.length}</small></h2><p>${sub}</p>`;
+    const g=document.createElement('div'); g.className='grid'; list.forEach(r=>g.appendChild(holdCard(r)));
+    sec.appendChild(g); body.appendChild(sec); }
+}
+$('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.target.value=capDefault(); return; }
+  port.settings={...(port.settings||{}),maxWeight:v,updatedAt:now()}; persistPort(); toast(`Max per stock: ${fmtN(v,1)} %`); };
+
+// ---------- holding sheet ----------
+function openHold(id){
+  holdId=id; const h=port.holdings.find(x=>x.id===id); if(!h) return;
+  const T=depotTotal(), s=hScore(h,T), x=px(h), c=curOf(x), d=dayOf(x), y=yldOf(x), hi=histOf(x), q=quoteOf(x), p=posOf_(h), v=valueOf(h), w=weightOf(h,T), a=addOf(h), idea=ideaOf(h), cur=curOfI(x), tb=toBuyOf(x), mm=mismatchOf(h);
+  const lbl={buy:'to add level',yld:PART.yld.label,rng:PART.rng.label};
+  $('#holdBody').innerHTML=`
+    <div class="top"><div class="title"><div class="tk">${esc(h.short||h.symbol)}</div><div class="nm">${esc(h.name)}${h.sector?' · '+esc(h.sector):''}</div>
+      <div class="meta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}</div></div></div>
+    ${s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(hWhy(h,s))}</span>
+      ${['buy','yld','rng'].map(k=>{const z=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${z?(z.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${z?`${Math.round(z.pts)}/${Math.round(z.max)}`:'n/a'}</b></div>`;}).join('')}
+      </div></div>`:''}
+    ${mm!=null?`<div class="warnbox">The live quote for ${esc(hSym(h))} converts to ${fmtP(v.unit,'EUR')}, the statement says ${fmtP(p.priceEur,'EUR')}. That is ${fmtPct(mm*100,0)} apart, so the Yahoo symbol is probably the wrong line or share class.</div>`:''}
+    <div class="kpis">
+      <div class="kpi"><b class="num">${c?fmtP(c,cur):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
+      <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
+      <div class="kpi"><b class="num ${!isFund(h)&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${isFund(h)?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
+      <div class="kpi"><b class="num">${p?fmtN(p.shares,3):'—'}</b><span>shares</span></div>
+      <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
+      ${hi?`<div class="kpi"><b class="num">${fmtN(hi.avg,2)} %</b><span>5-yr average yield</span></div><div class="kpi"><b class="num">${hi.fair?fmtP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
+      <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':fmtN(a.v)):'—'}</b><span>${a?`to add below ${fmtN(a.v)}${a.src==='radar'?' (Radar)':''}`:'no add level'}</span></div>
+      ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
+    </div>
+    ${posOf(x)!=null?`<div class="sec"><h4>52-week range</h4>${runwayHtml(x,s)}</div>`:''}
+    ${q?`<div class="quote">${liveDot(x)}${esc(hSym(h))} ${fmtP(q.price,q.currency)}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.</div>`
+      :hSym(h)&&errOf(x)?`<div class="quote"><span class="warn">No quote for ${esc(hSym(h))}.</span> Set the Yahoo symbol below, e.g. ALV.DE, DG.PA, ENEL.MI, 8058.T.</div>`:''}
+    ${idea?`<div class="row"><button class="btn" id="hIdea">↗ Open the Radar card (${esc(stageOf(idea).label)})</button><span class="hint">thesis, bull, bear, journal</span></div>`:''}
+    ${h.note?`<div class="sec"><h4>Note</h4><p>${esc(h.note)}</p></div>`:''}
+    <div class="sec"><h4>Settings for this holding</h4>
+    <div class="form">
+      <label>Short name<input id="h_short" value="${esc(h.short)}"></label>
+      <label>Yahoo symbol<input id="h_symbol" value="${esc(h.symbol)}" style="text-transform:uppercase"></label>
+      <label>Currency<input id="h_currency" value="${esc(h.currency)}" style="text-transform:uppercase"></label>
+      <label>Type<select id="h_kind">${KINDS.map(k=>`<option value="${k.k}" ${h.kind===k.k?'selected':''}>${k.label}</option>`).join('')}</select></label>
+      <label>Add below (${esc(cur||'price')})<input id="h_addBelow" type="number" step="any" inputmode="decimal" value="${h.addBelow??''}" placeholder="${a&&a.src==='radar'?'Radar: '+a.v:''}"></label>
+      <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${capDefault()} (default)"></label>
+      <label>Radar card ticker<input id="h_idea" value="${esc(h.idea??'')}" placeholder="auto by symbol" style="text-transform:uppercase"></label>
+      <label>Sector<input id="h_sector" value="${esc(h.sector)}"></label>
+      <label class="w4">Note<textarea id="h_note">${esc(h.note)}</textarea></label>
+    </div>
+    <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
+  if(idea) $('#hIdea').onclick=()=>{ closeAll(); openRead(idea.id); };
+  $('#hSave').onclick=()=>{
+    const num=v=>v===''?null:Number(v);
+    Object.assign(h,{short:$('#h_short').value.trim(),symbol:$('#h_symbol').value.trim().toUpperCase(),currency:$('#h_currency').value.trim().toUpperCase(),
+      kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),maxWeight:num($('#h_maxWeight').value),idea:$('#h_idea').value.trim().toUpperCase()||null,
+      sector:$('#h_sector').value.trim(),note:$('#h_note').value.trim(),updatedAt:now()});
+    persistPort(); openHold(h.id); toast('Saved');
+  };
+  $('#hDel').onclick=()=>{ if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
+  $('#mHold').classList.add('on');
+}
+
+// Portfolio updates pasted from Claude: {"holdings":[{"symbol":"ALV.DE","addBelow":420,…}]}. Matched by id, ISIN or symbol.
+function importHoldings(arr){
+  let n=0;
+  for(const raw of arr){ if(!raw||typeof raw!=='object') continue;
+    const o={...raw}; PRIVATE_KEYS.forEach(k=>delete o[k]);
+    if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
+    ['addBelow','maxWeight'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
+    const cur=port.holdings.find(h=>!h.deletedAt&&((o.id&&h.id===o.id)||(o.isin&&h.isin===o.isin)||(o.symbol&&hSym(h)===o.symbol)));
+    if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); n++; }
+    else if(o.symbol||o.isin){ port.holdings.push({id:o.isin?'h-'+o.isin:uid(),kind:'stock',addBelow:null,maxWeight:null,idea:null,note:'',...o,updatedAt:now()}); n++; }
+  }
+  return n;
+}
+
+// ---------- Trade Republic statement (Vermögensübersicht) ----------
+const PDFJS='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build/';
+async function pdfText(file){
+  const pdfjs=await import(PDFJS+'pdf.min.mjs'); pdfjs.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.mjs';
+  const doc=await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  const out=[];
+  for(let p=1;p<=doc.numPages;p++){ const tc=await (await doc.getPage(p)).getTextContent();
+    for(const it of tc.items){ const s=(it.str||'').trim(); if(s) out.push(s); } }
+  return out.join('\n');
+}
+const deNum=s=>Number(String(s).replace(/\./g,'').replace(',','.'));
+// One position = "<qty> Stk." / name / … / "ISIN: …" / … / price / date / value, in that text order.
+function parseTR(txt){
+  const pos={}, re=/(?:^|\n)(\d[\d.]*(?:,\d+)?) Stk\.\n([^\n]+)\n([\s\S]*?)\n(\d[\d.]*,\d+)\n(\d\d)\.(\d\d)\.(\d{4})\n(\d[\d.]*,\d\d)(?=\n|$)/g;
+  let m, asOf=null;
+  while((m=re.exec(txt))){
+    const isin=(m[3].match(/ISIN:\s*([A-Z]{2}[A-Z0-9]{9}\d)/)||[])[1]; if(!isin||/ Stk\.\n/.test(m[3])) continue;
+    pos[isin]={name:m[2].trim(),shares:deNum(m[1]),priceEur:deNum(m[4]),valueEur:deNum(m[8])};
+    asOf=asOf||`${m[7]}-${m[6]}-${m[5]}`;
+  }
+  const g=r=>{ const x=txt.match(r); return x?x:null; };
+  const z=g(/zum (\d\d)\.(\d\d)\.(\d{4})/); if(z) asOf=`${z[3]}-${z[2]}-${z[1]}`;
+  const cash=g(/\nCash\n(\d[\d.]*,\d\d)/), brok=g(/\nBrokerage\n(\d[\d.]*,\d\d)/), cnt=g(/ANZAHL POSITIONEN:\s*(\d+)/);
+  return {asOf,pos,cash:cash?deNum(cash[1]):0,brokerage:brok?deNum(brok[1]):null,count:cnt?Number(cnt[1]):null};
+}
+const fundLike=n=>/\b(ETF|UCITS|MSCI|STOXX|FTSE|S&P|Index|\((Dist|Acc)\))/i.test(n);
+$('#btnDepot').onclick=()=>$('#pdfIn').click();
+$('#pdfIn').onchange=async e=>{
+  const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  toast('Reading the statement…');
+  let r; try{ r=parseTR(await pdfText(f)); }catch(err){ console.error(err); toast('Could not read that PDF'); return; }
+  const isins=Object.keys(r.pos);
+  if(!isins.length){ toast('No positions found. Is it the Vermögensübersicht?'); return; }
+  depot={asOf:r.asOf||today(),importedAt:now(),cash:r.cash,brokerage:r.brokerage,pos:r.pos};
+  try{ localStorage.setItem(LS_DEPOT,JSON.stringify(depot)); }catch{}
+  let added=0;
+  for(const isin of isins) if(!holdings().some(h=>h.isin===isin)){
+    const nm=r.pos[isin].name, b=nm.match(/Bond|Anleihe|Corp Bond|Treasury/i);
+    port.holdings.push({id:'h-'+isin,isin,short:'',name:nm,symbol:'',currency:'',kind:b?'bond':fundLike(nm)?'fund':'stock',sector:'',addBelow:null,maxWeight:null,idea:null,note:'',updatedAt:now()});
+    added++;
+  }
+  const sum=isins.reduce((s,k)=>s+r.pos[k].valueEur,0);
+  const ok=(r.count==null||r.count===isins.length)&&(r.brokerage==null||Math.abs(sum-r.brokerage)<1);
+  if(added) persistPort(); else render();
+  toast(`${isins.length} positions as of ${fmtDate(depot.asOf)}${added?`, ${added} new (set their symbol)`:''}${ok?'':' – totals do not add up, check'}`);
+};
+$('#btnDepotForget').onclick=()=>{ if(!confirm('Remove the imported share counts from this browser?')) return;
+  depot=null; try{ localStorage.removeItem(LS_DEPOT); }catch{} renderDepotStatus(); render(); toast('Statement removed from this device'); };
+function renderDepotStatus(){ $('#depotStatus').textContent=depot?`Statement of ${fmtDate(depot.asOf)}, ${Object.keys(depot.pos).length} positions, imported ${ago(depot.importedAt)}. Stored only in this browser, never synced.`:'No statement imported on this device. Import it in the Portfolio tab; share counts stay in this browser.'; }
+$('#btnMenu').addEventListener('click',renderDepotStatus);
+
+// ---------- portfolio.json sync (same repo and folder as ideas.json) ----------
+const apiP=()=>`https://api.github.com/repos/${sync.repo}/contents/${sync.path.includes('/')?sync.path.replace(/[^/]+$/,''):''}portfolio.json`;
+function mergeP(remote){
+  let n=0; const map=new Map(port.holdings.map(h=>[h.id,h]));
+  for(const r of remote.holdings||[]){ if(!r||!r.id) continue; const c=map.get(r.id);
+    if(!c||(r.updatedAt||'')>(c.updatedAt||'')){ map.set(r.id,r); n++; } }
+  port.holdings=[...map.values()];
+  const rs=remote.settings||{}, ls=port.settings||{};
+  if((rs.updatedAt||'')>(ls.updatedAt||'')){ port.settings=rs; n++; }
+  return n;
+}
+let pushPTimer=null, pushingP=false;
+async function pullP(){
+  try{
+    if(!cfg()){ // no token: read-only copy from the site
+      const r=await fetch(`portfolio.json?t=${Date.now()}`,{cache:'no-store'});
+      if(r.ok&&mergeP(await r.json())){ savePortLocal(); render(); }
+      return;
+    }
+    const r=await fetch(`${apiP()}?ref=${sync.branch}&t=${Date.now()}`,{headers:hdr(),cache:'no-store'});
+    if(r.status===404){ portSha=null; if(holdings().length) await pushP(); return; }
+    if(!r.ok) throw new Error(r.status);
+    const j=await r.json(); portSha=j.sha; const remote=JSON.parse(b64dec(j.content));
+    if(mergeP(remote)){ savePortLocal(); render(); }
+    const ids=new Set((remote.holdings||[]).map(h=>h.id+'|'+h.updatedAt));
+    if(port.holdings.some(h=>!ids.has(h.id+'|'+h.updatedAt))||(port.settings?.updatedAt||'')>(remote.settings?.updatedAt||'')) await pushP();
+  }catch(e){ console.warn('portfolio sync',e); }
+}
+function schedulePushP(){ if(!cfg()) return; clearTimeout(pushPTimer); pushPTimer=setTimeout(pushP,1500); }
+async function pushP(retry=true){
+  if(!cfg()||pushingP) return; pushingP=true;
+  try{
+    // belt and braces: nothing private leaves the browser
+    const clean={...port,holdings:port.holdings.map(h=>{ const o={...h}; PRIVATE_KEYS.forEach(k=>delete o[k]); return o; })};
+    const body={message:`portfolio: update ${today()}`,content:b64enc(JSON.stringify(clean,null,2)+'\n'),branch:sync.branch};
+    if(portSha) body.sha=portSha;
+    const r=await fetch(apiP(),{method:'PUT',headers:{...hdr(),'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if((r.status===409||r.status===422)&&retry){ pushingP=false; await pullP(); return; }
+    if(!r.ok) throw new Error(r.status);
+    portSha=(await r.json()).content.sha;
+  }catch(e){ console.warn(e); toast('Saving portfolio.json failed'); }
+  finally{ pushingP=false; }
+}
+
 // ---------- misc ----------
 let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2200); }
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ pull(); loadPrices(); } });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ pull(); pullP(); loadPrices(); } });
 
-render();
+let v0='board'; try{ v0=localStorage.getItem(LS_VIEW)||'board'; }catch{}
+switchView(['board','score','port'].includes(v0)?v0:'board');
 pull();
+pullP();
 loadPrices();
 })();
 </script>
