@@ -5,13 +5,16 @@ on:
     # every 2 hours, 07:17–21:17 UTC, Monday to Friday (covers EU + US sessions)
     - cron: "17 7-21/2 * * 1-5"
   workflow_dispatch: {}   # "Refresh prices" button in the app, or Actions tab → Run workflow
+  push:                   # new or changed cards get a price right away
+    branches: [main]
+    paths: [ideas.json]
 
 permissions:
   contents: write
 
 concurrency:
   group: prices
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   fetch:

@@ -27,7 +27,7 @@ Setup:
 3. Actions tab → *prices* → **Run workflow** once to test. `prices.json` appears in the repo.
 4. Optional, for the "Refresh prices now" button in `⋯`: edit your token and add **Actions: Read and write**.
 
-Schedule: every 2 hours, 07:17–21:17 UTC, Mon–Fri. Change the `cron` line to taste.
+Runs every 2 hours (07:17–21:17 UTC, Mon–Fri) and whenever `ideas.json` changes, so a new card gets its price within a minute. Change the `cron` line to taste.
 
 Symbols: the card's **Yahoo symbol** field, or the ticker if empty. US stocks work as-is (`KO`, `PEP`);
 everything else needs the exchange suffix: `ENI.MI` (Milan), `SAP.DE` (Xetra), `NESN.SW` (Zurich), `ULVR.L` (London, in GBp), `NOVN.SW`, `ASML.AS`.
