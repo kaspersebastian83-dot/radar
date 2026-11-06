@@ -374,6 +374,9 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .dvbars i{position:relative;width:14px;background:var(--ochre);border-radius:3px 3px 0 0}
 .dvbars i.gap{opacity:.35}
 .dvbars s{position:absolute;top:100%;left:50%;transform:translateX(-50%);text-decoration:none;font-size:9.5px;color:var(--mute);font-style:normal}
+.hold2 .c2st{flex-wrap:wrap;gap:4px 10px}
+.hold2 .val{color:var(--ink2);font-weight:600}
+.hold2 .warnbox{margin:0}
 .c2th{margin:0;font-size:13px;line-height:1.4;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 /* one status pill: price age + sync state */
 #sync{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer}
@@ -613,8 +616,13 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='2.4.0';
+const VERSION='2.5.0';
 const CHANGELOG=[
+  {v:'2.5.0',d:'2026-11-06',t:'Portfolio cards like the idea cards',items:[
+    'Holdings now use the same card as ideas: score tile, one line with the tier and how far it is to your add level, the 52-week bar with your add level on it, the Yield / Return / Review box, the business line and two lines of thesis. Weight and value sit under the name.',
+    'Each holding can have its own thesis, bull and bear case, "I\'m wrong if", review date and journal, like an idea. Holdings with a Radar card show that card\'s texts, so nothing is written twice.',
+    'New field "Average buy price (EUR)": enter it as Trade Republic shows it, and the card shows your return in € and, with a statement loaded, the gain in €. Price only, dividends not included. The buy price stays on this device, like your share counts.',
+    'The holding details are laid out like the idea details: score, key figures, position, business, yield vs. its history, 52-week range, thesis and journal, then the settings.']},
   {v:'2.4.0',d:'2026-11-06',t:'Business trend and red flags',items:[
     'Every stock now shows how the business itself is doing, not just its price: a line on each card (Steady, Watch or Red flag) and a Business section in the details with up to four years of cash per share, payout, debt, return on capital and share count, plus ten years of dividends.',
     'Red flags: cash per share falling two years in a row, a dividend not covered for two years, a dividend cut, more shares without per-share growth, or debt rising fast. While one is open, the Buy score stops at Wait (Hold on Portfolio), however cheap the stock looks, so a falling business can\'t climb the board.',
@@ -1051,6 +1059,11 @@ function renderBoard(){
 }
 // Idea card (v2.3.0). Every fact of the old card is here once: score + tier + distance to buy in one
 // line, range bar with its ends, then yield / return / review, then two lines of thesis.
+function c2barHtml(i,what){
+  const p=posOf(i), q=quoteOf(i), cur=curOfI(i); if(p==null) return '';
+  const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
+  return `<div class="c2bar" title="52-week range${b!=null?`, your ${what} level (line)`:''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`;
+}
 const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
 function cardEl(i){
   const st=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), h=histOf(i), sc=scoreOf(i), cur=curOfI(i), t=totalOf(i);
@@ -1066,11 +1079,7 @@ function cardEl(i){
   if(rp&&rp.pos>=.85) dist+=' · near 52w high'; else if(rp&&rp.pos<=.15) dist+=' · near 52w low';
   // price: chosen currency first, the other one small next to today's move
   const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
-  // range bar
-  const p=posOf(i);
-  let bar='';
-  if(p!=null){ const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
-    bar=`<div class="c2bar" title="52-week range${b!=null?', your buy level (line)':''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`; }
+  const bar=c2barHtml(i,'buy');
   // yield vs its usual
   const yArr=h?(h.v==='cheap'?['▲','up']:h.v==='expensive'?['▼','dn']:['≈','']):null;
   const chg=t?t.best:null, retCls=chg==null||Math.abs(chg)<.05?'':chg>0?'up':'dn';
@@ -1427,10 +1436,18 @@ $('#btnPxRefresh').onclick=async()=>{
 // ================= portfolio =================
 // portfolio.json (repo, public): which stocks, Yahoo symbol, add-below level, notes. Never share counts.
 // Depot (localStorage only): shares and values from the Trade Republic statement PDF, per ISIN.
-const LS_PORT='radar.portfolio.v1', LS_DEPOT='radar.depot.v1';
+const LS_PORT='radar.portfolio.v1', LS_DEPOT='radar.depot.v1', LS_COST='radar.cost.v1';
+// Average buy price per holding in EUR (as Trade Republic shows it). Private like share counts:
+// kept in this browser only, never in portfolio.json.
+let costs={}; try{ costs=JSON.parse(localStorage.getItem(LS_COST))||{}; }catch{}
+const costKey=h=>h.isin||h.id;
+const costOf=h=>{ const v=costs[costKey(h)]; return v&&v.eur>0?v.eur:null; };
+function setCost(h,eur){ if(eur>0) costs[costKey(h)]={eur,at:today()}; else delete costs[costKey(h)]; try{ localStorage.setItem(LS_COST,JSON.stringify(costs)); }catch{} }
+// Thesis, kill criteria, review and journal: from the linked Radar card if there is one, otherwise the holding's own.
+const textSrc=h=>ideaOf(h)||h;
 const KINDS=[{k:'stock',label:'Stock'},{k:'fund',label:'Fund / ETF'},{k:'bond',label:'Bond fund'}];
 const HTIERS=[[75,'Add zone','var(--t-buy)'],[55,'Getting close','var(--t-close)'],[35,'Hold','var(--t-wait)'],[0,'Pricey','var(--t-exp)']];
-const PRIVATE_KEYS=['shares','value','valueEur','priceEur','qty','amount'];
+const PRIVATE_KEYS=['shares','value','valueEur','priceEur','qty','amount','buyPriceEur','avgPrice','cost','costEur'];
 let port=loadPort(), depot=null, portSha=null, holdId=null;
 try{ const d=JSON.parse(localStorage.getItem(LS_DEPOT)); if(d&&d.pos) depot=d; }catch{}
 function loadPort(){ try{ const d=JSON.parse(localStorage.getItem(LS_PORT)); if(d&&Array.isArray(d.holdings)) return d; }catch{} return {version:1,settings:{maxWeight:7},holdings:[]}; }
@@ -1491,32 +1508,55 @@ function renderBadge(){ const b=$('#portBadge'); if(!b) return;
   const n=portRows().filter(r=>r.inDepot&&r.s&&r.s.zone).length;
   b.hidden=!n; b.textContent=n; }
 
+// Price return against your average buy price, in EUR (dividends not included).
+function hRetOf(h){ const x=px(h), c=curOf(x), cost=costOf(h); if(!(c>0&&cost)) return null;
+  const e=eurOf(c,curOfI(x)); if(e==null) return null;
+  const p=posOf_(h); return {pct:(e/cost-1)*100, cost, unit:e, gain:p?p.shares*(e-cost):null}; }
+// Holding card (v2.5.0): same layout as the idea card. Weight and value take the place of the stage line.
 function holdCard(r){
-  const {h,x,s,v,w,y,mm}=r, c=curOf(x), d=dayOf(x), q=quoteOf(x), hi=histOf(x), idea=ideaOf(h), cur=curOfI(x);
-  const el=document.createElement('article'); el.className='idea hold'+(s?'':' fund'); el.tabIndex=0;
-  el.style.setProperty('--stage',s?s.c:'var(--line)');
-  const why=s?`<b class="tier">${s.tier}</b><span>${esc(hWhy(h,s))}</span>`
-    :!hSym(h)?`<b class="tier">No symbol</b><span class="dn">Open it and set the Yahoo symbol.</span>`
-    :!q&&errOf(x)?`<b class="tier">No quote</b><span class="dn">No quote for ${esc(hSym(h))}. Check the Yahoo symbol.</span>`
-    :!q?`<b class="tier">Waiting for price</b><span>The next price update picks it up.</span>`
-    :isFund(h)?`<b class="tier">${h.kind==='bond'?'Bond fund':'Fund'}</b><span>${posOf(x)!=null?`${fmtN(posOf(x)*100,0)} % up its 52-week range`:'not scored'}</span>`
-    :`<b class="tier">No score yet</b><span>Not enough price history.</span>`;
+  const {h,x,s,v,w,y,mm}=r, c=curOf(x), d=dayOf(x), q=quoteOf(x), hi=histOf(x), idea=ideaOf(h), cur=curOfI(x), src=textSrc(h), a=addOf(h), fund=isFund(h);
+  const tc=s?s.c:'var(--t-none)', bp=s?.parts.find(z=>z.k==='buy'), rp=s?.parts.find(z=>z.k==='rng');
+  let tier, dist;
+  if(s){ tier=s.tier;
+    dist=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} %`
+      :bp?(bp.above<=0?`at or below your add level ${mN(a.v,cur)}`:`${fmtN(bp.above,0)} % above add at ${mN(a.v,cur)}`)+(a.src==='radar'?' (Radar)':'')
+      :'no add level set';
+    if(s.cap==='flag') dist='held by a red flag · '+dist;
+    if(rp&&rp.pos>=.85) dist+=' · near 52w high'; else if(rp&&rp.pos<=.15) dist+=' · near 52w low'; }
+  else if(!hSym(h)){ tier='No symbol'; dist='open it and set the Yahoo symbol'; }
+  else if(!q&&errOf(x)){ tier='No quote'; dist=`no quote for ${hSym(h)}, check the Yahoo symbol`; }
+  else if(!q){ tier='Waiting for price'; dist='the next price update picks it up'; }
+  else if(fund){ tier=h.kind==='bond'?'Bond fund':'Fund'; dist=posOf(x)!=null?`${fmtN(posOf(x)*100,0)} % up its 52-week range · not scored`:'not scored'; }
+  else { tier='No score yet'; dist='not enough price history'; }
+  const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
+  const yArr=hi?(hi.v==='cheap'?['▲','up']:hi.v==='expensive'?['▼','dn']:['≈','']):null;
+  const rt=hRetOf(h), rc=rt==null||Math.abs(rt.pct)<.05?'':rt.pct>0?'up':'dn';
+  const due=src.nextReview&&src.nextReview<=today();
+  const b=fund?null:(s?s.biz:bizOf(hSym(h)));
+  const el=document.createElement('article'); el.className='card2 hold2'; el.tabIndex=0;
+  el.style.setProperty('--tc',tc);
   el.innerHTML=`
-    <div class="head"><span class="tk">${esc(h.short||h.symbol)||'?'}</span><span class="nm">${esc(h.name)}</span>${idea?`<span class="stage lnk" title="Has a Radar card">↗ Radar</span>`:''}</div>
-    <div class="main" style="--tc:${s?s.c:'var(--t-none)'}">
-      ${s?ringHtml(s):''}
-      <div class="why">${why}</div>
-      <div class="price num">${c?`${liveDot(x)}${mP(c,cur)}`:'—'}${c&&isConv(cur)?`<small class="fx" style="color:var(--mute)">${fmtP(c,cur)}</small>`:''}${d!=null?`<small class="day ${d>=0?'up':'dn'}">${fmtPct(d)}<span class="lg"> today</span></small>`:''}</div>
+    <div class="c2top">
+      <div class="c2sc" title="Add score${s?`: ${s.score} of 100`:''}">${s?s.score:'–'}</div>
+      <div class="c2id">
+        <div class="c2nm"><span class="tk">${esc(h.short||h.symbol)||'?'}</span><span class="nm">${esc(h.name)}</span></div>
+        <div class="c2st">${w!=null?wtHtml(h,w):''}${v?`<span class="val num" title="${v.live?'shares × live price':'value on the statement'}">${fmtK(v.eur)}</span>`:''}${idea?`<span class="lnk" title="Has a Radar card">↗ Radar</span>`:''}${w==null&&!v&&!idea?`<span>${fund?(h.kind==='bond'?'Bond fund':'Fund'):'Stock'}</span>`:''}</div>
+      </div>
+      <div class="c2px num">
+        <div class="p">${c?`${liveDot(x)}${mP(c,cur)}`:'—'}</div>
+        <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
+      </div>
     </div>
-    ${s?runwayHtml(x,s):''}
-    ${(b=>b&&!isFund(h)?`<div class="c2biz">${bizLine(b)}</div>`:'')(s?s.biz:bizOf(hSym(h)))}
+    <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
+    ${c2barHtml(x,'add')}
     ${mm!=null?`<div class="warnbox">Quote is ${fmtPct(mm*100,0)} off the statement price. Probably the wrong Yahoo symbol.</div>`:''}
-    <div class="foot">
-      <span class="yl num">${y!=null?`<b>${fmtN(y,2)} %</b> yield${hi?` · usual ${fmtN(hi.avg,2)} %`:''}`:isFund(h)&&q?'no distributions':'no yield data'}</span>
-      <span class="sp"></span>
-      ${v?`<span class="val num" title="${v.live?'shares × live price':'value on the statement'}">${fmtK(v.eur)}</span>`:''}
-      ${wtHtml(h,w)}
-    </div>`;
+    <div class="c2box num">
+      <div><span>Yield</span><b>${y!=null?fmtN(y,2)+' %':'—'}</b><span class="${yArr?yArr[1]:''}">${hi?`${yArr[0]} usual ${fmtN(hi.avg,2)} %`:y!=null?'no 5-yr history':fund&&q?'no distributions':'no data'}</span></div>
+      <div title="${rt?`Average buy price ${fmtP(rt.cost,'EUR')}, now ${fmtP(rt.unit,'EUR')}. Price only, dividends not included.`:'Enter your average buy price in the holding to see this'}"><span>Return in €</span><b class="${rc}">${rt?fmtPct(rt.pct):'—'}</b><span>${rt?(rt.gain!=null?`${rt.gain>=0?'+':'−'}${fmtEur(Math.abs(rt.gain))}`:`vs ${fmtP(rt.cost,'EUR')}`):'set buy price'}</span></div>
+      <div><span>Review</span><b title="${src.nextReview?fmtDate(src.nextReview):''}">${src.nextReview?new Date(src.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!src.nextReview?'not set':due?'due now':'next look'}</span></div>
+    </div>
+    ${b?`<div class="c2biz" title="Business trend, tap for details">${bizLine(b)}</div>`:''}
+    <p class="c2th">${src.thesis?esc(src.thesis):`<i>${fund?'No note yet.':'No thesis yet. Why do you own it?'}</i>`}</p>`;
   el.onclick=()=>openHold(h.id);
   el.onkeydown=e=>{ if(e.key==='Enter') openHold(h.id); };
   return el;
@@ -1559,50 +1599,82 @@ $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.
 function openHold(id){
   holdId=id; const h=port.holdings.find(x=>x.id===id); if(!h) return;
   const T=depotTotal(), s=hScore(h,T), x=px(h), c=curOf(x), d=dayOf(x), y=yldOf(x), hi=histOf(x), q=quoteOf(x), p=posOf_(h), v=valueOf(h), w=weightOf(h,T), a=addOf(h), idea=ideaOf(h), cur=curOfI(x), tb=toBuyOf(x), mm=mismatchOf(h);
+  const fund=isFund(h), src=textSrc(h), rt=hRetOf(h), own=!idea;
   const lbl={buy:'to add level',yld:PART.yld.label,rng:PART.rng.label};
+  const wide=window.matchMedia('(min-width:701px)').matches;
+  const fold=(t,v,cls)=>`<details class="cs ${cls}" ${wide?'open':''}><summary><b>${t}</b><span class="peek">${v?esc(v):'Nothing written yet.'}</span></summary><p>${v?esc(v):'Nothing written yet.'}</p></details>`;
   $('#holdBody').innerHTML=`
     <div class="top"><div class="title"><div class="tk">${esc(h.short||h.symbol)}</div><div class="nm">${esc(h.name)}${h.sector?' · '+esc(h.sector):''}</div>
-      <div class="meta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}</div></div></div>
+      <div class="meta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}${idea?` · <a href="#" id="hIdea" class="lnk">↗ Radar card (${esc(stageOf(idea).label)})</a>`:''}</div></div></div>
     ${s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(hWhy(h,s))}</span>
       ${['buy','yld','rng'].map(k=>{const z=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${z?(z.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${z?`${Math.round(z.pts)}/${Math.round(z.max)}`:'n/a'}</b></div>`;}).join('')}
       </div></div>`:''}
     ${mm!=null?`<div class="warnbox">The live quote for ${esc(hSym(h))} converts to ${fmtP(v.unit,'EUR')}, the statement says ${fmtP(p.priceEur,'EUR')}. That is ${fmtPct(mm*100,0)} apart, so the Yahoo symbol is probably the wrong line or share class.</div>`:''}
     <div class="kpis">
-      <div class="kpi"><b class="num">${c?mP(c,cur):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
-      <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
-      <div class="kpi"><b class="num ${!isFund(h)&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${isFund(h)?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
-      <div class="kpi"><b class="num">${p?fmtN(p.shares,3):'—'}</b><span>shares</span></div>
       <div class="kpi ochre"><b class="num">${y!=null?fmtN(y,2)+' %':'—'}</b><span>dividend yield</span></div>
-      ${hi?`<div class="kpi"><b class="num">${fmtN(hi.avg,2)} %</b><span>5-yr average yield</span></div><div class="kpi"><b class="num">${hi.fair?mP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
-      <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':mN(a.v,cur)):'—'}</b><span>${a?`to add below ${mN(a.v,cur)}${a.src==='radar'?' (Radar)':''}`:'no add level'}</span></div>
-      ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
+      ${hi?`<div class="kpi"><b class="num ${hi.v==='cheap'?'up':hi.v==='expensive'?'dn':''}">${fmtN(hi.avg,2)} %</b><span>5-yr average yield</span></div><div class="kpi"><b class="num">${hi.fair?mP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
+      <div class="kpi"><b class="num">${c?mP(c,cur):'—'}</b><span>${d!=null?`<span class="${d>=0?'up':'dn'}">${fmtPct(d)}</span> today`:'price'}</span></div>
+      ${fund&&!(h.addBelow>0)?'':`<div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':mN(a.v,cur)):'—'}</b><span>${a?`to add below ${mN(a.v,cur)}${a.src==='radar'?' (Radar)':''}`:'no add level'}</span></div>`}
+      <div class="kpi"><b class="num ${rt?(rt.pct>=0?'up':'dn'):''}">${rt?fmtPct(rt.pct):'—'}</b><span>${rt?`return in €, bought at ${fmtP(rt.cost,'EUR')} avg`:'return: set your buy price below'}</span></div>
+      ${src.nextReview?`<div class="kpi"><b style="font-size:16px">${fmtDate(src.nextReview)}</b><span>${src.nextReview<=today()?'<span class="dn">review due</span>':'next review'}</span></div>`:''}
     </div>
-    ${!isFund(h)&&hSym(h)?bizHtml(hSym(h),h,'hold'):''}
+    <div class="sec"><h4>Position</h4><div class="kpis">
+      <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
+      <div class="kpi"><b class="num ${!fund&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${fund?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
+      <div class="kpi"><b class="num">${p?fmtN(p.shares,3):'—'}</b><span>shares</span></div>
+      ${rt&&rt.gain!=null?`<div class="kpi"><b class="num ${rt.gain>=0?'up':'dn'}">${rt.gain>=0?'+':'−'}${fmtEur(Math.abs(rt.gain))}</b><span>gain in €, price only</span></div>`:''}
+      ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
+    </div></div>
+    ${!fund&&hSym(h)?bizHtml(hSym(h),h,'hold'):''}
+    ${hi?`<div class="sec"><h4>Yield vs. its own history</h4>
+      <p><span class="vtag ${hi.v}">${hi.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(hi.dev),0)} % ${hi.dev>=0?'above':'below'} its ${fmtN(hi.yrs,1)}-year average of ${fmtN(hi.avg,2)} %. ${hi.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':hi.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
+      ${ybarHtml(x)}</div>`:''}
     ${posOf(x)!=null?`<div class="sec"><h4>52-week range</h4>${runwayHtml(x,s)}</div>`:''}
-    ${q?`<div class="quote">${liveDot(x)}${esc(hSym(h))} ${fmtP(q.price,q.currency)}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${fxNote(q.currency)}</div>`
+    ${q?`<div class="quote">${liveDot(x)}${esc(hSym(h))} ${fmtP(q.price,q.currency)}${q.divTTM?`, ${fmtN(q.divTTM)} ${esc(q.currency)} dividends in the last 12 months`:''}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${fxNote(q.currency)}</div>`
       :hSym(h)&&errOf(x)?`<div class="quote"><span class="warn">No quote for ${esc(hSym(h))}.</span> Set the Yahoo symbol below, e.g. ALV.DE, DG.PA, ENEL.MI, 8058.T.</div>`:''}
-    ${idea?`<div class="row"><button class="btn" id="hIdea">↗ Open the Radar card (${esc(stageOf(idea).label)})</button><span class="hint">thesis, bull, bear, journal</span></div>`:''}
+    ${idea?`<p class="hint" style="margin:0">Thesis, cases, review date and journal come from the Radar card. <a href="#" id="hIdea2" class="lnk">Edit them there ↗</a></p>`:''}
+    <div class="sec"><h4>${fund?'Why I hold it':'Thesis'}</h4><p class="${src.thesis?'':'none'}">${src.thesis?esc(src.thesis):'Nothing written yet.'}</p></div>
+    ${fund?'':`<div class="folds">${fold('Bull case',src.bull,'bull')}${fold('Bear case',src.bear,'bear')}${fold("I'm wrong if",src.kill,'kill')}</div>`}
+    <div class="sec journal"><h4>Journal</h4><div id="hNoteList"></div>
+      <div class="add"><input id="h_noteIn" placeholder="Add a dated note"><button class="btn" id="hNoteBtn">Add</button></div></div>
     ${h.note?`<div class="sec"><h4>Note</h4><p>${esc(h.note)}</p></div>`:''}
     <div class="sec"><h4>Settings for this holding</h4>
     <div class="form">
+      <label>Average buy price (EUR)<input id="h_cost" type="number" step="any" inputmode="decimal" value="${costOf(h)??''}" placeholder="as in Trade Republic"></label>
+      <label>Add below (${esc(cur||'price')})<input id="h_addBelow" type="number" step="any" inputmode="decimal" value="${h.addBelow??''}" placeholder="${a&&a.src==='radar'?'Radar: '+a.v:''}"></label>
+      <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${capDefault()} (default)"></label>
+      ${own?`<label>Next review<input id="h_review" type="date" value="${esc(h.nextReview||'')}"></label>`:''}
       <label>Short name<input id="h_short" value="${esc(h.short)}"></label>
       <label>Yahoo symbol<input id="h_symbol" value="${esc(h.symbol)}" style="text-transform:uppercase"></label>
       <label>Currency<input id="h_currency" value="${esc(h.currency)}" style="text-transform:uppercase"></label>
       <label>Type<select id="h_kind">${KINDS.map(k=>`<option value="${k.k}" ${h.kind===k.k?'selected':''}>${k.label}</option>`).join('')}</select></label>
-      <label>Add below (${esc(cur||'price')})<input id="h_addBelow" type="number" step="any" inputmode="decimal" value="${h.addBelow??''}" placeholder="${a&&a.src==='radar'?'Radar: '+a.v:''}"></label>
-      <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${capDefault()} (default)"></label>
       <label>Radar card ticker<input id="h_idea" value="${esc(h.idea??'')}" placeholder="auto by symbol" style="text-transform:uppercase"></label>
       <label>Sector<input id="h_sector" value="${esc(h.sector)}"></label>
+      ${own?`<label class="w4">${fund?'Why I hold it':'Thesis'}<textarea id="h_thesis">${esc(h.thesis)}</textarea></label>
+      ${fund?'':`<label class="w4">Bull case<textarea id="h_bull">${esc(h.bull)}</textarea></label>
+      <label class="w4">Bear case<textarea id="h_bear">${esc(h.bear)}</textarea></label>
+      <label class="w4">I'm wrong if<textarea id="h_kill">${esc(h.kill)}</textarea></label>`}`:''}
       <label class="w4">Note<textarea id="h_note">${esc(h.note)}</textarea></label>
     </div>
+    <p class="hint">The buy price stays in this browser, like your share counts. Everything else is saved to GitHub.</p>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
-  if(idea) $('#hIdea').onclick=()=>{ closeAll(); openRead(idea.id); };
+  const toIdea=e=>{ e&&e.preventDefault(); closeAll(); openRead(idea.id); };
+  if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
   wireBiz($('#holdBody'),()=>openHold(h.id));
+  const notes=()=>{ $('#hNoteList').innerHTML=(src.notes||[]).slice().reverse().map(n=>`<div class="note"><small>${fmtDate(n.date)}</small><div>${esc(n.text)}</div></div>`).join('')||'<p class="none" style="margin:0;color:var(--mute);font-style:italic">No notes yet.</p>'; };
+  notes();
+  $('#hNoteBtn').onclick=()=>{ const t=$('#h_noteIn').value.trim(); if(!t) return;
+    src.notes=[...(Array.isArray(src.notes)?src.notes:[]),{date:today(),text:t}]; src.updatedAt=now();
+    $('#h_noteIn').value=''; notes(); idea?persist():persistPort(); };
+  $('#h_noteIn').onkeydown=e=>{ if(e.key==='Enter') $('#hNoteBtn').click(); };
   $('#hSave').onclick=()=>{
-    const num=v=>v===''?null:Number(v);
-    Object.assign(h,{short:$('#h_short').value.trim(),symbol:$('#h_symbol').value.trim().toUpperCase(),currency:$('#h_currency').value.trim().toUpperCase(),
-      kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),maxWeight:num($('#h_maxWeight').value),idea:$('#h_idea').value.trim().toUpperCase()||null,
-      sector:$('#h_sector').value.trim(),note:$('#h_note').value.trim(),updatedAt:now()});
+    const num=v=>v===''?null:Number(v), val=id=>$(id)?$(id).value.trim():undefined;
+    setCost(h,Number($('#h_cost').value));
+    Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:val('#h_currency').toUpperCase(),
+      kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),maxWeight:num($('#h_maxWeight').value),idea:val('#h_idea').toUpperCase()||null,
+      sector:val('#h_sector'),note:val('#h_note'),updatedAt:now()});
+    if(own){ h.nextReview=val('#h_review')||null; h.thesis=val('#h_thesis')||'';
+      if($('#h_bull')) Object.assign(h,{bull:val('#h_bull'),bear:val('#h_bear'),kill:val('#h_kill')}); }
     persistPort(); openHold(h.id); toast('Saved');
   };
   $('#hDel').onclick=()=>{ if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
