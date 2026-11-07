@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-07T05:59:01+00:00",
+  "updated": "2026-11-07T21:44:07+00:00",
   "quotes": {
     "6367.T": {
       "price": 21790.0,
@@ -55,11 +55,11 @@
       "divTTM": 17.1,
       "yieldTTM": 3.79,
       "payFreq": 1,
-      "avgYield5y": 4.71,
-      "yieldLow5y": 3.68,
+      "avgYield5y": 4.72,
+      "yieldLow5y": 3.78,
       "yieldHigh5y": 6.67,
       "yieldYears": 5.0,
-      "time": "2026-11-06T23:15:57+00:00"
+      "time": "2026-11-07T21:44:07+00:00"
     },
     "AMZN": {
       "price": 259.3,
@@ -371,11 +371,11 @@
       "divTTM": 4.12,
       "yieldTTM": 4.92,
       "payFreq": 1,
-      "avgYield5y": 4.13,
+      "avgYield5y": 4.14,
       "yieldLow5y": 3.18,
       "yieldHigh5y": 5.64,
       "yieldYears": 5.0,
-      "time": "2026-11-06T23:15:57+00:00"
+      "time": "2026-11-07T21:44:07+00:00"
     },
     "VGWD.DE": {
       "price": 82.32,
