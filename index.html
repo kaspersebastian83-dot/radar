@@ -336,6 +336,35 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .c2val{font-size:12.5px;line-height:1.35;color:var(--ink2);margin-top:-4px}
 .c2val b{font-weight:800}.c2val .up,.val .up{color:var(--teal)}.c2val .dn,.val .dn{color:var(--coral)}
 .stl{color:var(--coral);font-weight:700}
+.dbox{background:var(--panel2);border-radius:var(--r2);padding:12px 14px}.dbox[hidden]{display:none}
+.dform{display:flex;flex-direction:column;gap:10px}
+.dform .dh{font-size:15px;font-weight:800}
+.dform .hint{margin:0}
+.dform .drow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.dform .drow label{flex:1;min-width:130px}
+.dform .drow.end{justify-content:flex-end}
+.dchips{display:flex;flex-wrap:wrap;gap:6px}.dchips .chip{cursor:pointer;padding:7px 12px;font-size:13.5px}
+.dform .dq{margin:4px 0 -4px;font-size:13px;font-weight:700;color:var(--ink2)}.dform .dq small{font-weight:500;color:var(--mute)}.dform .dq.dn{color:var(--coral)}
+.dmore summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--research);list-style:none}.dmore summary::-webkit-details-marker{display:none}
+.dmore textarea{width:100%;box-sizing:border-box;margin-top:6px}
+.ckl{display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.ck{display:flex;gap:8px;align-items:flex-start;line-height:1.35}
+.ck i{flex:none;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:800}
+.ck.ok i{background:var(--teal-soft);color:var(--teal)}.ck.no i{background:var(--coral-soft);color:var(--coral)}
+.ck.no span{color:var(--coral)}
+.ck.man{width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;color:var(--ink);cursor:pointer}
+.ck.man i{border:2px solid var(--mute);box-sizing:border-box;color:var(--teal)}
+.ck.man.on{border-color:var(--teal);background:var(--teal-soft)}.ck.man.on i{border:0;background:var(--teal);color:#fff}
+.warnbtn{background:var(--coral)!important;border-color:var(--coral)!important;color:#fff!important}
+.kq{margin:0;padding:8px 10px;border-radius:var(--r2);background:var(--coral-soft);line-height:1.45;font-size:14px}
+.kq span{display:block;font-size:12px;font-weight:700;color:var(--coral)}
+.kq.none{background:var(--panel);color:var(--mute);font-style:italic}
+.dbtns{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 6px}
+.journal .note.dec .dk{font-weight:800}
+.journal .note.buy .dk,.journal .note.add .dk,.journal .note.holds .dk{color:var(--teal)}
+.journal .note.pass .dk,.journal .note.sell .dk,.journal .note.trim .dk{color:var(--ink2)}
+.journal .note.broken .dk{color:var(--coral)}.journal .note.changed .dk{color:var(--ochre)}
+#decBody .kpis{margin:10px 0 16px}#decBody .rpx{display:none}#decBody .r2{white-space:normal;line-height:1.35}
+.journal .note small{white-space:nowrap}.journal .note{grid-template-columns:92px 1fr}
 .epill{flex:none;align-self:center;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--research) 15%,transparent);color:var(--research);white-space:nowrap}
 .c2ern{font-size:12.5px;color:var(--mute);margin-top:-4px}.c2ern.soon{color:var(--research);font-weight:700}
 .nxhead{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ink2)}
@@ -633,6 +662,12 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
   </div>
 </div></div>
 
+<!-- decision journal -->
+<div class="modal" id="mDec"><div class="sheet" style="max-width:720px">
+  <h3>Decision journal<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <div id="decBody"></div>
+</div></div>
+
 <!-- changelog -->
 <div class="modal" id="mLog"><div class="sheet" style="max-width:620px">
   <h3>What's new<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
@@ -664,7 +699,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 
 <div class="modal" id="mMenu"><div class="sheet">
   <h3>Menu<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
-  <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnLog">What's new</button></div>
+  <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnDec">Decision journal</button><button class="btn small" id="btnLog">What's new</button></div>
   <div class="msec">
     <h4>Portfolio</h4>
     <div class="pstrip" id="pStrip"></div>
@@ -719,8 +754,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.2.1';
+const VERSION='3.3.0';
 const CHANGELOG=[
+  {v:'3.3.0',d:'2026-11-09',t:'Decision journal',items:[
+    'Moving an idea to Bought, or tapping "I added" on a holding, shows a checklist first. Five points fill in themselves: at or below your level, valuation current, no red flag, "I\'m wrong if" written, no results this week. Three you tick yourself: you can explain how it makes money, you buy because it\'s below fair value (not because it fell), and you\'d hold through a 30 % drop. If something is missing, the button says "anyway" and you tap why.',
+    'When a review is due, the details open with it: your "I\'m wrong if" on top, and you tap what you looked at (results, dividend, business, valuation, "I\'m wrong if"), then Still holds, Changed or Broken, and if it changed, what changed. Next review date is pre-filled (3 months for ideas, 6 for holdings). A broken thesis on a holding shows in its row and keeps it out of Next € until a later review says it holds again. A broken idea is passed.',
+    'Everything is tap-to-pick: why now, why anyway, why you pass, what would make you look again, why you trim or sell, what changed. A written note is optional behind "+ Add a note".',
+    'Passing on an idea asks for a reason: too expensive, too hard, red flag, better elsewhere, or other. The Passed row then shows the price you passed at and what it did since. "Too hard" gets its own tag.',
+    'Holdings have "I added", "I trimmed" and "I sold" in the journal, so every decision is dated with its price.',
+    'New in ⋯: Decision journal. Every buy, add, trim, sale, pass and review with the price then and now, and on top how your buys did against your passes, and how "anyway" buys did.']},
   {v:'3.2.1',d:'2026-11-09',t:'Results dates',items:[
     'A small blue "results 3 d" tag sits next to the ticker when a company reports within the next two weeks, on Ideas, Portfolio and Next €. So you don\'t buy blind the day before results.',
     'Every stock card shows the next results date, and the last one if it was in the last month. After results, the valuation turns stale, which is your cue to look at it again.',
@@ -1239,13 +1281,16 @@ function ideaRow(i,due){
   const bp=sc?.parts.find(x=>x.k==='buy'), rp=sc?.parts.find(x=>x.k==='rng'), biz=sc?sc.biz:bizOf(symOf(i));
   const bits=[];
   if(due) bits.push('<b class="dn">review due</b>');
-  if(!c) bits.push(!q&&errOf(i)?`no quote for ${esc(symOf(i))}`:'waiting for the first price');
+  if(brokenOf(i)) bits.push('<b class="dn">thesis broken</b>');
+  if(i.status==='out'&&i.passed){ const P=i.passed, since=P.price>0&&c>0?(c/P.price-1)*100:null;
+    bits.push(`${P.reason==='sold'?'sold':passLabel(P.reason).toLowerCase()} ${fmtDay(P.date)}${P.price>0?` at ${lvl(P.price)}`:''}${since!=null?` · ${fmtPct(since,0)} since`:''}`); }
+  else if(!c) bits.push(!q&&errOf(i)?`no quote for ${esc(symOf(i))}`:'waiting for the first price');
   else if(bp) bits.push(bp.above<=0?`<b class="up">at your price</b> · below ${lvl(i.buyBelow)}`:`${fmtN(bp.above,0)} % above ${lvl(i.buyBelow)}`);
   else bits.push(rp&&rp.pos<=.15?'no buy price · near 52w low':rp&&rp.pos>=.85?'no buy price · near 52w high':'no buy price');
   if(y!=null) bits.push(yTxt(y,h));
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
   if(t&&(daysSince(t.base.date)>30||Math.abs(t.best)>=5)) bits.push(`<span class="${t.best>=0?'up':'dn'}">${fmtPct(t.best,0)}</span>`);
-  const extra=(biz&&biz.red.length?FLAG:'')+earnPill(symOf(i))+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?'<span class="own out">passed</span>':'');
+  const extra=(biz&&biz.red.length?FLAG:'')+earnPill(symOf(i))+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?`<span class="own out">${i.passed?.reason==='toohard'?'too hard':i.passed?.reason==='sold'?'sold':'passed'}</span>`:'');
   return rowEl({tc:sc?sc.c:'var(--t-none)',tile:sc?sc.score:'–',tk:i.ticker,nm:i.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openRead(i.id)});
 }
 function renderBoard(){
@@ -1502,7 +1547,7 @@ function openRead(id){
     ${cardEl(i,true).outerHTML}
     <div class="dmeta">${i.sector?esc(i.sector)+' · ':''}logged ${fmtDate(i.loggedDate)} at ${mP(i.loggedPrice,i.currency,i.loggedDate)}${isBought(i)?` · bought ${fmtDate(i.boughtDate||i.loggedDate)} at ${mP(i.boughtPrice,i.currency,i.boughtDate||i.loggedDate)}`:''}${i.source?' · '+esc(i.source):''}</div>
     <div class="stagebar" id="stagebar"></div>
-    <div class="buyform" id="buyform" hidden></div>
+    <div class="dbox" id="buyform" hidden></div>
     ${flagFirst?bizHtml(symOf(i),i,'idea'):''}
     ${(s=>s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(whyOf(i,s))}</span>
       ${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${PART[k].label}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'n/a'}</b></div>`;}).join('')}
@@ -1528,10 +1573,20 @@ function openRead(id){
        :errOf(i)?`<div class="quote"><span class="warn">No quote for ${esc(symOf(i))}.</span> Set the Yahoo Finance symbol in Edit, e.g. ENI.MI (Milan), SAP.DE (Xetra), NESN.SW (Zurich), ULVR.L (London); US stocks just the ticker.</div>`:''}
     ${sec('Thesis',i.thesis)}
     <div class="folds">${fold('Bull case',i.bull,'bull')}${fold('Bear case',i.bear,'bear')}${fold("I'm wrong if",i.kill,'kill')}</div>
-    <div class="sec journal"><h4>Journal</h4><div id="noteList"></div>
+    <div class="sec journal"><h4>Journal</h4>
+      ${i.status!=='out'?`<div class="dbtns"><button class="btn small" id="iRev">Review now</button></div>`:''}
+      <div id="noteList"></div>
       <div class="add"><input id="f_note" placeholder="Add a dated note"><button class="btn" id="btnNote">Add</button></div></div>`;
   renderNotes(i);
   renderStagebar(i);
+  const revIdea=due=>reviewForm($('#buyform'),{due,kill:i.kill,months:3,onSave:r=>{
+      const c=curOf(i), cur=curOfI(i);
+      if(r.verdict==='broken'&&i.status!=='bought'){ // broken idea: passed, with the reason
+        logDecision(i,{kind:'pass',reason:'broken',changed:r.changed,checked:r.checked,price:c,cur,sym:symOf(i),text:`Passed (Thesis broken)${c?` at ${fmtP(c,cur)}`:''}. ${revText(r)}`});
+        i.passed={date:today(),price:c,reason:'broken'}; i.nextReview=r.next; setStage(i,'out'); return; }
+      saveReview(i,r,c,cur,symOf(i)); persist(); openRead(i.id); toast('Review saved'); }});
+  if($('#iRev')) $('#iRev').onclick=()=>{ revIdea(false); $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); };
+  if(reviewDue(i)&&i.status!=='out') revIdea(true);
   wireBiz($('#dossier'),()=>openRead(i.id));
   $('#btnNote').onclick=()=>{
     const t=$('#f_note').value.trim(); if(!t) return;
@@ -1549,34 +1604,27 @@ function renderStagebar(i){
   bf.hidden=true; bf.innerHTML='';
   $$('#stagebar .chip').forEach(b=>b.onclick=()=>{
     const k=b.dataset.s; if(k===i.status) return;
-    if(k==='bought'){ showBuyForm(i); return; }
+    if(k==='bought'){ buyFlow(i); return; }
+    if(k==='out'){ passFlow(i); return; }
     setStage(i,k);
   });
 }
-function showBuyForm(i){
-  const bf=$('#buyform'), c=curOf(i), cur=curOfI(i);
-  bf.hidden=false;
-  bf.innerHTML=`<label>Bought at (${esc(cur||'price')})<input id="b_price" type="number" step="any" inputmode="decimal" value="${c?Number(c.toFixed(2)):''}" placeholder="price per share"></label>
-    <label>Bought on<input id="b_date" type="date" value="${today()}"></label>
-    <button class="btn primary" id="b_go">Mark as bought</button><button class="btn quiet" id="b_cancel">Cancel</button>
-    <span class="hint">From now on the return is measured from this price and date, not from when you logged the idea.</span>`;
-  $('#b_price').focus();
-  $('#b_cancel').onclick=()=>{ bf.hidden=true; bf.innerHTML=''; };
-  $('#b_go').onclick=()=>{
-    const p=Number($('#b_price').value), d=$('#b_date').value||today();
-    if(!(p>0)){ toast('Enter the purchase price'); return; }
-    i.boughtPrice=p; i.boughtDate=d;
-    i.notes=i.notes||[]; i.notes.push({date:d,text:`Bought at ${fmtP(p,cur)}`});
-    setStage(i,'bought');
-  };
-}
+function buyFlow(i){
+  const c=curOf(i), cur=curOfI(i), sym=symOf(i);
+  decisionForm($('#buyform'),{kind:'buy',title:'Mark as bought',go:'Mark as bought',c,cur,sym,
+    ctx:{c,cur,lvl:i.buyBelow,val:valNorm(i.val),sym,kill:i.kill,word:'buy'},
+    onSave:e=>{ i.boughtPrice=e.price; i.boughtDate=e.date; delete i.broken; logDecision(i,e); setStage(i,'bought'); }});
+  $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); }
+function passFlow(i){
+  const c=curOf(i), cur=curOfI(i), sym=symOf(i), sold=i.status==='bought';
+  decisionForm($('#buyform'),sold?{kind:'sell',title:'Sold',go:'Mark as sold',c,cur,sym,onSave:e=>{ i.passed={date:e.date,price:e.price,reason:'sold'}; logDecision(i,e); setStage(i,'out'); }}
+    :{kind:'pass',title:'Pass on it',go:'Pass',c,cur,sym,reasons:PASS_WHY.filter(x=>x[0]!=='broken'),onSave:e=>{ i.passed={date:e.date,price:e.price,reason:e.reason}; logDecision(i,e); setStage(i,'out'); }});
+  $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); }
 function setStage(i,k){
   const from=stageOf(i).label; i.status=k; i.updatedAt=now();
   persist(); openRead(i.id); toast(`${from} → ${stageOf(i).label}`);
 }
-function renderNotes(i){
-  $('#noteList').innerHTML=(i.notes||[]).slice().reverse().map(n=>`<div class="note"><small>${fmtDate(n.date)}</small><div>${esc(n.text)}</div></div>`).join('')||'<p class="none" style="margin:0;color:var(--mute);font-style:italic">No notes yet.</p>';
-}
+function renderNotes(i){ $('#noteList').innerHTML=noteRows(i.notes); }
 $('#btnEdit').onclick=()=>{ const id=readingId; closeAll(); openEdit(id); };
 
 // ---------- edit sheet ----------
@@ -1881,6 +1929,7 @@ function holdRow(r,due){
   const bp=s?.parts.find(z=>z.k==='buy'), p=posOf(x), bits=[];
   if(due) bits.push('<b class="dn">review due</b>');
   if(mm!=null) bits.push(`<b class="dn">quote ${fmtPct(mm*100,0)} off statement</b>`);
+  if(brokenOf(textSrc(h))) bits.push('<b class="dn">thesis broken</b>');
   if(!hSym(h)) bits.push('set the Yahoo symbol');
   else if(!q&&errOf(x)) bits.push(`no quote for ${esc(hSym(h))}`);
   else if(!q) bits.push('waiting for the first price');
@@ -1899,6 +1948,139 @@ function holdRow(r,due){
   return rowEl({tc:grey?'var(--t-none)':s.c,tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
     tk:h.short||h.symbol,nm:h.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
 }
+// ---------- decision journal (v3.3.0) ----------
+// Decisions are journal notes with a kind: {date, text, kind, price, cur, sym, verdict?, reason?, checks?}.
+// Old plain notes stay as they are. Everything lands in the same journal, so nothing is written twice.
+const DKIND={buy:'Bought',add:'Added',trim:'Trimmed',sell:'Sold',pass:'Passed',review:'Review'};
+const PASS_WHY=[['price','Too expensive'],['toohard','Too hard'],['flag','Red flag'],['better','Better elsewhere'],['broken','Thesis broken'],['other','Other']];
+const passLabel=k=>(PASS_WHY.find(x=>x[0]===k)||[,'Passed'])[1];
+const VERDICT={holds:'Still holds',changed:'Changed',broken:'Broken'};
+const pad2=n=>String(n).padStart(2,'0');
+function addMonths(d,n){ const x=new Date(d+'T00:00:00'); x.setMonth(x.getMonth()+n); return `${x.getFullYear()}-${pad2(x.getMonth()+1)}-${pad2(x.getDate())}`; }
+function logDecision(src,e){ src.notes=[...(Array.isArray(src.notes)?src.notes:[]),{date:today(),...e}]; src.updatedAt=now(); }
+// Buy / add checklist. The first five fill in themselves, the last three are honest-to-yourself ticks.
+function checkItems(x){
+  const biz=bizOf(x.sym), age=x.val?valAge(x.val,x.sym):null, e=earnOf(x.sym), w=x.word;
+  return [
+    {k:'level',s:'level',auto:1,ok:x.lvl>0&&x.c>0&&x.c<=x.lvl,t:!(x.lvl>0)?`No ${w} level set`:x.c<=x.lvl?`At or below your ${w} level ${mN(x.lvl,x.cur)}`:`${fmtN((x.c/x.lvl-1)*100,0)} % above your ${w} level ${mN(x.lvl,x.cur)}`},
+    {k:'val',s:'valuation current',auto:1,ok:!!x.val&&!(age&&age.stale),t:!x.val?'No valuation written down':age&&age.stale?'Valuation is stale, results came out since':'Valuation is current'},
+    {k:'flag',s:'no red flag',auto:1,ok:!(biz&&biz.red.length),t:biz&&biz.red.length?`Open red flag: ${biz.red.map(f=>f.t).join('; ')}`:'No open red flag in the business'},
+    {k:'kill',s:'"I\'m wrong if"',auto:1,ok:!!String(x.kill||'').trim(),t:String(x.kill||'').trim()?'"I\'m wrong if" is written down':'No "I\'m wrong if" written yet'},
+    {k:'earn',s:'no results this week',auto:1,ok:!(e&&e.dn!=null&&e.dn<=7),t:e&&e.dn!=null&&e.dn<=7?`Results ${e.dn===0?'today':e.dn===1?'tomorrow':`in ${e.dn} days`}`:'No results due this week'},
+    {k:'explain',s:'can explain it',t:'I can explain in two sentences how it makes money'},
+    {k:'why',s:'below fair value',t:'I\'m buying because it\'s below fair value, not because it fell or someone tipped it'},
+    {k:'drop',s:'would hold a 30 % drop',t:'If it fell 30 % right after, I\'d hold or add, not sell'}]; }
+const checkHtml=items=>`<p class="hint" style="margin:0">Ticked automatically where the app knows. Tap the rest if they're true.</p><div class="ckl">${items.map(x=>x.auto?`<div class="ck ${x.ok?'ok':'no'}"><i>${x.ok?'✓':'✗'}</i><span>${esc(x.t)}</span></div>`:`<button type="button" class="ck man" data-ck="${x.k}"><i></i><span>${esc(x.t)}</span></button>`).join('')}</div>`;
+function checkRead(root,items){ const res={}; items.forEach(x=>{ res[x.k]=x.auto?!!x.ok:!!root.querySelector(`[data-ck="${x.k}"]`)?.classList.contains('on'); });
+  const miss=items.filter(x=>!res[x.k]); return {res,miss,n:items.length}; }
+// Tap-to-pick answers, so the journal is quick on the phone and says the same things every time.
+const WHY_BUY=[['level','At or below my level'],['yield','Yield above its usual'],['temp','Bad news I think is temporary'],['quality','Quality business, long runway'],['income','For the dividend income'],['gap','Fills a gap in the depot']];
+const ANYWAY=[['starter','Small starter, rest at my level'],['close','Close enough to my level'],['long','Long horizon, a few % don\'t matter'],['checked','I checked the missing point myself'],['fomo','Honestly: fear of missing out']];
+const LOOK_AGAIN=[['level','Price at my level'],['flag','Red flag cleared'],['results','After the next results'],['understand','Once I understand it better'],['never','Not again']];
+const WHY_OUT=[['weight','Over my max weight'],['fair','Above fair value'],['broken','Thesis broken'],['better','Better use for the money'],['cash','Need the cash'],['tax','Tax reasons'],['simple','Fewer positions']];
+const REV_CHECK=[['results','Latest results'],['div','Dividend'],['biz','Business section'],['val','Valuation'],['kill','"I\'m wrong if"']];
+const CHANGED=[['growth','Growth slower'],['margin','Margins down'],['div','Dividend cut or frozen'],['debt','Debt up'],['mgmt','Management or strategy'],['comp','Competition or disruption'],['price','Price far above fair value'],['better','Better than I thought']];
+const chipsHtml=(g,opts,multi,pre)=>`<div class="dchips" data-g="${g}" data-m="${multi?1:0}">${opts.map(([k,l])=>`<button type="button" class="chip ${pre&&pre.includes(k)?'on':''}" data-r="${k}">${esc(l)}</button>`).join('')}</div>`;
+function wireChips(root,onChange){ root.querySelectorAll('.dchips').forEach(g=>{ const m=g.dataset.m==='1';
+  g.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ if(m) b.classList.toggle('on'); else g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b)); onChange&&onChange(); }); }); }
+const chipsOf=(root,g)=>[...root.querySelectorAll(`.dchips[data-g="${g}"] .chip.on`)].map(b=>b.dataset.r);
+const labs=(opts,keys)=>keys.map(k=>(opts.find(o=>o[0]===k)||[,k])[1]);
+const dq=(t,sub,cls='')=>`<p class="dq ${cls}">${t}${sub?` <small>${sub}</small>`:''}</p>`;
+const noteBox=id=>`<details class="dmore"><summary>+ Add a note</summary><textarea id="${id}" rows="2" placeholder="optional, only if the chips miss something"></textarea></details>`;
+// One form for buy / add / trim / sell / pass. o: {kind, title, go, c, cur, sym, ctx?, reasons?, onSave(entry)}
+function decisionForm(box,o){
+  const items=o.ctx?checkItems(o.ctx):null, nd=o.c>=1000?0:2, k=o.kind, buyish=k==='buy'||k==='add', out=k==='trim'||k==='sell';
+  box.hidden=false;
+  box.innerHTML=`<div class="dform"><b class="dh">${esc(o.title)}</b>
+    ${items?dq('Before you buy')+checkHtml(items):''}
+    ${buyish?dq('Why now?','tap all that fit')+chipsHtml('why',WHY_BUY,1):''}
+    ${items?`<div id="d_any" hidden>${dq('Why anyway?','pick at least one','dn')}${chipsHtml('any',ANYWAY,1)}</div>`:''}
+    ${k==='pass'?dq('Why pass?')+chipsHtml('reason',o.reasons,0,[o.reasons[0][0]])+dq('What would make you look again?','optional')+chipsHtml('look',LOOK_AGAIN,1):''}
+    ${out?dq('Why?','pick at least one')+chipsHtml('why',WHY_OUT,1):''}
+    <div class="drow"><label>${k==='pass'?'Price now':'Price'} (${esc(o.cur||'')})<input id="d_price" type="number" step="any" inputmode="decimal" value="${o.c>0?Number(o.c.toFixed(nd)):''}"></label>
+      <label>Date<input id="d_date" type="date" value="${today()}"></label></div>
+    ${noteBox('d_note')}
+    <div class="drow end"><button type="button" class="btn quiet" id="d_cancel">Cancel</button><button type="button" class="btn primary" id="d_go">${esc(o.go)}</button></div></div>`;
+  const state=()=>items?checkRead(box,items):null;
+  const upd=()=>{ const r=state(); if(!r) return; const any=r.miss.length>0;
+    $('#d_go').textContent=any?`${o.go} anyway`:o.go; $('#d_go').classList.toggle('warnbtn',any); $('#d_any').hidden=!any; };
+  box.querySelectorAll('[data-ck]').forEach(c=>c.onclick=()=>{ c.classList.toggle('on'); c.querySelector('i').textContent=c.classList.contains('on')?'✓':''; upd(); }); wireChips(box,upd); upd();
+  $('#d_cancel').onclick=()=>{ box.hidden=true; box.innerHTML=''; };
+  $('#d_go').onclick=()=>{
+    const p=Number($('#d_price').value), d=$('#d_date').value||today(), note=$('#d_note').value.trim(), r=state();
+    const why=chipsOf(box,'why'), any=chipsOf(box,'any'), reason=chipsOf(box,'reason')[0]||null, look=chipsOf(box,'look');
+    if(k!=='pass'&&!(p>0)){ toast('Enter the price'); return; }
+    if(r&&r.miss.length&&!any.length){ toast('Tap why you buy anyway'); $('#d_any').scrollIntoView({block:'center'}); return; }
+    if(out&&!why.length){ toast('Tap why'); return; }
+    const parts=[k==='pass'?`Passed (${passLabel(reason)})${p>0?` at ${fmtP(p,o.cur)}`:''}`:`${DKIND[k]}${p>0?` at ${fmtP(p,o.cur)}`:''}`];
+    if(why.length) parts.push(`Why: ${labs(buyish?WHY_BUY:WHY_OUT,why).join(', ')}`);
+    if(r) parts.push(`Checklist ${r.n-r.miss.length}/${r.n}${r.miss.length?`, missing: ${r.miss.map(x=>x.s).join(', ')}`:''}`);
+    if(any.length) parts.push(`Anyway: ${labs(ANYWAY,any).join(', ')}`);
+    if(look.length) parts.push(`Look again: ${labs(LOOK_AGAIN,look).join(', ')}`);
+    if(note) parts.push(note);
+    const e={date:d,kind:k,price:p>0?p:null,cur:o.cur,sym:o.sym,text:parts.join('. ')};
+    if(reason) e.reason=reason; if(why.length) e.why=why; if(any.length) e.anyway=any; if(look.length) e.look=look; if(r) e.checks=r.res;
+    o.onSave(e); }; }
+// Review: show "I'm wrong if", tap what you checked, the verdict and (if not "holds") what changed.
+function reviewForm(box,o){
+  box.hidden=false;
+  box.innerHTML=`<div class="dform rev"><b class="dh">${o.due?'Review due':'Review'}</b>
+    ${String(o.kill||'').trim()?`<p class="kq"><span>I'm wrong if</span>${esc(o.kill)}</p>`:`<p class="kq none">No "I'm wrong if" written yet. Add one in ${o.isHold?'the settings below':'Edit'}, so the next review has something to test.</p>`}
+    ${dq('What did you look at?','tap all you checked')}${chipsHtml('chk',REV_CHECK,1)}
+    ${dq('So the thesis…')}${chipsHtml('v',Object.entries(VERDICT),0,['holds'])}
+    <div id="r_chg" hidden>${dq('What changed?','pick at least one')}${chipsHtml('chg',CHANGED,1)}</div>
+    <div class="drow"><label>Next review<input id="r_next" type="date" value="${addMonths(today(),o.months)}"></label></div>
+    ${noteBox('r_note')}
+    <div class="drow end"><button type="button" class="btn quiet" id="r_cancel">${o.due?'Later':'Cancel'}</button><button type="button" class="btn primary" id="r_go">Save review</button></div></div>`;
+  wireChips(box,()=>{ $('#r_chg').hidden=chipsOf(box,'v')[0]==='holds'; });
+  $('#r_cancel').onclick=()=>{ box.hidden=true; box.innerHTML=''; };
+  $('#r_go').onclick=()=>{ const v=chipsOf(box,'v')[0]||'holds', chg=v==='holds'?[]:chipsOf(box,'chg'), chk=chipsOf(box,'chk');
+    if(!chk.length){ toast('Tap what you looked at'); return; }
+    if(v!=='holds'&&!chg.length){ toast('Tap what changed'); return; }
+    o.onSave({verdict:v,checked:chk,changed:chg,note:$('#r_note').value.trim(),next:$('#r_next').value||null}); }; }
+const revText=r=>[`Looked at: ${labs(REV_CHECK,r.checked).join(', ')}`,r.changed.length?`Changed: ${labs(CHANGED,r.changed).join(', ')}`:'',r.note].filter(Boolean).join('. ');
+function saveReview(src,r,c,cur,sym){
+  logDecision(src,{kind:'review',verdict:r.verdict,checked:r.checked,changed:r.changed,price:c>0?c:null,cur,sym,text:`Review: ${VERDICT[r.verdict].toLowerCase()}. ${revText(r)}`});
+  src.nextReview=r.next;
+  if(r.verdict==='broken') src.broken=today(); else delete src.broken; }
+const brokenOf=o=>!!(o&&o.broken);
+// The journal list, decisions marked.
+function noteRows(notes){
+  const strip=n=>{ const t=String(n.text||''); if(n.kind==='review') return t.replace(/^Review: /,''); if(n.kind==='pass') return t.replace(/^Passed /,''); const w=DKIND[n.kind]+' '; return t.startsWith(w)?t.slice(w.length):t; };
+  return (notes||[]).map((n,k)=>[n,k]).sort((a,b)=>(b[0].date||'').localeCompare(a[0].date||'')||b[1]-a[1]).map(([n])=>`<div class="note ${n.kind?'dec '+n.kind+' '+(n.verdict||''):''}"><small>${fmtDate(n.date)}</small><div>${n.kind?`<b class="dk">${n.kind==='pass'?'Passed':DKIND[n.kind]}</b> `:''}${esc(n.kind?strip(n):n.text)}</div></div>`).join('')
+    ||'<p class="none" style="margin:0;color:var(--mute);font-style:italic">No notes yet.</p>'; }
+// ---------- decision journal sheet (⋯ → Decision journal) ----------
+function allDecisions(){
+  const out=[];
+  for(const i of data.ideas.filter(x=>!x.deletedAt)) for(const n of i.notes||[]) if(n&&n.kind) out.push({n,tk:i.ticker,nm:i.name,sym:n.sym||symOf(i),open:()=>{closeAll();openRead(i.id);}});
+  for(const h of holdings()){ if(textSrc(h)!==h) continue; for(const n of h.notes||[]) if(n&&n.kind) out.push({n,tk:h.short||h.symbol,nm:h.name,sym:n.sym||hSym(h),open:()=>{closeAll();openHold(h.id);}}); }
+  for(const d of out){ const c=curOf({symbol:d.sym}); d.now=c; d.since=d.n.price>0&&c>0?(c/d.n.price-1)*100:null; }
+  return out.sort((a,b)=>(b.n.date||'').localeCompare(a.n.date||'')); }
+function openDecisions(){
+  const D=allDecisions(), avg=a=>{ const v=a.filter(d=>d.since!=null).map(d=>d.since); return v.length?v.reduce((s,x)=>s+x,0)/v.length:null; };
+  const bought=D.filter(d=>d.n.kind==='buy'||d.n.kind==='add'), passed=D.filter(d=>d.n.kind==='pass'||d.n.kind==='sell'||d.n.kind==='trim'), rev=D.filter(d=>d.n.kind==='review');
+  const anyway=bought.filter(d=>d.n.checks&&Object.values(d.n.checks).some(v=>!v));
+  const cnt=v=>rev.filter(d=>d.n.verdict===v).length;
+  const kpi=(v,l,cls='')=>`<div class="kpi"><b class="num ${cls}">${v}</b><span>${l}</span></div>`;
+  $('#decBody').innerHTML=`
+    <p class="hint">Every buy, add, trim, sale, pass and review you logged, with the price then and now (price only, in the listing currency). Over time this shows whether your buys beat your passes, and whether "anyway" buys go worse.</p>
+    <div class="kpis">
+      ${kpi(bought.length?`${fmtPct(avg(bought),1)}`:'—',`buys and adds since (${bought.length})`,(avg(bought)??0)>=0?'up':'dn')}
+      ${kpi(passed.length?`${fmtPct(avg(passed),1)}`:'—',`passes and sales since (${passed.length}), plus = what you missed`)}
+      ${anyway.length?kpi(fmtPct(avg(anyway),1),`"anyway" buys since (${anyway.length})`,(avg(anyway)??0)>=0?'up':'dn'):''}
+      ${kpi(rev.length?`${cnt('holds')} · ${cnt('changed')} · ${cnt('broken')}`:'—','reviews: holds · changed · broken')}
+    </div>
+    <div class="list" id="decList"></div>`;
+  const L=$('#decList');
+  if(!D.length) L.innerHTML='<div class="empty"><b>No decisions logged yet</b>They appear here when you mark an idea as bought or passed, log an add, trim or sale on a holding, or save a review.</div>';
+  else L.appendChild(groupEl('Newest first',D.map(d=>{ const n=d.n, k=n.kind;
+    const lbl=k==='review'?`Review: ${VERDICT[n.verdict]?.toLowerCase()||''}`:k==='pass'?`Passed, ${passLabel(n.reason).toLowerCase()}`:DKIND[k];
+    const good=k==='buy'||k==='add', sc=d.since;
+    const tone=k==='review'?(n.verdict==='broken'?'var(--coral)':n.verdict==='changed'?'var(--ochre)':'var(--teal)'):good?'var(--teal)':'var(--out)';
+    const line2=`${fmtDay(n.date)} · <b>${esc(lbl)}</b>${n.price>0?` at ${lvl(n.price)}`:''}${sc!=null?` · now ${lvl(d.now)} (<span class="${good?(sc>=0?'up':'dn'):''}">${fmtPct(sc,0)}</span>)`:''}`;
+    const el=rowEl({tc:tone,tile:sc!=null&&k!=='review'?fmtN(sc,0):'·',txt:false,tk:d.tk,nm:d.nm,line2,px:{main:'',sub:''},onOpen:d.open});
+    el.title=n.text; el.querySelector('.rsc').classList.add('nx'); return el; })));
+  closeAll(); $('#mDec').classList.add('on'); }
 // ---------- Next €: where the next money goes (v3.2.0) ----------
 // Expected return a year over ~5 years, in € terms before German tax (the same for every stock):
 //   dividend yield × (1 − withholding you can't credit) + long-run growth + catch-up to fair value
@@ -1919,10 +2101,10 @@ function nextCands(){
     const x=px(h), z=valOfH(h), a=addOf(h), w=weightOf(h,T), v=valueOf(h);
     seen.add(hSym(h));
     out.push({kind:'hold',id:h.id,tk:h.short||h.symbol,nm:h.name,sym:hSym(h),x,c:curOf(x),cur:curOfI(x),val:z?z.v:null,lvl:a?a.v:null,
-      y:yldOf(x),cc:ccOf(h.isin,hSym(h)),sector:sectorOf(hSym(h),h.sector),w,eur:v?v.eur:0,cap:capOf(h),inDepot:!depot||!!posOf_(h),open:()=>openHold(h.id)}); }
+      y:yldOf(x),cc:ccOf(h.isin,hSym(h)),sector:sectorOf(hSym(h),h.sector),w,eur:v?v.eur:0,cap:capOf(h),inDepot:!depot||!!posOf_(h),broken:brokenOf(textSrc(h)),open:()=>openHold(h.id)}); }
   for(const i of live()){ if(i.status==='out'||seen.has(symOf(i))) continue;
     out.push({kind:'idea',id:i.id,tk:i.ticker,nm:i.name,sym:symOf(i),x:i,c:curOf(i),cur:curOfI(i),val:valNorm(i.val),lvl:i.buyBelow>0?i.buyBelow:null,
-      y:yldOf(i),cc:ccOf(null,symOf(i)),sector:sectorOf(symOf(i),i.sector),w:depot?0:null,eur:0,cap:capDefault(),inDepot:true,open:()=>openRead(i.id)}); }
+      y:yldOf(i),cc:ccOf(null,symOf(i)),sector:sectorOf(symOf(i),i.sector),w:depot?0:null,eur:0,cap:capDefault(),inDepot:true,broken:brokenOf(i),open:()=>openRead(i.id)}); }
   return out;
 }
 function nextRank(amt){
@@ -1950,13 +2132,13 @@ function nextRank(amt){
       if(r.kind==='hold'){ o.wAfter=(r.eur+amt)/T2*100; o.full=o.wAfter>r.cap; } }
     o.adj=o.er-o.pen;
     o.above=r.lvl>0?(c/r.lvl-1)*100:null;
-    o.st=o.flag?'flag':o.full?'full':!(r.lvl>0)?'nolevel':o.above>0?'wait':'ready';
+    o.st=o.broken?'broken':o.flag?'flag':o.full?'full':!(r.lvl>0)?'nolevel':o.above>0?'wait':'ready';
     return o; });
   const by=(a)=>a.sort((p,q)=>(q.adj??-99)-(p.adj??-99));
   return {rows,haveDepot,
     ready:by(rows.filter(r=>r.st==='ready')),
     wait:by(rows.filter(r=>r.st==='wait'||r.st==='nolevel')),
-    blocked:by(rows.filter(r=>r.st==='flag'||r.st==='full')),
+    blocked:by(rows.filter(r=>r.st==='broken'||r.st==='flag'||r.st==='full')),
     noval:rows.filter(r=>r.st==='noval'||r.st==='noprice')}; }
 // the bond fund in the depot is the "do nothing clever" alternative
 function bondRef(){ const b=holdings().find(h=>h.kind==='bond'&&hSym(h)); if(!b) return null; const y=yldOf(px(b)); return y!=null?{y,nm:b.short||b.name}:null; }
@@ -1972,6 +2154,7 @@ function nextRow(r,n){
   else if(r.st==='wait') bits.push(`${fmtN(r.above,0)} % above ${lvl(r.lvl)}`);
   else if(r.st==='nolevel') bits.push('no level set');
   else if(r.st==='flag') bits.push('<b class="dn">red flag</b>');
+  else if(r.st==='broken') bits.push('<b class="dn">thesis broken</b>');
   else if(r.st==='full') bits.push(`<b class="dn">would be ${fmtN(r.wAfter,1)} %</b>, max ${fmtN(r.cap,1)}`);
   if(r.er!=null) bits.push(erParts(r));
   if(r.age&&r.age.stale) bits.push('<span class="dn">valuation stale</span>');
@@ -2013,7 +2196,7 @@ function renderNext(){
     <li><b>Growth</b>: the long-run growth from your valuation (the g in the Gordon method). Without one, the dividend growth of the last 5 years, capped at 6 %. Buybacks are part of it, because it's growth per share.</li>
     <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value.</li>
     <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out.</li></ul>
-    <p>Only stocks at or below your level count as "at your level". Above your max weight or with an open red flag a stock is held back, however good the number. German tax (Abgeltungsteuer) is the same for all of them, so it's left out. The ${b?esc(b.nm)+' bond fund':'bond fund'} line is the low-risk alternative: a stock should beat it clearly to be worth the risk.</p>
+    <p>Only stocks at or below your level count as "at your level". Above your max weight, with an open red flag, or after a review called the thesis broken, a stock is held back, however good the number. German tax (Abgeltungsteuer) is the same for all of them, so it's left out. The ${b?esc(b.nm)+' bond fund':'bond fund'} line is the low-risk alternative: a stock should beat it clearly to be worth the risk.</p>
     <p>The number is only as good as your fair value: ${NX.years}-year catch-up is an assumption, and a stale valuation makes it wrong.</p></div>`;
   body.appendChild(ex);
   $('#nxAmt').onchange=e=>{ const v=Number(e.target.value); if(!(v>0)){ e.target.value=nextAmt; return; } nextAmt=v; try{localStorage.setItem(LS_NEXT,String(v));}catch{} renderNext(); };
@@ -2067,6 +2250,7 @@ function openHold(id){
   $('#holdBody').innerHTML=`
     ${card.outerHTML}
     <div class="dmeta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)}${h.sector?' · '+esc(h.sector):''} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}${idea?` · <a href="#" id="hIdea" class="lnk">↗ Radar card (${esc(stageOf(idea).label)})</a>`:''}</div>
+    <div class="dbox" id="hDec" hidden></div>
     ${flagFirst?bizHtml(hSym(h),h,'hold'):''}
     ${s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(hWhy(h,s))}</span>
       ${['buy','yld','rng'].map(k=>{const z=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${z?(z.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${z?`${Math.round(z.pts)}/${Math.round(z.max)}`:'n/a'}</b></div>`;}).join('')}
@@ -2095,7 +2279,9 @@ function openHold(id){
     ${idea?`<p class="hint" style="margin:0">Thesis, cases, review date and journal come from the Radar card. <a href="#" id="hIdea2" class="lnk">Edit them there ↗</a></p>`:''}
     <div class="sec"><h4>${fund?'Why I hold it':'Thesis'}</h4><p class="${src.thesis?'':'none'}">${src.thesis?esc(src.thesis):'Nothing written yet.'}</p></div>
     ${fund?'':`<div class="folds">${fold('Bull case',src.bull,'bull')}${fold('Bear case',src.bear,'bear')}${fold("I'm wrong if",src.kill,'kill')}</div>`}
-    <div class="sec journal"><h4>Journal</h4><div id="hNoteList"></div>
+    <div class="sec journal"><h4>Journal</h4>
+      <div class="dbtns"><button class="btn small" id="hRev">Review now</button>${fund?'':'<button class="btn small" id="hAdd">I added</button><button class="btn small" id="hTrim">I trimmed</button><button class="btn small" id="hSold">I sold</button>'}</div>
+      <div id="hNoteList"></div>
       <div class="add"><input id="h_noteIn" placeholder="Add a dated note"><button class="btn" id="hNoteBtn">Add</button></div></div>
     ${h.note?`<div class="sec"><h4>Note</h4><p>${esc(h.note)}</p></div>`:''}
     <div class="sec"><h4>Settings for this holding</h4>
@@ -2123,8 +2309,17 @@ function openHold(id){
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
   wireBiz($('#holdBody'),()=>openHold(h.id));
   if(!fund) valWire('hv_','#h_addBelow',cur);
-  const notes=()=>{ $('#hNoteList').innerHTML=(src.notes||[]).slice().reverse().map(n=>`<div class="note"><small>${fmtDate(n.date)}</small><div>${esc(n.text)}</div></div>`).join('')||'<p class="none" style="margin:0;color:var(--mute);font-style:italic">No notes yet.</p>'; };
+  const notes=()=>{ $('#hNoteList').innerHTML=noteRows(src.notes); };
   notes();
+  const saveH=msg=>{ idea?persist():persistPort(); if(idea) persistPort(); openHold(h.id); toast(msg); };
+  const box=$('#hDec'), sym=hSym(h), go=()=>box.scrollIntoView({behavior:'smooth',block:'center'});
+  const revH=due=>reviewForm(box,{due,kill:src.kill,months:6,isHold:true,onSave:r=>{ saveReview(src,r,c,cur,sym); saveH(r.verdict==='broken'?'Saved. Next € holds it back until a review says it holds again.':'Review saved'); }});
+  $('#hRev').onclick=()=>{ revH(false); go(); };
+  if(!fund){
+    $('#hAdd').onclick=()=>{ decisionForm(box,{kind:'add',title:'I added to it',go:'Log the add',c,cur,sym,ctx:{c,cur,lvl:a?a.v:null,val:valOfH(h)?.v,sym,kill:src.kill,word:'add'},onSave:e=>{ logDecision(src,e); saveH('Logged'); }}); go(); };
+    $('#hTrim').onclick=()=>{ decisionForm(box,{kind:'trim',title:'I trimmed it',go:'Log the trim',c,cur,sym,onSave:e=>{ logDecision(src,e); saveH('Logged'); }}); go(); };
+    $('#hSold').onclick=()=>{ decisionForm(box,{kind:'sell',title:'I sold it all',go:'Log the sale',c,cur,sym,onSave:e=>{ logDecision(src,e); saveH('Logged. Remove the holding once it\'s gone from your statement.'); }}); go(); }; }
+  if(reviewDue(src)) revH(true);
   $('#hNoteBtn').onclick=()=>{ const t=$('#h_noteIn').value.trim(); if(!t) return;
     src.notes=[...(Array.isArray(src.notes)?src.notes:[]),{date:today(),text:t}]; src.updatedAt=now();
     $('#h_noteIn').value=''; notes(); idea?persist():persistPort(); };
@@ -2276,6 +2471,7 @@ function openLog(){
 }
 $('#verBtn').onclick=openLog;
 $('#btnLog').onclick=openLog;
+$('#btnDec').onclick=openDecisions;
 renderVersion();
 
 // ---------- misc ----------

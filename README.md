@@ -65,6 +65,10 @@ Separate from the idea tracking: what you actually own, and whether any of it is
 
 "Where does my next €1,000 go?" Every idea and stock holding with a valuation gets an expected return a year over ~5 years: dividend yield × (1 − withholding Germany doesn't credit) + long-run growth (`val.g`, else 5-yr dividend growth capped at 6 %) + annualised catch-up to `val.base`. With a statement on the device, soft penalties apply when the amount would push one sector (Yahoo sector) above 20 % of the depot or one foreign currency above 40 %, and holdings that would go over their max weight are held back. Only stocks at or below their level are recommended; the bond fund's yield is shown as the low-risk line. German tax is the same for all and left out.
 
+## Decision journal (v3.3.0)
+
+Decisions are journal notes with a `kind` (`buy`, `add`, `trim`, `sell`, `pass`, `review`), the price and symbol at the time, and the tapped answers (`why`, `anyway`, `look`, `reason`, `checked`, `changed`, `checks`). Buying (idea → Bought, or "I added" on a holding) runs an 8-point checklist; reviews show "I'm wrong if" and record Still holds / Changed / Broken. A broken thesis (`broken` date on the card or holding) holds the stock back in Next €. Passing stores `passed: {date, price, reason}`. ⋯ → Decision journal lists them all with the price then and now.
+
 ## Import from Claude
 
 At the end of a stock discussion, ask Claude for "a Radar card" and paste the JSON into `Import from Claude`. Format (all fields optional except `ticker` or `name`):
