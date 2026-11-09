@@ -558,6 +558,23 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .capl input{width:72px;text-align:right;padding:6px 9px}
 details.syncset{border-top:1px solid var(--line);padding-top:14px}
 details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bottom:8px}
+/* v3.5.0: Today strip, folded groups, one decision block in the sheet */
+.today{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.today button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.today button b{color:var(--ink);font-weight:800}
+.today button.lvl b{color:var(--teal)}.today button.lvl.zero b{color:var(--mute)}
+.today button.warn b{color:var(--coral)}
+.today button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}.today button.on b{color:var(--bg)}
+.today .px{border-color:transparent;background:transparent;color:var(--mute);padding-left:4px;padding-right:4px}
+.today .px.old{color:var(--coral);font-weight:700}
+.fhd{display:flex;align-items:center;gap:8px;margin:0 0 10px}.fhd .sp{flex:1}
+.rmore{display:block;width:100%;border:0;border-top:1px solid var(--line2);background:transparent;padding:11px 14px;text-align:left;font-size:13px;font-weight:700;color:var(--research)}
+.rmore:hover{background:var(--panel2)}
+.grp.flash .rows{box-shadow:0 0 0 2px var(--research);transition:box-shadow .3s}
+.c2blk{display:flex;flex-direction:column;gap:8px;background:var(--panel2);border-radius:var(--r2);padding:11px 12px}
+.c2blk .bars{display:flex;flex-direction:column;gap:6px}
+.c2lvl{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}.c2lvl b{color:var(--ink);font-weight:800}
+.nxsec p{margin:0 0 6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -579,6 +596,8 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 
 <main>
   <div class="stalebar" id="staleBar" hidden></div>
+  <div class="today" id="today" aria-label="Today"></div>
+  <section id="viewFocus" hidden><div class="list" id="focusBody"></div></section>
   <section id="viewBoard"><div class="list" id="grid"></div></section>
   <section id="viewScore" hidden>
     <div class="sum" id="summary"></div>
@@ -757,8 +776,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.4.1';
+const VERSION='3.5.0';
 const CHANGELOG=[
+  {v:'3.5.0',d:'2026-11-09',t:'Today, at a glance',items:[
+    'New "Today" line under the top bar on every tab: how many stocks are at your level, reviews due, results this week, stale valuations and how old the prices are. Ideas and holdings count together, and parts with nothing in them disappear (except "at level"). Tap a part to see exactly those stocks; tap it again or ✕ to go back. "0 at level" opens Next €.',
+    'Portfolio tiles: Hold, Pricey and Full are now grey, because a low add score on something you own just means "expensive, keep". Red only shows up for an open red flag or a thesis you called broken, so red always means "look at this". Add zone stays green, Getting close blue. The Ideas tab keeps its colours.',
+    'Long lists fold: Hold and Funds and bonds on Portfolio, and "Not at your level yet" and "Held back" on Next €, show 5 rows plus "Show all". Radar remembers which ones you opened.',
+    'Details say the tier once: one box with the verdict, the three score bars and your level (and 2nd level) underneath. The "In zone" tile and the second score ring are gone. "Price at its usual yield" only shows when it is within 25 % of your fair value, so ZTS no longer shows a meaningless 180 $.',
+    'The lone "last 5. Nov." line now reads "Last results 5. Nov., 4 days ago".',
+    'Next € rows are calmer: the line under the name only says where the price stands. The yield + growth + fair breakdown moved into the details, in a new "Next € · expected return" section with your rank, the withholding tax and the mix check.']},
   {v:'3.4.1',d:'2026-11-09',t:'Stock or currency?',items:[
     'Foreign holdings have a new "Bought around" date next to the average buy price. With it, the holding shows how much of your € return came from the stock itself and how much from the currency, e.g. JNJ +12 % in USD, dollar −5 % against the €. The date stays on this device, like the buy price.',
     'ENI and National Grid now have a valuation too, so Next € can rank them.']},
@@ -881,6 +907,7 @@ let data = load();
 let sync = JSON.parse(localStorage.getItem(LS_SYNC)||'null') || {repo:'',branch:'main',path:'ideas.json',token:''};
 let editingId=null, readingId=null, view='board', sortKey='score', sortDir=-1;
 let filter='all'; try{ filter=localStorage.getItem(LS_FILTER)||'all'; }catch{}
+let focus=null, todayCache=null;   // v3.5.0 Today strip: filtered list instead of a tab
 let boardSort='score'; try{ boardSort=localStorage.getItem(LS_SORT)||'score'; }catch{}
 let prices={quotes:{},errors:{}};
 try{ const p=JSON.parse(localStorage.getItem(LS_PRICES)); if(p&&p.quotes) prices=p; }catch{}
@@ -1226,7 +1253,12 @@ const LS_TABLE='radar.table.v1';
 let tableMode=false; try{ tableMode=localStorage.getItem(LS_TABLE)==='1'; }catch{}
 const mqWide=window.matchMedia('(min-width:720px)');
 const showTable=()=>view==='board'&&tableMode&&mqWide.matches;
-function render(){ view==='port'?renderPort():view==='next'?renderNext():showTable()?renderScore():renderBoard(); renderSub(); renderPxInfo(); renderBadge(); }
+function applyVis(){ const tbl=showTable(), f=!!focus;
+  $('#viewFocus').hidden=!f;
+  $('#viewBoard').hidden=f||view!=='board'||tbl; $('#viewScore').hidden=f||!tbl; $('#viewPort').hidden=f||view!=='port'; $('#viewNext').hidden=f||view!=='next';
+  document.body.classList.toggle('wide',tbl&&!f); }
+function render(){ applyVis(); if(focus) renderFocus(); else view==='port'?renderPort():view==='next'?renderNext():showTable()?renderScore():renderBoard();
+  renderToday(); renderSub(); renderPxInfo(); renderBadge(); }
 // line under the tabs: what you're looking at, price age, sort
 function renderSub(){
   let t;
@@ -1236,7 +1268,7 @@ function renderSub(){
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
     t=showTable()?'':`${n} idea${n===1?'':'s'}${st?' · '+st.label:''}`; }
   $('#subTxt').textContent=t;
-  $('#btnSort').hidden=view!=='board'||showTable();
+  $('#btnSort').hidden=view!=='board'||showTable()||!!focus;
   $('#btnSort').innerHTML=`↕ ${sortOf().short}${filter!=='all'?' · '+esc(STATUSES.find(s=>s.k===filter)?.label||''):''}`;
   $('#btnTable').hidden=view!=='board';
   $('#btnTable').classList.toggle('on',tableMode);
@@ -1287,11 +1319,22 @@ function rowEl({tc,tile,txt,tk,nm,extra='',line2,px,onOpen}){
     <span class="rpx"><b>${px.main}</b>${px.sub?`<small>${px.sub}</small>`:''}</span>`;
   el.onclick=onOpen; return el;
 }
-function groupEl(title,list,empty){
-  const sec=document.createElement('section'); sec.className='grp';
+// Long groups (v3.5.0): with a fold key and more than 6 rows, show 5 plus "Show all N".
+// Open/closed is remembered per group in radar.fold.v1.
+const LS_FOLD='radar.fold.v1'; let folds={}; try{ folds=JSON.parse(localStorage.getItem(LS_FOLD))||{}; }catch{}
+const FOLD_MAX=6, FOLD_SHOW=5;
+function groupEl(title,list,empty,foldKey){
+  const sec=document.createElement('section'); sec.className='grp'; sec.dataset.g=title;
   sec.innerHTML=`<div class="ghd"><span>${title}</span><span>${list.length}</span></div>`;
   const box=document.createElement('div'); box.className='rows';
-  if(list.length) list.forEach(el=>box.appendChild(el)); else box.innerHTML=`<div class="rempty">${empty||''}</div>`;
+  const fill=()=>{ box.innerHTML='';
+    const foldable=foldKey&&list.length>FOLD_MAX, open=!foldable||!!folds[foldKey];
+    (open?list:list.slice(0,FOLD_SHOW)).forEach(el=>box.appendChild(el));
+    if(foldable){ const m=document.createElement('button'); m.type='button'; m.className='rmore';
+      m.textContent=open?'Show fewer':`Show all ${list.length}`;
+      m.onclick=()=>{ if(open) delete folds[foldKey]; else folds[foldKey]=1; try{localStorage.setItem(LS_FOLD,JSON.stringify(folds));}catch{} fill(); };
+      box.appendChild(m); } };
+  if(list.length) fill(); else box.innerHTML=`<div class="rempty">${empty||''}</div>`;
   sec.appendChild(box); return sec;
 }
 const reviewDue=o=>!!(o.nextReview&&o.nextReview<=today());
@@ -1346,7 +1389,7 @@ function earnPill(sym){ const e=earnOf(sym); if(!e||e.dn==null||e.dn>14) return 
 // line on the card: always when a date is known
 function earnLine(sym){ const e=earnOf(sym); if(!e||(!e.next&&!e.last)) return '';
   const soon=e.dn!=null&&e.dn<=14, n=e.next?`Next results ${fmtDay(e.next)}${e.dn===0?', today':e.dn===1?', tomorrow':`, in ${e.dn} days`}`:'';
-  const l=e.last&&(!e.next||e.dl<=30)?`${n?' · ':''}last ${fmtDay(e.last)}`:'';
+  const l=e.last&&(!e.next||e.dl<=30)?`${n?' · last results ':'Last results '}${fmtDay(e.last)}${n?'':e.dl===0?', today':e.dl===1?', yesterday':`, ${e.dl} days ago`}`:'';
   return `<div class="c2ern ${soon?'soon':''}">${n}${l}</div>`; }
 // ---------- valuation (v3.1.0) ----------
 // val = {date, price (at the estimate), methods:[{t,v}], base, discount (%), why, bear, bearWhy, reverse, g (long-run growth %, used by Next €)}
@@ -1444,6 +1487,13 @@ function valWire(p,levelSel,cur){
   $('#'+p+'use').onclick=()=>{ const l=upd(); if(l){ $(levelSel).value=niceRound(l); toast('Level set, save to keep it'); } };
   upd(); }
 const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
+// v3.5.0: the detail sheet says the tier once. One block: decision line → the three score bars → the level line.
+const sbarsHtml=(s,lbl)=>`<div class="bars">${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'n/a'}</b></div>`;}).join('')}</div>`;
+const decBlk=(tier,dec,s,lbl,lvlLine)=>`<div class="c2blk"><div class="c2dec"><b>${tier}</b> · ${dec}</div>${s?sbarsHtml(s,lbl):''}${lvlLine?`<div class="c2lvl">${lvlLine}</div>`:''}</div>`;
+const lvlLineHtml=(word,v,cur,l2,extra='')=>v>0?`${word} below <b>${mN(v,cur)}</b>${eurTag(v,cur)}${extra}${l2?` · 2nd level <b>${mN(l2,cur)}</b>${eurTag(l2,cur)}`:''}`:'';
+const rngTxt=rp=>rp&&rp.pos>=.85?' · near 52w high':rp&&rp.pos<=.15?' · near 52w low':'';
+// "Price at its usual yield" only means something when it's within 25 % of your fair value.
+const usualOk=(hi,v)=>!!(hi&&hi.fair&&v&&v.base>0&&hi.fair<=v.base*1.25);
 function cardEl(i,inSheet){
   const st=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), h=histOf(i), sc=scoreOf(i), cur=curOfI(i), t=totalOf(i);
   const due=i.nextReview&&i.nextReview<=today();
@@ -1456,6 +1506,15 @@ function cardEl(i,inSheet){
   if(!sc&&!q&&errOf(i)) dist=`no quote for ${symOf(i)}, set the Yahoo symbol in Edit`;
   else if(!sc&&!c) dist='waiting for the first price';
   if(rp&&rp.pos>=.85) dist+=' · near 52w high'; else if(rp&&rp.pos<=.15) dist+=' · near 52w low';
+  // in the sheet: the same facts without repeating the tier or the level (both have their own place)
+  let dec=dist;
+  if(inSheet){ const l2=lvl2Of(i);
+    if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':'at your buy level'):`${fmtN(bp.above,0)} % above your buy level`):'no buy price set';
+      if(sc.cap==='flag') dec=`held at Wait by a red flag (would be ${sc.raw}) · `+dec;
+      else if(sc.cap==='above'||sc.cap==='level') dec+=`, so it stops at Getting close (would be ${sc.raw})`;
+      dec+=rngTxt(rp); }
+    else if(!(!q&&errOf(i))&&c) dec='not enough data for a score';
+    if(brokenOf(i)) dec='thesis broken · '+dec; }
   // price: chosen currency first, the other one small next to today's move
   const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
   const bar=c2barHtml(i,'buy');
@@ -1476,7 +1535,7 @@ function cardEl(i,inSheet){
         <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
       </div>
     </div>
-    <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
+    ${inSheet?decBlk(tier,esc(dec),sc,{buy:PART.buy.label,yld:PART.yld.label,rng:PART.rng.label},lvlLineHtml('Buy',i.buyBelow,cur,lvl2Of(i))):`<div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>`}
     ${valLine(valNorm(i.val),c,cur,symOf(i))}
     ${earnLine(symOf(i))}
     ${bar}
@@ -1553,10 +1612,8 @@ function renderScore(){
 $('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['score','toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
-function switchView(v){ view=v==='port'||v==='next'?v:'board'; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
-  const tbl=showTable();
-  $('#viewBoard').hidden=view!=='board'||tbl; $('#viewScore').hidden=!tbl; $('#viewPort').hidden=view!=='port'; $('#viewNext').hidden=view!=='next';
-  document.body.classList.toggle('wide',tbl); render(); }
+function switchView(v){ view=v==='port'||v==='next'?v:'board'; focus=null; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
+  render(); }
 $$('.seg button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
 // ---------- reading mode ----------
@@ -1573,14 +1630,9 @@ function openRead(id){
     <div class="stagebar" id="stagebar"></div>
     <div class="dbox" id="buyform" hidden></div>
     ${flagFirst?bizHtml(symOf(i),i,'idea'):''}
-    ${(s=>s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(whyOf(i,s))}</span>
-      ${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${PART[k].label}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'n/a'}</b></div>`;}).join('')}
-      </div></div>`:'')(scoreOf(i))}
-    <div class="kpis">
-      <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${tb==null?(i.buyBelow?mN(i.buyBelow,curOfI(i)):'—'):tb>=0?'In zone':'−'+fmtN(-tb,0)+' %'}</b><span>${i.buyBelow?'to buy below '+mN(i.buyBelow,curOfI(i)):'no buy level'}</span></div>
-      ${(h=>h?`<div class="kpi"><b class="num">${h.fair?mP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
-    </div>
+    ${(h=>usualOk(h,valNorm(i.val))?`<div class="kpis"><div class="kpi"><b class="num">${mP(h.fair,curOfI(i))}</b><span>price at its usual yield</span></div></div>`:'')(histOf(i))}
     ${valHtml(valNorm(i.val),c,curOfI(i),i.buyBelow,'buy',symOf(i))}
+    ${nextSecHtml('idea',i.id,symOf(i))}
     ${(t=>t?`<div class="sec"><h4>Return ${sinceLabel(i)}</h4>
       <div class="kpis">
         <div class="kpi"><b class="num ${t.price>=0?'up':'dn'}">${fmtPct(t.price)}</b><span>price, ${fmtP(t.base.price,curOfI(i))} to ${fmtP(curOf(i),curOfI(i))}</span></div>
@@ -1917,7 +1969,7 @@ function hRetOf(h){ const x=px(h), c=curOf(x), cost=costOf(h); if(!(c>0&&cost)) 
 // Holding card (v2.5.0): same layout as the idea card. Weight and value take the place of the stage line.
 function holdCard(r){
   const {h,x,s,v,w,y,mm}=r, c=curOf(x), d=dayOf(x), q=quoteOf(x), hi=histOf(x), idea=ideaOf(h), cur=curOfI(x), src=textSrc(h), a=addOf(h), fund=isFund(h);
-  const tc=s?s.c:'var(--t-none)', bp=s?.parts.find(z=>z.k==='buy'), rp=s?.parts.find(z=>z.k==='rng');
+  const tc=hTone(h,s), bp=s?.parts.find(z=>z.k==='buy'), rp=s?.parts.find(z=>z.k==='rng');
   let tier, dist;
   if(s){ tier=s.tier;
     dist=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} %`
@@ -1930,6 +1982,17 @@ function holdCard(r){
   else if(!q){ tier='Waiting for price'; dist='the next price update picks it up'; }
   else if(fund){ tier=h.kind==='bond'?'Bond fund':'Fund'; dist=posOf(x)!=null?`${fmtN(posOf(x)*100,0)} % up its 52-week range · not scored`:'not scored'; }
   else { tier='No score yet'; dist='not enough price history'; }
+  // the card only lives in the sheet: the tier once, then the bars, then the level line
+  let dec=dist;
+  if(s){ const l2=lvl2Of(x);
+    dec=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} % (would be ${s.rawTier.toLowerCase()}, ${s.score})`
+      :bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd add level':'at your add level'):`${fmtN(bp.above,0)} % above your add level`)
+      :s.capped||s.cap==='level'?'no add level yet, so it stops at Getting close':'no add level yet';
+    if(!s.full&&s.cap==='flag') dec=`held at Hold by a red flag (would be ${s.raw}) · `+dec;
+    else if(!s.full&&s.cap==='above'&&bp) dec+=`, so it stops at Getting close (would be ${s.raw})`;
+    dec+=rngTxt(rp); }
+  if(!fund&&brokenOf(textSrc(h))) dec='thesis broken · '+dec;
+  const lvlLine=a?lvlLineHtml('Add',a.v,cur,lvl2Of(x),a.src==='radar'?' (from the Radar card)':''):'';
   const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
   const yArr=hi?(hi.v==='cheap'?['▲','up']:hi.v==='expensive'?['▼','dn']:['≈','']):null;
   const rt=hRetOf(h), rc=rt==null||Math.abs(rt.pct)<.05?'':rt.pct>0?'up':'dn';
@@ -1949,7 +2012,7 @@ function holdCard(r){
         <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
       </div>
     </div>
-    <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
+    ${decBlk(tier,esc(dec),s,{buy:'to add level',yld:PART.yld.label,rng:PART.rng.label},lvlLine)}
     ${fund?'':(z=>z?valLine(z.v,c,cur,hSym(h)):'')(valOfH(h))}
     ${fund?'':earnLine(hSym(h))}
     ${c2barHtml(x,'add')}
@@ -1966,6 +2029,15 @@ function holdCard(r){
   return el;
 }
 
+// Tile colour on the Portfolio tab (v3.5.0). A low add score on something you own means "expensive, keep",
+// so Hold / Pricey / Full are grey. Red only when something needs a look: an open red flag or a broken thesis.
+// Add zone (green) and Getting close (blue) keep their colour. The Ideas tab keeps the full ladder.
+function hTone(h,s){
+  const biz=isFund(h)?null:(s?s.biz:bizOf(hSym(h)));
+  if((biz&&biz.red.length)||brokenOf(textSrc(h))) return 'var(--t-exp)';
+  if(!s||s.full||!addOf(h)) return 'var(--t-none)';
+  return s.tier==='Add zone'||s.tier==='Getting close'?s.c:'var(--t-none)';
+}
 // One row per holding (v3.0.0). Line 2 answers "can I add?": distance to the add level, or what's
 // stopping it (no level, full, red flag), then the yield.
 function holdRow(r,due){
@@ -1988,8 +2060,7 @@ function holdRow(r,due){
   const biz=fund?null:(s?s.biz:bizOf(hSym(h)));
   const over=!fund&&w!=null&&w>capOf(h);
   const extra=(w!=null?`<span class="w ${over?'over':''}" title="share of the depot">${fmtN(w,1)} %</span>`:'')+(biz&&biz.red.length?FLAG:'')+(fund?'':earnPill(hSym(h)));
-  const grey=!s||s.full||!a;
-  return rowEl({tc:grey?'var(--t-none)':s.c,tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
+  return rowEl({tc:hTone(h,s),tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
     tk:h.short||h.symbol,nm:h.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
 }
 // ---------- decision journal (v3.3.0) ----------
@@ -2200,7 +2271,6 @@ function nextRow(r,n){
   else if(r.st==='flag') bits.push('<b class="dn">red flag</b>');
   else if(r.st==='broken') bits.push('<b class="dn">thesis broken</b>');
   else if(r.st==='full') bits.push(`<b class="dn">would be ${fmtN(r.wAfter,1)} %</b>, max ${fmtN(r.cap,1)}`);
-  if(r.er!=null) bits.push(erParts(r));
   if(r.age&&r.age.stale) bits.push('<span class="dn">valuation stale</span>');
   const extra=(r.flag?FLAG:'')+earnPill(r.sym)+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
   const el=rowEl({tc:tone,tile:r.adj!=null?fmtN(r.adj,1):'–',tk:r.tk,nm:r.nm,extra,line2:bits.join(' · '),px:pxCol(r.c,r.cur),onOpen:r.open});
@@ -2222,15 +2292,15 @@ function renderNext(){
       :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?fmtN(r.above,0)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
     </div>`;
   const g=document.createElement('div'); g.className='list';
-  const list=(t,a,empty)=>{ if(!a.length&&!empty) return; g.appendChild(groupEl(t,a.map(nextRow),empty)); };
+  const list=(t,a,empty,fk)=>{ if(!a.length&&!empty) return; g.appendChild(groupEl(t,a.map(nextRow),empty,fk)); };
   const readyEls=R.ready.map(nextRow);
   if(b){ const at=R.ready.findIndex(r=>r.adj<b.y); const line=document.createElement('div'); line.className='nxbond';
     line.innerHTML=`<span>${esc(b.nm)} bond fund · ${pp(b.y)} %</span><small>below this line you'd do better in bonds</small>`;
     if(at>=0) readyEls.splice(at,0,line); else if(readyEls.length) readyEls.push(line); }
   const sec=groupEl('At your level · expected % a year',[],'Nothing at your level today.'); if(readyEls.length){ const box=sec.querySelector('.rows'); box.innerHTML=''; readyEls.forEach(e=>box.appendChild(e)); sec.querySelector('.ghd span:last-child').textContent=R.ready.length; }
   g.appendChild(sec);
-  list('Not at your level yet',R.wait);
-  list('Held back',R.blocked);
+  list('Not at your level yet',R.wait,null,'next.wait');
+  list('Held back',R.blocked,null,'next.held');
   if(R.noval.length) g.appendChild(groupEl('Not ranked',R.noval.map(r=>rowEl({tc:'var(--t-none)',tile:'–',tk:r.tk,nm:r.nm,extra:r.kind==='hold'?'<span class="own">own</span>':'',line2:r.st==='noprice'?'no price yet':'no valuation yet, add one to rank it',px:pxCol(r.c,r.cur),onOpen:r.open}))));
   body.appendChild(g);
   const ex=document.createElement('details'); ex.className='cs nxex';
@@ -2244,6 +2314,86 @@ function renderNext(){
     <p>The number is only as good as your fair value: ${NX.years}-year catch-up is an assumption, and a stale valuation makes it wrong.</p></div>`;
   body.appendChild(ex);
   $('#nxAmt').onchange=e=>{ const v=Number(e.target.value); if(!(v>0)){ e.target.value=nextAmt; return; } nextAmt=v; try{localStorage.setItem(LS_NEXT,String(v));}catch{} renderNext(); };
+}
+// Sheet section (v3.5.0): the Next € breakdown that used to sit on the row.
+function nextSecHtml(kind,id,sym){
+  const R=nextRank(nextAmt), r=R.rows.find(x=>x.kind===kind&&x.id===id)||R.rows.find(x=>x.sym===sym);
+  if(!r||r.er==null) return '';
+  const rank=R.ready.indexOf(r), b=bondRef();
+  const st=r.st==='ready'?(rank>=0?`At your level: number ${rank+1} of ${R.ready.length} for your next ${fmtEur(nextAmt)}.`:'At your level.')
+    :r.st==='wait'?`${fmtN(r.above,0)} % above your level, so it waits under "Not at your level yet".`
+    :r.st==='nolevel'?'No level set yet, so it can\'t be "at your level".'
+    :r.st==='flag'?'Held back by an open red flag.'
+    :r.st==='broken'?'Held back: your last review called the thesis broken.'
+    :r.st==='full'?`Held back: ${fmtEur(nextAmt)} more would make it ${fmtN(r.wAfter,1)} % of the depot, your max is ${fmtN(r.cap,1)} %.`:'';
+  const notes=[r.gSrc==='val'?'growth from your valuation':r.gSrc==='div'?'growth = dividend growth of the last 5 years':'no growth assumed (none in the valuation, no dividend history)'];
+  if(r.tax>=.05) notes.push(`withholding you can't credit takes ${pp(r.tax)} of the ${pp(r.y||0)} % yield`);
+  if(r.why&&r.why.length) notes.push('mix: '+r.why.join(', '));
+  if(b) notes.push(`${esc(b.nm)} bond fund ${pp(b.y)} %`);
+  return `<div class="sec nxsec"><h4>Next € · expected return</h4>
+    <p><b class="num">≈ ${pp(r.adj)} % a year</b>: ${erParts(r)} %, over ${NX.years} years, before German tax.</p>
+    <p>${st}</p><p class="hint">${notes.join(' · ')}.</p></div>`;
+}
+// ---------- Today strip (v3.5.0) ----------
+// One line under the header on every tab with what needs you today, ideas and holdings together.
+// Each part is tappable: it jumps to its group when all of it sits on one tab, otherwise it shows a
+// filtered list (ideas and holdings mixed). Tap it again or ✕ to go back.
+const TODAY=[
+  {k:'level',one:'at level',many:'at level',title:'Ideas in the buy zone and holdings in the add zone. With none, it opens Next €.'},
+  {k:'due',one:'review due',many:'reviews due',title:'Theses whose review date has passed'},
+  {k:'earn',one:'reports this week',many:'report this week',title:'Results in the next 7 days'},
+  {k:'stale',one:'valuation stale',many:'valuations stale',title:'Results came out after the valuation, or it is older than ~6 months'},
+];
+const FOCUS_T={level:'At your level',due:'Review due',earn:'Results in the next 7 days',stale:'Valuation stale'};
+function todayData(){
+  const P=portRows().filter(r=>r.inDepot), ideas=live().filter(i=>i.status!=='out');
+  const H=r=>({kind:'hold',r,key:hSym(r.h)}), I=i=>({kind:'idea',i,key:symOf(i)});
+  // one entry per stock: a holding wins over an idea on the same symbol
+  const pick=a=>{ const seen=new Set(); return a.filter(o=>{ if(!o.key) return true; if(seen.has(o.key)) return false; seen.add(o.key); return true; }); };
+  const level=pick([...P.filter(r=>r.s&&r.s.zone).map(H),...ideas.filter(i=>scoreOf(i)?.tier==='Buy zone').map(I)]);
+  // one per thesis: a holding linked to a Radar card shares the card's review date
+  const due=[], seen=new Set();
+  for(const i of ideas) if(reviewDue(i)){ seen.add(i); due.push({kind:'idea',i}); }
+  for(const r of P){ const src=textSrc(r.h); if(reviewDue(src)&&!seen.has(src)){ seen.add(src); due.push({kind:'hold',r}); } }
+  const stk=P.filter(r=>!isFund(r.h)&&hSym(r.h));
+  const earn=pick([...stk.map(H),...ideas.map(I)].filter(o=>{ const e=earnOf(o.key); return e&&e.dn!=null&&e.dn<=7; }))
+    .sort((a,b)=>earnOf(a.key).dn-earnOf(b.key).dn);
+  const stale=pick([...stk.filter(r=>{ const z=valOfH(r.h); return z&&valAge(z.v,hSym(r.h))?.stale; }).map(H),
+    ...ideas.filter(i=>{ const v=valNorm(i.val); return v&&valAge(v,symOf(i))?.stale; }).map(I)]);
+  return {level,due,earn,stale};
+}
+function agoShort(iso){ const m=Math.max(0,Math.round((Date.now()-new Date(iso))/6e4));
+  return m<60?`${m} min`:m<48*60?`${Math.round(m/60)} h`:`${Math.round(m/1440)} d`; }
+function renderToday(){
+  const el=$('#today'); if(!el) return; const D=todayCache=todayData();
+  const parts=TODAY.filter(p=>p.k==='level'||D[p.k].length).map(p=>{ const n=D[p.k].length;
+    const cls=[p.k==='level'?'lvl':'',p.k==='level'&&!n?'zero':'',p.k==='due'||p.k==='stale'?'warn':'',focus===p.k?'on':''].join(' ');
+    return `<button type="button" data-k="${p.k}" class="${cls}" title="${p.title}"><b>${n}</b> ${n===1?p.one:p.many}</button>`; });
+  if(prices.updated){ const old=pxStaleH(); parts.push(`<button type="button" class="px ${old?'old':''}" data-k="px" title="Age of the last price change. Tap for details.">prices ${agoShort(prices.updated)}</button>`); }
+  el.innerHTML=parts.join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>todayTap(b.dataset.k));
+}
+function todayTap(k){
+  if(k==='px'){ $('#btnMenu').click(); return; }
+  if(focus===k){ focus=null; render(); return; }
+  const L=(todayCache||todayData())[k]||[];
+  if(k==='level'&&!L.length){ switchView('next'); return; }
+  const kinds=new Set(L.map(o=>o.kind));
+  if((k==='level'||k==='due')&&kinds.size===1){
+    const tab=kinds.has('idea')?'board':'port';
+    const ok=tab==='port'||(boardSort==='score'&&filter==='all'&&!(tableMode&&mqWide.matches));
+    if(ok){ switchView(tab);
+      const sec=$(`#${tab==='board'?'viewBoard':'viewPort'} .grp[data-g="${k==='due'?'Review due':tab==='board'?'Buy zone':'Add zone'}"]`);
+      if(sec){ sec.scrollIntoView({block:'start',behavior:'smooth'}); sec.classList.add('flash'); setTimeout(()=>sec.classList.remove('flash'),1200); return; } } }
+  focus=k; render(); window.scrollTo({top:0});
+}
+function renderFocus(){
+  const b=$('#focusBody'); b.innerHTML=''; const L=todayData()[focus]||[];
+  const hd=document.createElement('div'); hd.className='fhd';
+  hd.innerHTML=`<span class="hint">Ideas and holdings together</span><span class="sp"></span><button class="btn small" type="button">✕ Show everything</button>`;
+  hd.querySelector('button').onclick=()=>{ focus=null; render(); };
+  b.appendChild(hd);
+  b.appendChild(groupEl(FOCUS_T[focus],L.map(o=>o.kind==='idea'?ideaRow(o.i,focus==='due'):holdRow(o.r,focus==='due')),'Nothing here any more.'));
 }
 function renderPort(){
   const rows=portRows(), body=$('#portBody'), T=depotTotal();
@@ -2269,14 +2419,14 @@ function renderPort(){
     ['Add zone',by(rest.filter(r=>r.s&&r.s.zone)),'Nothing at your add level.'],
     ['Getting close',by(rest.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score>=55&&lev(r)))],
     ['No add level yet',by(rest.filter(r=>stock(r)&&r.s&&!r.s.full&&!lev(r)))],
-    ['Hold',by(rest.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score<55&&lev(r)))],
-    ['Full',by(rest.filter(r=>r.s&&r.s.full))],
-    ['Funds and bonds',rest.filter(r=>isFund(r.h)&&!r.s).sort((p,q)=>(q.w??0)-(p.w??0))],
+    ['Hold',by(rest.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score<55&&lev(r))),null,false,'port.hold'],
+    ['Full',by(rest.filter(r=>r.s&&r.s.full)),null,false,'port.full'],
+    ['Funds and bonds',rest.filter(r=>isFund(r.h)&&!r.s).sort((p,q)=>(q.w??0)-(p.w??0)),null,false,'port.funds'],
     ['Needs a symbol or quote',rest.filter(r=>stock(r)&&!r.s)],
     ['Not in your last statement',rows.filter(r=>!r.inDepot)],
   ];
-  for(const [t,list,empty,isDue] of groups){ if(!list.length&&!empty) continue;
-    body.appendChild(groupEl(t,list.map(r=>holdRow(r,isDue)),empty)); }
+  for(const [t,list,empty,isDue,fk] of groups){ if(!list.length&&!empty) continue;
+    body.appendChild(groupEl(t,list.map(r=>holdRow(r,isDue)),empty,fk)); }
 }
 $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.target.value=capDefault(); return; }
   port.settings={...(port.settings||{}),maxWeight:v,updatedAt:now()}; persistPort(); toast(`Max per stock: ${fmtN(v,1)} %`); };
@@ -2296,16 +2446,13 @@ function openHold(id){
     <div class="dmeta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)}${h.sector?' · '+esc(h.sector):''} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}${idea?` · <a href="#" id="hIdea" class="lnk">↗ Radar card (${esc(stageOf(idea).label)})</a>`:''}</div>
     <div class="dbox" id="hDec" hidden></div>
     ${flagFirst?bizHtml(hSym(h),h,'hold'):''}
-    ${s?`<div class="scorebox" style="--tc:${s.c}">${ringHtml(s,true)}<div class="bars"><b class="tier">${s.tier}</b><span class="why1">${esc(hWhy(h,s))}</span>
-      ${['buy','yld','rng'].map(k=>{const z=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${z?(z.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${z?`${Math.round(z.pts)}/${Math.round(z.max)}`:'n/a'}</b></div>`;}).join('')}
-      </div></div>`:''}
     ${mm!=null?`<div class="warnbox">The live quote for ${esc(hSym(h))} converts to ${fmtP(v.unit,'EUR')}, the statement says ${fmtP(p.priceEur,'EUR')}. That is ${fmtPct(mm*100,0)} apart, so the Yahoo symbol is probably the wrong line or share class.</div>`:''}
-    ${fund&&!(h.addBelow>0)&&!hi?'':`<div class="kpis">
-      ${fund&&!(h.addBelow>0)?'':`<div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${a?(tb!=null&&tb>=0?'In zone':tb!=null?'−'+fmtN(-tb,0)+' %':mN(a.v,cur)):'—'}</b><span>${a?`to add below ${mN(a.v,cur)}${a.src==='radar'?' (Radar)':''}`:'no add level, set one in the settings below'}</span></div>`}
-      ${hi?`<div class="kpi"><b class="num">${hi.fair?mP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
+    ${(u=>u||rt?`<div class="kpis">
+      ${u?`<div class="kpi"><b class="num">${mP(hi.fair,cur)}</b><span>price at its usual yield</span></div>`:''}
       ${rt?`<div class="kpi"><b class="num">${fmtP(rt.cost,'EUR')}</b><span>your average buy price</span></div>`:''}
-    </div>`}
+    </div>`:'')(!fund&&usualOk(hi,valOfH(h)?.v))}
     ${fund?'':(z=>valHtml(z?z.v:null,c,cur,a?a.v:null,'add',hSym(h),z?z.src:null))(valOfH(h))}
+    ${fund?'':nextSecHtml('hold',h.id,hSym(h))}
     <div class="sec"><h4>Position</h4><div class="kpis">
       <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
       <div class="kpi"><b class="num ${!fund&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${fund?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
