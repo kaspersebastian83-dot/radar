@@ -566,6 +566,17 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .lktodo ul{margin:0;padding-left:18px}.lktodo li+li{margin-top:4px}.lktodo b{color:var(--ink)}.lktodo .up{color:var(--teal);font-weight:700}
 .lktodo .hint{margin:6px 0 0}
 .c2wht{font-size:12.5px;color:var(--ink2);line-height:1.4}.c2wht .dn{color:var(--coral);font-weight:700}
+.xr{margin:0 0 9px}.xrt{display:flex;align-items:baseline;gap:8px;font-size:13.5px}.xrt .xl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xrt b{font-weight:700}
+.xo{font-size:11px;font-weight:700;color:var(--coral);background:var(--coral-soft);border-radius:999px;padding:0 6px;margin-left:2px}
+.xrb{position:relative;height:8px;background:var(--panel2);border-radius:4px;margin:3px 0 2px}
+.xrb i{position:absolute;left:0;top:0;bottom:0;background:var(--teal);border-radius:4px;min-width:2px}
+.xr.over .xrb i{background:var(--coral)}.xr.grey .xrb i{background:var(--mute);opacity:.45}.xr.grey .xrt{color:var(--ink2)}
+.xrb u{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px}
+.xw{font-size:11.5px;color:var(--mute);line-height:1.35}
+#xrayBox{margin:0 0 16px}#xrayBox .ink{font-size:12.5px;color:var(--ink2);margin:0 0 10px;line-height:1.45}#xrayBox .ink b{color:var(--ink)}
+.xrsec{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;margin:0 0 10px}
+.xrsec h5{margin:0 0 2px;font-size:13.5px;font-weight:700}.xrsec .xv{margin:0 0 10px;font-size:12.5px;color:var(--ink2);line-height:1.45}.xrsec .xv b{color:var(--ink)}
+.xrsec .hint{margin:6px 0 0}.xrsec .rmore{display:block;width:100%;margin:2px 0 0;padding:8px 0 2px}
 .rclrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.rclrow .chip{cursor:pointer}.rclrow .hint{margin:0;flex:1 1 200px}
 .today button.inc b{color:var(--teal)}
 .nxhero .inc{font-size:13px;color:var(--ink2);font-weight:600}
@@ -758,6 +769,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
     <h4>Portfolio</h4>
     <div class="inc" id="incBox"></div>
     <div class="inc" id="leakBox"></div>
+    <div class="inc" id="xrayBox"></div>
     <div class="pstrip" id="pStrip"></div>
     <p class="hint" id="depotStatus">No statement imported on this device.</p>
     <div class="row">
@@ -810,8 +822,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.7.0';
+const VERSION='3.8.0';
 const CHANGELOG=[
+  {v:'3.8.0',d:'2026-11-09',t:'Portfolio x-ray',items:[
+    'New "Portfolio x-ray" in ⋯ → Portfolio, under the withholding block: your depot by sector, by currency, by country, and your five biggest stocks, each as a share of the depot with bars.',
+    'Sector and currency show the lines Next € already used without telling you: 20 % per sector, 40 % per foreign currency. A bar over its line turns red and says how many points Next € takes off new money there.',
+    'Each bar names the stocks in it with their weight. Funds, bond funds and cash have their own grey bars; funds aren\'t looked through, the same as in Next €.',
+    'Biggest stocks: each bar has a tick at that stock\'s max weight, and the line on top says how much your top five add up to.',
+    'Under the sectors: which sectors have no stock yet, and which of your Radar ideas would fill them, as a hint for the next idea screen. That part also works without a statement.',
+    'Long lists show 5 bars and "Show all". Scores, tiers and every list are unchanged.']},
   {v:'3.7.0',d:'2026-11-09',t:'What withholding tax costs you',items:[
     'New block under the income view in ⋯ → Portfolio: "about N € a year lost to withholding you can\'t credit" (Italy, Japan …), and separately what you lose on top if you don\'t file the reclaims (Canada, Switzerland …).',
     'Below it, every holding that loses something, sorted by € a year: country, gross dividend, lost, reclaimable, with a "reclaim" tag where filing would get money back. Tap one for its details.',
@@ -2458,7 +2477,7 @@ function renderNext(){
     <ul><li><b>Yield</b>: today's dividend yield, minus withholding tax Germany doesn't credit and you'd only get back by filing a reclaim yourself (Italy 11 of 26 %, Canada 10 of 25 %, Switzerland 20 of 35 %, Japan 0.3 %). US, Dutch, French, German and UK dividends lose nothing. If you tap "I reclaim this" in a holding's settings, the part you get back counts as yours (Canada, Switzerland); Italy's stays lost.</li>
     <li><b>Growth</b>: the long-run growth from your valuation (the g in the Gordon method). Without one, the dividend growth of the last 5 years, capped at 6 %. Buybacks are part of it, because it's growth per share.</li>
     <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value.</li>
-    <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out.</li></ul>
+    <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out. ⋯ → Portfolio x-ray shows where each sector and currency stands today.</li></ul>
     <p>Only stocks at or below your level count as "at your level". Above your max weight, with an open red flag, or after a review called the thesis broken, a stock is held back, however good the number. German tax (Abgeltungsteuer) is the same for all of them, so it's left out. The ${b?esc(b.nm)+' bond fund':'bond fund'} line is the low-risk alternative: a stock should beat it clearly to be worth the risk.</p>
     <p>The number is only as good as your fair value: ${NX.years}-year catch-up is an assumption, and a stale valuation makes it wrong.</p></div>`;
   body.appendChild(ex);
@@ -2559,7 +2578,7 @@ function chgLine(c,lbl){ const pct=c.before>0?c.total/c.before*100:null;
   return `<p><b>${sgnEur(c.total)} a year</b>${pct!=null?` (${fmtPct(pct,1)})`:''} ${lbl} ${fmtDate(c.from)}: raises ${sgnEur(c.raise)}, new money ${sgnEur(c.newm)}.</p>`; }
 function renderIncome(){
   const box=$('#incBox'); if(!box) return;
-  histSync(); renderLeak();
+  histSync(); renderLeak(); renderXray();
   const I=incomeOf(), list=document.createElement('div');
   if(!I){
     // without a statement: yields only
@@ -2660,6 +2679,91 @@ function renderLeak(){
     line2:line2(r),line3:line3(r),px:{main:r.miss>=.5?'−'+fmtEur(r.miss):eurW(r.miss),sub:'a year'},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),'Nothing: all your dividends are fully credited.'));
   box.appendChild(list);
   box.insertAdjacentHTML('beforeend',todo(R)+credTxt);
+}
+// ---------- Portfolio x-ray (v3.8.0) ----------
+// Four views of the depot by € value: sector, currency, country, the five biggest stocks. Same math as Next €
+// (share of depotTotal(), stocks only per sector/currency, funds counted as spread out), so a bar over the line
+// here is exactly what makes Next € take points off. Funds and bonds are not looked through.
+// Yahoo sectors (fundamentals.json); used for the gap hint.
+const SECTORS=['Basic Materials','Communication Services','Consumer Cyclical','Consumer Defensive','Energy','Financial Services','Healthcare','Industrials','Real Estate','Technology','Utilities'];
+const XR_SHOW=5;
+function xrRows(){
+  const T=depotTotal(); if(!(T>0)) return null;
+  const H=holdings(), rows=[], seen=new Set();
+  for(const h of H){ const v=valueOf(h); if(!v) continue; seen.add(h.isin);
+    const fund=isFund(h), x=px(h), sym=hSym(h);
+    rows.push({h,eur:v.eur,w:v.eur/T*100,fund,bond:h.kind==='bond',tk:h.short||h.symbol||h.name,
+      sector:fund?null:sectorOf(sym,h.sector),cur:fund?null:(fxCode(curOfI(x))[0]||curOfI(x)||'EUR'),cc:fund?null:ccOf(h.isin,sym),cap:fund?null:capOf(h)}); }
+  let other=0; for(const [isin,p] of Object.entries(depot.pos)) if(!seen.has(isin)) other+=p.valueEur||0;
+  return {T,rows,cash:depot.cash||0,other};
+}
+// group the stocks by key, then funds / bonds / cash / other as their own grey lines
+function xrGroup(X,key){
+  const m={};
+  for(const r of X.rows) if(!r.fund){ const k=r[key]||'Unknown'; (m[k]=m[k]||{k,eur:0,who:[]}).eur+=r.eur; m[k].who.push(r); }
+  const L=Object.values(m).map(g=>({...g,w:g.eur/X.T*100,who:g.who.sort((a,b)=>b.eur-a.eur)})).sort((a,b)=>b.eur-a.eur);
+  const F=X.rows.filter(r=>r.fund&&!r.bond), B=X.rows.filter(r=>r.bond), S=a=>a.reduce((s,r)=>s+r.eur,0);
+  const tail=[];
+  if(F.length) tail.push({k:'Funds (spread out)',eur:S(F),who:F,grey:true});
+  if(B.length) tail.push({k:'Bond funds',eur:S(B),who:B,grey:true});
+  if(X.cash>=1) tail.push({k:'Cash',eur:X.cash,who:[],grey:true});
+  if(X.other>=1) tail.push({k:'Other positions (not in the list)',eur:X.other,who:[],grey:true});
+  return [...L,...tail.map(t=>({...t,w:t.eur/X.T*100}))];
+}
+// one bar row: label + %, then the bar with an optional limit tick, then who is in it
+function xrBar(g,lim,max,label){
+  const over=lim!=null&&!g.grey&&g.w>lim, sc=v=>Math.min(100,v/max*100);
+  const who=g.who&&g.who.length?g.who.map(r=>`${esc(r.tk)} ${fmtN(r.w,1)}`).join(' · '):'';
+  return `<div class="xr ${over?'over':''} ${g.grey?'grey':''}" title="${esc(label||g.k)}: ${fmtEur(g.eur)}, ${fmtN(g.w,1)} % of the depot${lim!=null&&!g.grey?`; line at ${fmtN(lim,0)} %`:''}">
+    <div class="xrt"><span class="xl">${esc(label||g.k)}${over?` <b class="xo">above ${fmtN(lim,0)} %</b>`:''}</span><b class="num">${fmtN(g.w,1)} %</b></div>
+    <div class="xrb"><i style="width:${sc(g.w)}%"></i>${lim!=null&&!g.grey?`<u style="left:${sc(lim)}%"></u>`:''}</div>
+    ${who?`<div class="xw">${who}</div>`:''}</div>`; }
+function xrSec(id,title,verdict,list,lim,note,noFold){
+  const limOf=typeof lim==='function'?lim:()=>lim;
+  const max=Math.max(...list.map(g=>Math.max(g.w,limOf(g)??0)))*1.05||1, open=!!folds['xr.'+id], many=!noFold&&list.length>XR_SHOW+1;
+  const shown=many&&!open?list.slice(0,XR_SHOW):list;
+  return `<div class="xrsec" data-x="${id}"><h5>${title}</h5><p class="xv">${verdict}</p>
+    ${shown.map(g=>xrBar(g,limOf(g),max,g.label)).join('')}
+    ${many?`<button type="button" class="rmore" data-xf="${id}">${open?'Show fewer':`Show all ${list.length}`}</button>`:''}
+    ${note?`<p class="hint">${note}</p>`:''}</div>`; }
+function renderXray(){
+  const box=$('#xrayBox'); if(!box) return;
+  const X=xrRows();
+  // sector gaps work without a statement: which Yahoo sectors have no stock at all, and which ideas would fill them
+  const held=new Set(holdings().filter(h=>!isFund(h)&&hSym(h)&&(!depot||posOf_(h))).map(h=>sectorOf(hSym(h),null)));
+  const gaps=SECTORS.filter(s=>!held.has(s));
+  const fill=s=>live().filter(i=>i.status!=='out'&&symOf(i)&&sectorOf(symOf(i),null)===s).map(i=>esc(i.ticker));
+  const gapTxt=gaps.length?`No stock yet in <b>${gaps.map(s=>{ const f=fill(s); return esc(s)+(f.length?` (Radar: ${f.join(', ')})`:''); }).join(', ')}</b>. Worth a look in the next idea screen, if something there fits how you invest.`:'Every sector has at least one stock.';
+  if(!X){ box.innerHTML=`<h4 class="shd">Portfolio x-ray</h4><p class="ink">Sector, currency, country and your biggest stocks by weight need your statement on this device.</p><p class="ink">${gapTxt}</p>`; return; }
+  const T=X.T, stk=X.rows.filter(r=>!r.fund);
+  // 1. sector, line at NX.sectorCap
+  const sec=xrGroup(X,'sector'), sTop=sec.find(g=>!g.grey), sOver=sec.filter(g=>!g.grey&&g.w>NX.sectorCap);
+  const sV=sOver.length?sOver.map(g=>`<b>${esc(g.k)}</b> is ${fmtN(g.w,1)} %, above the ${NX.sectorCap} % line, so Next € takes about ${pp((g.w-NX.sectorCap)/NX.sectorPen)} points off new money there`).join('; ')+'.'
+    :sTop?`No sector above ${NX.sectorCap} %. The biggest is <b>${esc(sTop.k)}</b> at ${fmtN(sTop.w,1)} %.`:'No stocks in the statement.';
+  // 2. currency of the listing, line at NX.fxCap for foreign currencies
+  const cur=xrGroup(X,'cur').map(g=>({...g,label:g.grey?g.k:g.k==='EUR'?'EUR stocks':`${g.k} stocks`}));
+  const cOver=cur.filter(g=>!g.grey&&g.k!=='EUR'&&g.w>NX.fxCap), cTop=cur.find(g=>!g.grey&&g.k!=='EUR');
+  const foreign=cur.filter(g=>!g.grey&&g.k!=='EUR').reduce((s,g)=>s+g.w,0);
+  const cV=(cOver.length?cOver.map(g=>`<b>${esc(g.k)}</b> is ${fmtN(g.w,1)} %, above the ${NX.fxCap} % line, so Next € takes about ${pp((g.w-NX.fxCap)/NX.fxPen)} points off new ${esc(g.k)} buys`).join('; ')+'. '
+    :cTop?`No foreign currency above ${NX.fxCap} %; the biggest is <b>${esc(cTop.k)}</b> at ${fmtN(cTop.w,1)} %. `:'')+`Stocks in foreign currencies together: ${fmtN(foreign,1)} %.`;
+  // 3. country of the company (ISIN), no line: Next € doesn't use it
+  const ctry=xrGroup(X,'cc').map(g=>({...g,label:g.grey?g.k:(CC_NAME[g.k]||g.k)}));
+  const kTop=ctry.find(g=>!g.grey);
+  const kV=kTop?`The biggest is <b>${esc(CC_NAME[kTop.k]||kTop.k)}</b> at ${fmtN(kTop.w,1)} %, across ${ctry.filter(g=>!g.grey).length} countries.`:'';
+  // 4. the five biggest stocks, each with a tick at its own max weight
+  const big=[...stk].sort((a,b)=>b.eur-a.eur), t5=big.slice(0,5), S=a=>a.reduce((s,r)=>s+r.eur,0);
+  const top=[...t5.map(r=>({k:r.tk,label:`${r.tk} · ${r.h.name||''}`,eur:r.eur,w:r.w,cap:r.cap,who:[]})),
+    ...(big.length>5?[{k:'rest',label:`The other ${big.length-5} stocks`,eur:S(big.slice(5)),w:S(big.slice(5))/T*100,grey:true,who:[]}]:[]),
+    ...xrGroup(X,'none').filter(g=>g.grey)];
+  const t5w=S(t5)/T*100, full=t5.filter(r=>r.w>r.cap);
+  const tV=t5.length?`Your ${t5.length} biggest stocks are <b>${fmtN(t5w,1)} %</b> of the depot, the biggest is ${esc(t5[0].tk)} at ${fmtN(t5[0].w,1)} %.${full.length?` Above their max weight: ${full.map(r=>`${esc(r.tk)} (max ${fmtN(r.cap,1)} %)`).join(', ')}.`:' None is above its max weight.'}`:'';
+  box.innerHTML=`<h4 class="shd">Portfolio x-ray</h4>
+    <p class="ink">Share of your ${fmtEur(T)} depot, at live prices. Funds and bonds count as spread out and are not looked through, the same as in Next €.</p>
+    ${xrSec('sec','Sector',sV,sec,NX.sectorCap,gapTxt)}
+    ${xrSec('cur','Currency of the listing',cV,cur,g=>g.k==='EUR'?null:NX.fxCap,'A world ETF trades in € but mostly holds dollar shares, so your real dollar share is higher than this.')}
+    ${xrSec('cc','Country of the company',kV,ctry,null,'From the ISIN. Next € doesn\'t use it; withholding tax by country is in the block above.')}
+    ${xrSec('top','Biggest stocks',tV,top,g=>g.cap??null,'The tick on each bar is that stock\'s max weight (from its stars, or your own).',true)}`;
+  box.querySelectorAll('[data-xf]').forEach(b=>b.onclick=()=>{ const k='xr.'+b.dataset.xf; folds={...folds,[k]:!folds[k]}; try{ localStorage.setItem(LS_FOLD,JSON.stringify(folds)); }catch{} renderXray(); });
 }
 // ---------- Today strip (v3.5.0) ----------
 // One line under the header on every tab with what needs you today, ideas and holdings together.
