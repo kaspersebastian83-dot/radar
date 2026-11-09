@@ -29,11 +29,16 @@
       "currency": "USD",
       "kind": "stock",
       "sector": "BDC – lower middle-market lending",
-      "addBelow": null,
+      "addBelow": 41,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ $57.01. Base ~$58.5 = avg of 1.45x NAV (my read of its usual premium) × ~$34.5 NAV ($50) and Gordon on distributable earnings: DNII ~$3.95/yr, g 2 %, 8 % hurdle ($67). BDC = leveraged credit → 30 % off = $41 (≈7.8 % regular / ~10.7 % total yield, ~1.2x NAV). Bear $27.5 = NAV −20 % × 1.0x. Reverse DCF: DNII yield 6.9 % + ~1 % growth = 8 % at today's price.",
+      "updatedAt": "2026-11-09T07:07:27.682Z",
+      "thesis": "Best-in-class internally managed BDC: lower-middle-market debt + equity, private loans, asset-management arm. Q3 26 NAV $34.22 (17th straight rise), DNII $0.96, ROE 14.7 % annualised, non-accruals ~0.9 %. Regular monthly dividend raised again for Q1 27 + 21st straight $0.30 supplemental.",
+      "bull": "No regular dividend cut since 2007 IPO; NAV/sh +2.7 % YTD; low leverage, fresh SBIC and note funding; equity stakes give realised gains in good years.",
+      "bear": "Trades at ~1.67x NAV (≈66 % premium) — the premium can vanish fast. DNII/sh −7 % y/y as base rates fall and the share count grew 4.6 %; Q3 total payout $1.095 > DNII $0.96 (supplementals lean on spillover). US 15 % WHT credited.",
+      "kill": "I'm wrong if NAV/sh falls two quarters in a row, non-accruals exceed 3 % at fair value, or DNII drops below the regular monthly dividend.",
+      "nextReview": "2027-03-01"
     },
     {
       "id": "h-US74340W1036",
@@ -59,11 +64,16 @@
       "currency": "EUR",
       "kind": "stock",
       "sector": "Semiconductor equipment",
-      "addBelow": null,
+      "addBelow": 870,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ €1,283.60. Base ~€1,240 = avg of 28x (below its ~34x 5-yr avg fwd P/E) × 2027e EPS ~€51 (€1,428) and Gordon on FCF/sh ~€42 next yr, g 4 %, 8 % hurdle (€1,050). Wide moat but cyclical semicap (AI capex, China ~20 %) → 30 % off = €870. Bear €660 = €30 EPS (order pause) × 22x. Reverse DCF: €1,284 needs ~4.7 %/yr FCF growth forever. No flags (FCF covers div+buyback easily).",
+      "updatedAt": "2026-11-09T07:07:27.682Z",
+      "thesis": "EUV monopoly; every leading-edge fab needs it. Q3 26 sales €11.7bn, GM 57.5 %, net income €5.0bn; 2026 guide €44–45bn. Supply for 2027–28 won't meet demand; customers asking for 2029–30 slots. Add only in a semicap downturn.",
+      "bull": "Capacity +30 % in 2027 and maybe more in 2028; Installed Base (service/upgrades) €3.3bn/q = annuity; EPS seen ~€24.7 (2025) → ~€76 (2028e consensus). Net cash, buybacks.",
+      "bear": "Moves 6–9 % a day on AI-capex mood; 2027 outlook only on 27 Jan; China export rules; customer concentration (TSMC, Samsung, SK Hynix). At €1,284 ~25x fwd — fine only if the AI cycle holds. NL 15 % WHT credited in DE, yield ~0.6 % anyway.",
+      "kill": "I'm wrong if 2027 sales guide comes in below 2026 (~€44bn), gross margin falls under 52 %, or a High-NA/EUV competitor gets a customer.",
+      "nextReview": "2027-01-28"
     },
     {
       "id": "h-US1667641005",
@@ -109,11 +119,16 @@
       "currency": "USD",
       "kind": "stock",
       "sector": "Tech – search, cloud",
-      "addBelow": null,
+      "addBelow": 265,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ $284.78. Base ~$356 = avg of 22x (own ~23x 5-yr avg fwd P/E) × 2027e normalised EPS $15.14 ($333) and Gordon on owner earnings (normalised EPS as stand-in, FCF is negative during the build-out) $15.14, g 4 %, 8 % hurdle ($379). Wide moat but search disruption + capex >$300bn in 2027 → 25 % off = $265. Bear $180 = $12 EPS × 15x. Reported EPS is inflated by gains on private stakes; use normalised. App note: no 5-yr yield history, so the score leans on the 52w range — it shows Add zone ~7 % above the level.",
+      "updatedAt": "2026-11-09T07:07:27.682Z",
+      "thesis": "Search + YouTube + Cloud (+103 % to $30.7bn in Q3, $561bn backlog) + TPUs + Waymo. Q3 26 revenue +25 % to $127.6bn, op. margin 31.8 %. ~19–20x 2027 normalised EPS after a −30 % fall from the May high — below its own history.",
+      "bull": "Cloud's added profit now rivals Services'; Search still +12 %; Gemini app 1bn users; TPU system sales start in earnest 2027. $265bn cash + securities.",
+      "bear": "FCF −$9.1bn in Q3; capex $195–205bn in 2026 and 'significantly' more in 2027 (>$300bn), funded partly by debt and first-ever share sales ($12bn). AI answers can erode search clicks; ad miss in Q3; antitrust remedies. US 15 % WHT credited (yield 0.3 %).",
+      "kill": "I'm wrong if Search revenue growth turns negative for 2 quarters, Cloud growth falls under 30 % while capex keeps rising, or share count rises >2 %/yr.",
+      "nextReview": "2027-02-05"
     },
     {
       "id": "h-DE0005933956",
@@ -209,11 +224,16 @@
       "currency": "USD",
       "kind": "stock",
       "sector": "Financials – payments",
-      "addBelow": null,
+      "addBelow": 265,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ $320.99. Base ~$353 = avg of 17x (my read of its 10-yr norm) × 2027e EPS ~$20 ($340; mid-teens growth on 2026 adj. $17.75) and Gordon on earnings: $20 × 91 % payout (g 3 %, RoE ~35 %) / 5 % = $366. Wide moat but credit-cyclical → 25 % off = $265 (≈1.4 % yield). Bear $156 = $13 EPS (recession credit losses) × 12x. Reverse DCF: at 8 % today's price implies ~1.5 %/yr growth — cheap on my hurdle, only fair vs its multiple.",
+      "updatedAt": "2026-11-09T07:07:27.682Z",
+      "thesis": "Closed-loop premium card network: spend + fees + interest. Q3 26 revenue $20.1bn (+9 %), adj. EPS $4.68 (+13 %); 2026 adj. EPS guide raised to $17.60–17.90; ROE ~35 %; $2.2bn returned in Q3. Buffett's long-time holding.",
+      "bull": "Card fee growth 17 %, 76 % of new cards fee-paying, write-offs stable at 1.2–1.3 % for 15 quarters; buybacks shrink share count ~2–3 %/yr; dividend grew ~16 %/yr 2021–25.",
+      "bear": "−13 % YTD; consumer/credit cycle and a recession would hit spend + losses at once; OCC civil money penalty and 5 % job cuts; rewards-cost arms race (Chase, Citi). US 15 % WHT credited.",
+      "kill": "I'm wrong if net write-offs go above 2.5 % outside a recession, card fee growth falls below 8 %, or adj. EPS growth stays under 8 %.",
+      "nextReview": "2027-02-01"
     },
     {
       "id": "h-US0231351067",
@@ -224,11 +244,16 @@
       "currency": "USD",
       "kind": "stock",
       "sector": "Tech – retail, cloud",
-      "addBelow": null,
+      "addBelow": 180,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ $259.30. Base ~$261 = avg of 25x (just below its 5-yr low fwd P/E ~26x) × 2027e normalised EPS $10.43 ($261) and Gordon on owner earnings (normalised EPS as stand-in, FCF is −$42bn TTM) $10.43, g 4 %, 8 % hurdle ($261). Wide moat but $220bn/yr capex makes it complex → 30 % off = $180. Bear $160 = $8 EPS × 20x. Watch flag 'FCF/sh −77 %' is real (AI capex), not a data glitch. Reported 2026 EPS includes Anthropic mark-ups — use normalised.",
+      "updatedAt": "2026-11-09T07:07:27.682Z",
+      "thesis": "AWS (+39 % in Q3, $184bn run-rate, guided >40 % in 2027 and 2028) + retail + ads. Q3 26 op. income $28.1bn, record 13.9 % margin. Priced about at fair value on my hurdle; add on a real drawdown.",
+      "bull": "AWS acceleration 6 quarters running; North America op. income nearly doubled y/y; ads high-teens growth; consensus EPS ~$10.4 (2027) → ~$13.4 (2028).",
+      "bear": "TTM FCF −$42.4bn vs +$14.8bn a year ago; 2026 capex ~$220bn, $115bn new debt in 9 months; depreciation wave will hit margins; FTC/antitrust suits; no dividend. US 15 % WHT irrelevant (no dividend).",
+      "kill": "I'm wrong if AWS growth drops below 25 % while capex stays >$200bn, or operating cash flow stops growing for a year.",
+      "nextReview": "2027-02-08"
     },
     {
       "id": "h-US4781601046",
@@ -309,11 +334,16 @@
       "currency": "USD",
       "kind": "stock",
       "sector": "Tech – social, ads",
-      "addBelow": null,
+      "addBelow": 520,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ $610.15. Base ~$742 = avg of 20x (below ~23x 3-yr avg NTM P/E) × 2027e normalised EPS ~$33 ($660) and Gordon on owner earnings (normalised EPS as stand-in, FCF ~0 in the build-out) $33, g 4 %, 8 % hurdle ($825). Wide moat, but capex + legal + founder control → 30 % off = $520. Bear $336 = $24 EPS × 14x. !! Effective 2-for-1 split (1 new non-voting Class C share per share) expected late Jan 2027 → halve addBelow to $260 then, or the app will show a false Add zone.",
+      "updatedAt": "2026-11-09T07:07:27.682Z",
+      "thesis": "3.64bn daily users; ads re-accelerating (Q3 rev +26 % to $64.6bn, price per ad +14 %). Adj. Q3 EPS $7.40 ex $9.9bn settlement. Muse agent 10m+ accounts. Trades ~19x 2027e; add only with a margin of safety because of the spending and legal tail.",
+      "bull": "AI recommendations lift engagement and pricing; Reality Labs losses to narrow to ~$15bn in 2027; Q4 guide $73–76bn (+21–27 %); Muse monetisation (commerce fees, subscriptions) is optionality.",
+      "bear": "2026 capex $135–145bn, 2027 guided 'aggressively' higher (Wells Fargo ~$250bn); $25bn New Mexico penalty (accrues 15 %/yr interest, under appeal) on top of the $18bn states settlement; non-voting shares to fund AI. US 15 % WHT credited (yield 0.3 %).",
+      "kill": "I'm wrong if ad revenue growth drops below 10 % while capex keeps rising, the NM penalty is upheld and more states follow, or Reality Labs losses don't fall in 2027.",
+      "nextReview": "2027-01-25"
     },
     {
       "id": "h-IT0003128367",
