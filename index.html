@@ -578,16 +578,17 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
   <div class="explain">
     <h4>How the Buy score works</h4>
     <p>0 to 100. It only measures how cheap the stock is <b>against your own thesis</b>. Conviction stays separate (the stars).</p>
-    <div class="sbar"><span>50 points</span><i><em style="width:100%;background:var(--teal)"></em></i><b></b></div>
+    <div class="sbar"><span>60 points</span><i><em style="width:100%;background:var(--teal)"></em></i><b></b></div>
     <p style="margin-top:-6px">Distance to your buy-below price. Full points at or under it, zero at 25 % above.</p>
-    <div class="sbar"><span>30 points</span><i><em style="width:60%;background:var(--research)"></em></i><b></b></div>
+    <div class="sbar"><span>30 points</span><i><em style="width:50%;background:var(--research)"></em></i><b></b></div>
     <p style="margin-top:-6px">Yield vs. its own 5-year average. Full points at 15 % above average, zero at 25 % below.</p>
-    <div class="sbar"><span>20 points</span><i><em style="width:40%;background:var(--ochre)"></em></i><b></b></div>
-    <p style="margin-top:-6px">Position in the 52-week range. Full points at the low, zero at the high.</p>
+    <div class="sbar"><span>10 points</span><i><em style="width:17%;background:var(--ochre)"></em></i><b></b></div>
+    <p style="margin-top:-6px">Position in the 52-week range. Full points at the low, zero at the high. Kept small on purpose: a stock near its low is often cheap for a reason.</p>
     <div class="tiers"><span style="--tc:var(--t-buy)">75+ Buy zone</span><span style="--tc:var(--t-close)">55–74 Getting close</span><span style="--tc:var(--t-wait)">35–54 Wait</span><span style="--tc:var(--t-exp)">under 35 Expensive</span></div>
     <p class="hint">If one input is missing (no buy price, no dividend history), its points are spread over the others. Bought positions are scored the same way, so you can see when it is a good moment to add.</p>
-    <h4 style="margin-top:14px">Two limits on top</h4>
+    <h4 style="margin-top:14px">Three limits on top</h4>
     <p><b>Red flag in the business:</b> the score stops at 54 (Wait) while the business shows an unchecked red flag: cash per share falling 2 years in a row, dividend not covered for 2 years, a dividend cut, share count up without per-share growth, or debt rising fast. Open the card, look at it, and mark it as checked if there's a harmless reason. The next year's figures raise it again.</p>
+    <p><b>Above your price:</b> Buy zone only at or below your buy-below. Even 1 % above, the score stops at 74 (Getting close), however good the yield looks.</p>
     <p><b>No buy price:</b> without your own buy-below, yield and 52-week range alone stop at 74 (Getting close).</p>
   </div>
 </div></div>
@@ -634,7 +635,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
       <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
     </div>
     <label class="capl" for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max weight per stock<span><input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</span></label>
-    <p class="hint"><span id="pAsOf"></span> The Add score works like the Buy score: 50 points for the distance to your add level, 30 for yield vs. its 5-year average, 20 for the 52-week range. Without an add level (your own, or the buy-below of a Radar card on the same symbol) a stock can't reach the add zone, so it is listed under "No add level yet". Stocks above your max weight are listed as full. An unchecked red flag holds a stock at Hold.</p>
+    <p class="hint"><span id="pAsOf"></span> The Add score works like the Buy score: 60 points for the distance to your add level, 30 for yield vs. its 5-year average, 10 for the 52-week range. Add zone only at or below your add level. Without an add level (your own, or the buy-below of a Radar card on the same symbol) a stock can't reach the add zone, so it is listed under "No add level yet". Stocks above your max weight are listed as full. An unchecked red flag holds a stock at Hold.</p>
   </div>
   <div class="msec">
     <h4>Live prices</h4>
@@ -678,8 +679,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.0.0';
+const VERSION='3.0.1';
 const CHANGELOG=[
+  {v:'3.0.1',d:'2026-11-09',t:'Buy zone means at your price',items:[
+    'Buy zone and Add zone now only show when the price is at or below your level. Before, a high yield plus a price near the 52-week low could put a stock in the top group while it was still ~8 % above your level (Danone and Alphabet were). Above your level, the score now stops at 74 (Getting close) and the details say what it would have been.',
+    'The 52-week range counts less: 10 points instead of 20, the distance to your level 60 instead of 50. A stock sitting near its low is often cheap for a reason, so it shouldn\'t climb the board on that alone.']},
   {v:'3.0.0',d:'2026-11-06',t:'Easy to read on the phone',items:[
     'Two tabs, two questions: Ideas (is anything at my entry price?) and Portfolio (is anything at my add price?).',
     'One slim row per stock instead of a big card: score, ticker, how far it is to your level and the yield (▲ above its usual, ▼ below), price in € with the local price small. A small red flag next to the ticker when the business has one. All 7 ideas fit on one screen.',
@@ -1034,17 +1038,19 @@ function wireBiz(root,rerender){
 
 // ---------- buy score ----------
 // 0–100: how cheap the stock is against the card's own thesis.
-// 50 pts distance to buy-below (full at/below it, zero at +25 %), 30 pts yield vs. 5-yr average
-// (full at +15 %, zero at −25 %), 20 pts position in the 52-week range (full at the low).
+// 60 pts distance to buy-below (full at/below it, zero at +25 %), 30 pts yield vs. 5-yr average
+// (full at +15 %, zero at −25 %), 10 pts position in the 52-week range (full at the low).
+// v3.0.1: range cut from 20 to 10 (near the low is momentum, not value) and the top tier
+// needs the price at/below your level — yield and range alone can't put it in the buy zone.
 // Missing inputs: their weight is spread over the available ones.
 const TIERS=[[75,'Buy zone','var(--t-buy)'],[55,'Getting close','var(--t-close)'],[35,'Wait','var(--t-wait)'],[0,'Expensive','var(--t-exp)']];
 const PART={buy:{label:'to buy price',c:'var(--teal)'},yld:{label:'yield vs 5-yr',c:'var(--research)'},rng:{label:'52w range',c:'var(--ochre)'}};
 const lin=(v,a,b)=>Math.min(1,Math.max(0,(v-a)/(b-a)));
 function scoreOf(i){
   const parts=[], c=curOf(i);
-  if(i.buyBelow>0&&c>0){ const above=(c/i.buyBelow-1)*100; parts.push({k:'buy',w:50,f:1-lin(above,0,25),above}); }
+  if(i.buyBelow>0&&c>0){ const above=(c/i.buyBelow-1)*100; parts.push({k:'buy',w:60,f:1-lin(above,0,25),above}); }
   const h=histOf(i); if(h) parts.push({k:'yld',w:30,f:lin(h.dev,-25,15),dev:h.dev});
-  const p=posOf(i); if(p!=null) parts.push({k:'rng',w:20,f:1-p,pos:p});
+  const p=posOf(i); if(p!=null) parts.push({k:'rng',w:10,f:1-p,pos:p});
   if(!parts.length) return null;
   const W=parts.reduce((s,x)=>s+x.w,0);
   parts.forEach(x=>{ x.max=x.w*100/W; x.pts=x.f*x.max; });
@@ -1054,6 +1060,8 @@ function scoreOf(i){
   let score=raw, cap=null; const biz=bizOf(symOf(i));
   if(biz&&biz.red.length&&score>54){ score=54; cap='flag'; }
   if(!(i.buyBelow>0)&&score>74){ score=74; cap=cap||'level'; }
+  const ab=parts.find(x=>x.k==='buy');
+  if(ab&&ab.above>0&&score>74){ score=74; cap=cap||'above'; }
   const t=TIERS.find(t=>score>=t[0]);
   return {score,raw,cap,biz,parts,tier:t[1],c:t[2]};
 }
@@ -1061,7 +1069,7 @@ function whyOf(i,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng');
   if(i.status==='bought') out.push('Holding');
   if(s.cap==='flag') out.push(`held at Wait by a red flag (would be ${s.raw})`);
-  out.push(b?(b.above<=0?'in the buy zone':`${fmtN(b.above,0)} % above buy`):s.cap==='level'?`no buy price set, so it stops at Getting close (would be ${s.raw})`:'no buy price set');
+  out.push(b?(b.above<=0?'in the buy zone':`${fmtN(b.above,0)} % above buy`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:'')):s.cap==='level'?`no buy price set, so it stops at Getting close (would be ${s.raw})`:'no buy price set');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
   return out.join(' · ');
@@ -1618,7 +1626,7 @@ function hWhy(h,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng'), a=addOf(h);
   if(s.full) out.push(`would be ${s.rawTier.toLowerCase()} (${s.score}), but already ${fmtN(s.w,1)} % of the depot`);
   if(s.cap==='flag') out.push(`held at Hold by a red flag (would be ${s.raw})`);
-  out.push(b?(b.above<=0?'at or below your add level':`${fmtN(b.above,0)} % above add level`)+(a&&a.src==='radar'?' (from Radar card)':''):s.capped||s.cap==='level'?'set an add level to reach the add zone':'no add level yet');
+  out.push(b?(b.above<=0?'at or below your add level':`${fmtN(b.above,0)} % above add level`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:''))+(a&&a.src==='radar'?' (from Radar card)':''):s.capped||s.cap==='level'?'set an add level to reach the add zone':'no add level yet');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
   return out.join(' · ');
