@@ -386,11 +386,11 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .vbar .rt{position:relative;height:18px}
 .vbar .tr{position:absolute;left:0;right:0;top:6px;height:6px;border-radius:3px;background:var(--line)}
 .vbar .zn{position:absolute;left:0;top:6px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--teal) 32%,transparent)}
-.vbar .fr{position:absolute;top:4px;height:10px;border-radius:5px;background:color-mix(in srgb,var(--research) 35%,transparent)}
-.vbar .bs{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--research)}
-.vbar .lv{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--teal)}
-.vbar .br{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--coral)}
-.vbar .nw{position:absolute;top:3px;width:12px;height:12px;box-sizing:border-box;margin-left:-6px;border-radius:50%;background:var(--panel);border:3px solid var(--ink)}
+.vbar .rt .fr{position:absolute;top:4px;height:10px;border-radius:5px;background:color-mix(in srgb,var(--research) 35%,transparent)}
+.vbar .rt .bs{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--research)}
+.vbar .rt .lv{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--teal)}
+.vbar .rt .br{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--coral)}
+.vbar .rt .nw{position:absolute;top:3px;width:12px;height:12px;box-sizing:border-box;margin-left:-6px;border-radius:50%;background:var(--panel);border:3px solid var(--ink)}
 .vbar .lg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
 .vbar .k{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .vbar .k.br{background:var(--coral)}.vbar .k.lv{background:var(--teal)}.vbar .k.fr{background:color-mix(in srgb,var(--research) 55%,transparent)}.vbar .k.nw{border-radius:50%;border:2.5px solid var(--ink);box-sizing:border-box;background:var(--panel)}
@@ -842,8 +842,10 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.12.0';
+const VERSION='3.12.1';
 const CHANGELOG=[
+  {v:'3.12.1',d:'2026-11-09',t:'Fix',items:[
+    'The small red, green and blue marks and the ring that floated at the top of a stock\'s details are back where they belong: next to "bear", "level", "fair" and "now" under the valuation scale.']},
   {v:'3.12.0',d:'2026-11-09',t:'Next € ranks by discount to fair value',items:[
     'The expected return in Next € is now your 8 % hurdle plus the yearly catch-up to your fair value, minus withholding tax you can\'t credit. At fair value every stock shows about 8 %, cheaper ones more, dearer ones less.',
     'Before, it was dividend yield + long-run growth + catch-up. That left out earnings a company keeps or spends on buybacks, so ASML showed 4,6 % and Main Street 9,6 % with both exactly at fair value. High yield no longer earns extra points by itself.',
