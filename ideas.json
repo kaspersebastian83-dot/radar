@@ -69,6 +69,7 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 25.46,
       "currency": "EUR",
+      "symbol": "ENI.MI",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 15.3,
@@ -78,6 +79,8 @@
       "bear": "Peak-cycle earnings from a Middle East price spike; stock already +64% in a year and at the top of its range; special dividend and buyback shrink when Brent normalises; refining/chemicals in structural decline; Italian windfall-tax and golden-power risk; 26% Italian withholding tax with 11% only reclaimable by hand.",
       "kill": "Ordinary dividend cut below €1.10; gearing back above 20%; Enilive/Plenitude EBITDA guidance for 2026 (€1.1 bn / €1.3 bn) missed by >20%; Italy introduces a new windfall tax on energy profits; Brent below $65 for two consecutive quarters without a cut to capex.",
       "nextReview": "2027-02-26",
+      "boughtDate": "",
+      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-05",
@@ -94,7 +97,6 @@
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
       "updatedAt": "2026-11-09T10:37:42.000Z",
-      "symbol": "ENI.MI",
       "val": {
         "date": "2026-11-09",
         "price": 25.01,
@@ -366,7 +368,7 @@
         }
       ],
       "createdAt": "2026-11-06T20:32:30.021Z",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
+      "updatedAt": "2026-11-09T11:56:24.081Z",
       "val": {
         "date": "2026-11-06",
         "price": 82.11,
