@@ -336,6 +336,8 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .c2val{font-size:12.5px;line-height:1.35;color:var(--ink2);margin-top:-4px}
 .c2val b{font-weight:800}.c2val .up,.val .up{color:var(--teal)}.c2val .dn,.val .dn{color:var(--coral)}
 .stl{color:var(--coral);font-weight:700}
+.epill{flex:none;align-self:center;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--research) 15%,transparent);color:var(--research);white-space:nowrap}
+.c2ern{font-size:12.5px;color:var(--mute);margin-top:-4px}.c2ern.soon{color:var(--research);font-weight:700}
 .nxhead{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ink2)}
 .nxin{display:inline-flex;align-items:center;gap:6px;font-weight:700}
 .nxin input{width:110px;font-size:16px;font-weight:800;text-align:right}
@@ -717,8 +719,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.2.0';
+const VERSION='3.2.1';
 const CHANGELOG=[
+  {v:'3.2.1',d:'2026-11-09',t:'Results dates',items:[
+    'A small blue "results 3 d" tag sits next to the ticker when a company reports within the next two weeks, on Ideas, Portfolio and Next €. So you don\'t buy blind the day before results.',
+    'Every stock card shows the next results date, and the last one if it was in the last month. After results, the valuation turns stale, which is your cue to look at it again.',
+    'Next €: if the best pick reports within a week, it says so and suggests seeing the results first.']},
   {v:'3.2.0',d:'2026-11-09',t:'Next €: where your next money goes',items:[
     'New third tab "Next €". It ranks every idea and every stock you own by expected return a year over the next 5 years, and names the best place for your next €1,000 (change the amount on top).',
     'Expected return = dividend yield after withholding tax you can\'t credit (Italy, Canada, Switzerland cost you, US/NL/FR/DE/UK don\'t) + long-run growth from your valuation + the yearly catch-up to your fair value. The row shows each part, e.g. "yield 2,7 + growth 3 + fair 6,7".',
@@ -1239,7 +1245,7 @@ function ideaRow(i,due){
   if(y!=null) bits.push(yTxt(y,h));
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
   if(t&&(daysSince(t.base.date)>30||Math.abs(t.best)>=5)) bits.push(`<span class="${t.best>=0?'up':'dn'}">${fmtPct(t.best,0)}</span>`);
-  const extra=(biz&&biz.red.length?FLAG:'')+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?'<span class="own out">passed</span>':'');
+  const extra=(biz&&biz.red.length?FLAG:'')+earnPill(symOf(i))+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?'<span class="own out">passed</span>':'');
   return rowEl({tc:sc?sc.c:'var(--t-none)',tile:sc?sc.score:'–',tk:i.ticker,nm:i.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openRead(i.id)});
 }
 function renderBoard(){
@@ -1262,6 +1268,21 @@ function c2barHtml(i,what){
   const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
   return `<div class="c2bar" title="52-week range${b!=null?`, your ${what} level (line)`:''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`;
 }
+// ---------- results dates (v3.2.1) ----------
+// next = upcoming results date; last = most recent past one (Yahoo's history, or a "next" date that has passed)
+function earnOf(sym){ const c=(fund.companies||{})[sym]; if(!c) return null; const t=today();
+  const next=c.nextEarnings&&c.nextEarnings>=t?c.nextEarnings:null;
+  const last=[c.lastEarnings,c.nextEarnings].filter(d=>d&&d<t&&d>'2015').sort().pop()||null;
+  const dd=d=>Math.round(Math.abs(Date.parse(d)-Date.parse(t))/864e5);
+  return {next,dn:next?dd(next):null,last,dl:last?dd(last):null}; }
+// pill next to the ticker in rows: only when results are ≤14 days away
+function earnPill(sym){ const e=earnOf(sym); if(!e||e.dn==null||e.dn>14) return '';
+  return `<span class="epill" title="Results on ${fmtDate(e.next)}">${e.dn===0?'results today':e.dn===1?'results tmrw':`results ${e.dn} d`}</span>`; }
+// line on the card: always when a date is known
+function earnLine(sym){ const e=earnOf(sym); if(!e||(!e.next&&!e.last)) return '';
+  const soon=e.dn!=null&&e.dn<=14, n=e.next?`Next results ${fmtDay(e.next)}${e.dn===0?', today':e.dn===1?', tomorrow':`, in ${e.dn} days`}`:'';
+  const l=e.last&&(!e.next||e.dl<=30)?`${n?' · ':''}last ${fmtDay(e.last)}`:'';
+  return `<div class="c2ern ${soon?'soon':''}">${n}${l}</div>`; }
 // ---------- valuation (v3.1.0) ----------
 // val = {date, price (at the estimate), methods:[{t,v}], base, discount (%), why, bear, bearWhy, reverse, g (long-run growth %, used by Next €)}
 // Base defaults to the average of the methods. Level = base × (1 − discount).
@@ -1388,6 +1409,7 @@ function cardEl(i,inSheet){
     </div>
     <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
     ${valLine(valNorm(i.val),c,cur,symOf(i))}
+    ${earnLine(symOf(i))}
     ${bar}
     <div class="c2box num">
       <div><span>Yield</span><b>${y!=null?fmtN(y,2)+' %':'—'}</b><span class="${yArr?yArr[1]:''}">${h?`${yArr[0]} usual ${fmtN(h.avg,2)} %`:y!=null?'no 5-yr history':'no data'}</span></div>
@@ -1837,6 +1859,7 @@ function holdCard(r){
     </div>
     <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
     ${fund?'':(z=>z?valLine(z.v,c,cur,hSym(h)):'')(valOfH(h))}
+    ${fund?'':earnLine(hSym(h))}
     ${c2barHtml(x,'add')}
     ${mm!=null?`<div class="warnbox">Quote is ${fmtPct(mm*100,0)} off the statement price. Probably the wrong Yahoo symbol.</div>`:''}
     <div class="c2box num">
@@ -1871,7 +1894,7 @@ function holdRow(r,due){
   if(!bits.length) bits.push('no dividend');
   const biz=fund?null:(s?s.biz:bizOf(hSym(h)));
   const over=!fund&&w!=null&&w>capOf(h);
-  const extra=(w!=null?`<span class="w ${over?'over':''}" title="share of the depot">${fmtN(w,1)} %</span>`:'')+(biz&&biz.red.length?FLAG:'');
+  const extra=(w!=null?`<span class="w ${over?'over':''}" title="share of the depot">${fmtN(w,1)} %</span>`:'')+(biz&&biz.red.length?FLAG:'')+(fund?'':earnPill(hSym(h)));
   const grey=!s||s.full||!a;
   return rowEl({tc:grey?'var(--t-none)':s.c,tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
     tk:h.short||h.symbol,nm:h.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
@@ -1952,7 +1975,7 @@ function nextRow(r,n){
   else if(r.st==='full') bits.push(`<b class="dn">would be ${fmtN(r.wAfter,1)} %</b>, max ${fmtN(r.cap,1)}`);
   if(r.er!=null) bits.push(erParts(r));
   if(r.age&&r.age.stale) bits.push('<span class="dn">valuation stale</span>');
-  const extra=(r.flag?FLAG:'')+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
+  const extra=(r.flag?FLAG:'')+earnPill(r.sym)+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
   const el=rowEl({tc:tone,tile:r.adj!=null?fmtN(r.adj,1):'–',tk:r.tk,nm:r.nm,extra,line2:bits.join(' · '),px:pxCol(r.c,r.cur),onOpen:r.open});
   el.querySelector('.rsc').classList.add('nx'); el.title=`about ${pp(r.adj??0)} % a year expected`; return el; }
 function renderNext(){
@@ -1966,7 +1989,7 @@ function renderNext(){
       ${top&&beatsBond?`<span class="k">Best place for ${amt} today</span>
         <b class="tk">${esc(top.tk)} <span>${esc(top.nm)}</span></b>
         <span class="er num">≈ ${pp(top.adj)} % a year</span>
-        <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}</span>
+        <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
         ${R.ready[1]?`<span class="ex">Next best at your level: ${R.ready.slice(1,3).map(r=>`${esc(r.tk)} ${pp(r.adj)} %`).join(', ')}.</span>`:''}`
       :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b><span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
       :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?fmtN(r.above,0)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
