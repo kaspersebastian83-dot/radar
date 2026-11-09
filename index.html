@@ -842,8 +842,14 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.11.1';
+const VERSION='3.12.0';
 const CHANGELOG=[
+  {v:'3.12.0',d:'2026-11-09',t:'Next € ranks by discount to fair value',items:[
+    'The expected return in Next € is now your 8 % hurdle plus the yearly catch-up to your fair value, minus withholding tax you can\'t credit. At fair value every stock shows about 8 %, cheaper ones more, dearer ones less.',
+    'Before, it was dividend yield + long-run growth + catch-up. That left out earnings a company keeps or spends on buybacks, so ASML showed 4,6 % and Main Street 9,6 % with both exactly at fair value. High yield no longer earns extra points by itself.',
+    'The order changes: stocks below fair value move up whatever they pay out, and "Lowest expected return in your depot" now simply lists the holdings furthest above your fair value.',
+    'Each stock\'s Next € section still says what the amount would pay you in dividends a year, and how much of the 8 % arrives as dividend.',
+    'Buy and Add scores, tiers, levels and who counts as "at your level" are unchanged.']},
   {v:'3.11.1',d:'2026-11-09',t:'Fixes from the reliability check',items:[
     'Import from Claude no longer makes a second card for a stock that is already on the Radar. It updates the card you have (level, valuation, texts), adds new journal notes, and keeps its stage and the price it was logged at.',
     'Saving to GitHub keeps working when your lists grow. Before, saving from the iPhone would have failed once a file passed about 65 KB.',
@@ -1587,7 +1593,7 @@ function renderSub(){
   let t;
   if(view==='port'){ const H=holdings(), T=depotTotal();
     t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtEur(T)}`:''} · ${depot?'statement '+fmtDay(depot.asOf):'no statement yet'}`; }
-  else if(view==='next') t=`ideas and holdings, ranked by expected return${depot?'':' · no statement, so no mix check'}`;
+  else if(view==='next') t=`ideas and holdings, ranked by discount to your fair value${depot?'':' · no statement, so no mix check'}`;
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
     t=showTable()?'':`${n} idea${n===1?'':'s'}${st?' · '+st.label:''}`; }
   $('#subTxt').textContent=t;
@@ -2552,11 +2558,12 @@ function openDecisions(){
   closeAll(); $('#mDec').classList.add('on'); }
 // ---------- Next €: where the next money goes (v3.2.0) ----------
 // Expected return a year over ~5 years, in € terms before German tax (the same for every stock):
-//   dividend yield × (1 − withholding you can't credit) + long-run growth + catch-up to fair value
+//   your hurdle (8 %, the rate the fair values are built on) + catch-up to fair value − withholding you can't credit
+// v3.12.0: was dividend yield + val.g + catch-up, which left out retained earnings and buybacks and so ranked by payout.
 // minus soft penalties for piling into one sector or one foreign currency.
 const LS_NEXT='radar.next.v1';
 let nextAmt=1000; try{ const v=Number(localStorage.getItem(LS_NEXT)); if(v>0) nextAmt=v; }catch{}
-const NX={years:5,sectorCap:20,sectorPen:5,fxCap:40,fxPen:10};
+const NX={years:5,hurdle:8,sectorCap:20,sectorPen:5,fxCap:40,fxPen:10};   // hurdle: the 8 % in every Gordon method; a stock at fair value returns it
 // ---------- Withholding tax (v3.7.0): one table, everything else is derived from it ----------
 // Per country (ISIN prefix / symbol suffix, see ccOf), as shares of the gross dividend, for a German private investor:
 //   rate = withheld at source · cred = credited against German tax · back = only comes back if you file a reclaim
@@ -2623,7 +2630,7 @@ function nextRank(amt){
     const vg=numOr(v.g), dg=o.biz&&o.biz.dg!=null?Math.max(0,Math.min(6,o.biz.dg)):null;
     o.g=vg??dg??0; o.gSrc=vg!=null?'val':dg!=null?'div':'none';
     o.rr=(Math.pow(v.base/c,1/NX.years)-1)*100;
-    o.er=o.yNet+o.g+o.rr;
+    o.er=NX.hurdle+o.rr-o.tax;
     o.pen=0; o.why=[];
     if(haveDepot){ const T2=T+amt;
       const s=((bySec[r.sector]||0)+amt)/T2*100; if(s>NX.sectorCap){ const p=(s-NX.sectorCap)/NX.sectorPen; o.pen+=p; o.why.push(`${esc(r.sector)} would be ${fmtN(s,0)} % of the depot`); }
@@ -2693,9 +2700,8 @@ const nextIncOf=r=>r&&r.y>0?nextAmt*r.y*(1-leakOf(r.cc,r.rc))/100:null;
 // v3.7.0: € a year of the next amount's dividend lost to withholding you can't credit
 const nextLeakOf=r=>r&&r.y>0?nextAmt*r.y*leakOf(r.cc,r.rc)/100:0;
 const nextIncTxt=r=>{ const v=nextIncOf(r); return v==null?(r&&r.c>0?'no dividend':''):`+${fmtN(v,0)} € a year in dividends`; };
-function erParts(r){ let t=`yield ${pp(r.yNet)}`;
-  if(r.g) t+=` + growth ${pp(r.g)}`;
-  t+=` ${r.rr>=0?'+':'−'} fair ${pp(Math.abs(r.rr))}`;
+function erParts(r){ let t=`hurdle ${pp(NX.hurdle)} ${r.rr>=0?'+':'−'} fair ${pp(Math.abs(r.rr))}`;
+  if(r.tax>=.05) t+=` − withholding ${pp(r.tax)}`;
   if(r.pen>=.05) t+=` − mix ${pp(r.pen)}`;
   return t; }
 function nextRow(r,n){
@@ -2743,9 +2749,9 @@ function renderNext(){
   const ex=document.createElement('details'); ex.className='cs nxex';
   ex.innerHTML=`<summary><b>How this is worked out</b></summary><div class="vtxt">
     <p>Each stock with a valuation gets an expected return a year over the next ${NX.years} years, in percent:</p>
-    <ul><li><b>Yield</b>: today's dividend yield, minus withholding tax Germany doesn't credit and you'd only get back by filing a reclaim yourself (Italy 11 of 26 %, Canada 10 of 25 %, Switzerland 20 of 35 %, Japan 0.3 %). US, Dutch, French, German and UK dividends lose nothing. If you tap "I reclaim this" in a holding's settings, the part you get back counts as yours (Canada, Switzerland); Italy's stays lost.</li>
-    <li><b>Growth</b>: the long-run growth from your valuation (the g in the Gordon method). Without one, the dividend growth of the last 5 years, capped at 6 %. Buybacks are part of it, because it's growth per share.</li>
+    <ul><li><b>Hurdle</b>: ${NX.hurdle} %, the return your fair values are built on. A stock bought exactly at fair value should earn it, as dividends plus growth, whatever the split between the two. Growth and buybacks are already inside the fair value, so they aren't added again.</li>
     <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value.</li>
+    <li><b>Withholding</b>: the part of the dividend yield that goes to tax Germany doesn't credit and you'd only get back by filing a reclaim yourself (Italy 11 of 26 %, Canada 10 of 25 %, Switzerland 20 of 35 %, Japan 0.3 %). US, Dutch, French, German and UK dividends lose nothing. If you tap "I reclaim this" in a holding's settings, the part you get back counts as yours (Canada, Switzerland); Italy's stays lost.</li>
     <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out. ⋯ → Portfolio x-ray shows where each sector and currency stands today.</li></ul>
     <p>Only stocks at or below your level count as "at your level". Above your max weight, with an open red flag, or after a review called the thesis broken, a stock is held back, however good the number. German tax (Abgeltungsteuer) is the same for all of them, so it's left out. The ${b?esc(b.nm)+' bond fund':'bond fund'} line is the low-risk alternative: a stock should beat it clearly to be worth the risk.</p>
     <p>The number is only as good as your fair value: ${NX.years}-year catch-up is an assumption, and a stale valuation makes it wrong.</p>
@@ -2764,7 +2770,7 @@ function nextSecHtml(kind,id,sym){
     :r.st==='flag'?'Held back by an open red flag.'
     :r.st==='broken'?'Held back: your last review called the thesis broken.'
     :r.st==='full'?`Held back: ${fmtEur(nextAmt)} more would make it ${fmtN(r.wAfter,1)} % of the depot, your max is ${fmtN(r.cap,1)} %.`:'';
-  const notes=[r.gSrc==='val'?'growth from your valuation':r.gSrc==='div'?'growth = dividend growth of the last 5 years':'no growth assumed (none in the valuation, no dividend history)'];
+  const notes=[r.yNet>=.05?`of the ${NX.hurdle} %, about ${pp(Math.min(r.yNet,NX.hurdle))} arrives as dividend, the rest as growth`:`pays no dividend, the ${NX.hurdle} % is all growth`];
   if(nextIncOf(r)!=null) notes.push(`${fmtEur(nextAmt)} here = ${nextIncTxt(r)}, after withholding`);
   if(r.tax>=.05) notes.push(`withholding you can't credit takes ${pp(r.tax)} of the ${pp(r.y||0)} % yield, ${fmtEur(nextLeakOf(r))} a year on ${fmtEur(nextAmt)}${!r.rc&&backOf(r.cc)>0?` (${pp(r.y*backOf(r.cc))} of it comes back if you file the ${esc(r.cc)} reclaim)`:''}`);
   else if(r.rc&&backOf(r.cc)>0) notes.push(`you file the ${esc(r.cc)} reclaim, so no withholding is lost`);

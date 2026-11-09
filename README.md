@@ -63,7 +63,7 @@ Separate from the idea tracking: what you actually own, and whether any of it is
 
 ## Next € tab (v3.2.0)
 
-"Where does my next €1,000 go?" Every idea and stock holding with a valuation gets an expected return a year over ~5 years: dividend yield × (1 − withholding Germany doesn't credit) + long-run growth (`val.g`, else 5-yr dividend growth capped at 6 %) + annualised catch-up to `val.base`. With a statement on the device, soft penalties apply when the amount would push one sector (Yahoo sector) above 20 % of the depot or one foreign currency above 40 %, and holdings that would go over their max weight are held back. Only stocks at or below their level are recommended; the bond fund's yield is shown as the low-risk line. German tax is the same for all and left out.
+"Where does my next €1,000 go?" Every idea and stock holding with a valuation gets an expected return a year over ~5 years: the 8 % hurdle the fair values are built on + annualised catch-up to `val.base` − the part of the dividend yield lost to withholding Germany doesn't credit (since v3.12.0; before, dividend yield + `val.g` + catch-up, which ranked by payout). With a statement on the device, soft penalties apply when the amount would push one sector (Yahoo sector) above 20 % of the depot or one foreign currency above 40 %, and holdings that would go over their max weight are held back. Only stocks at or below their level are recommended; the bond fund's yield is shown as the low-risk line. German tax is the same for all and left out.
 
 ## Decision journal (v3.3.0)
 
