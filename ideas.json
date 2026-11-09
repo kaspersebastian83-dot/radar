@@ -71,7 +71,7 @@
       "currency": "EUR",
       "currentPrice": null,
       "currentDate": null,
-      "buyBelow": 19.5,
+      "buyBelow": 15.3,
       "conviction": 3,
       "thesis": "Gas-weighted major with record-low gearing (9%), rising production and a satellite model (Plenitude, Enilive) that funds transition growth without touching the dividend. Ordinary dividend €1.10 (~4.3%), plus €0.46 special and €3.8 bn buyback in 2026.",
       "bull": "Production growth 7%, gearing 9% makes the €1.10 dividend safe even at $60 Brent; satellites raised €5.9 bn in 2025 and target >€5 bn EBITDA combined by 2030; buybacks ~5% of market cap/year.",
@@ -86,10 +86,14 @@
         {
           "date": "2026-11-06",
           "text": "Corrected logged price from €23.40 (stale search figure) to €25.46, Yahoo close on 2026-11-05. At this level the ordinary yield is ~4.3%, so the €19.50 buy-below is ~23% away."
+        },
+        {
+          "date": "2026-11-09",
+          "text": "Level lowered from €19.50 to €15.30: fair value ~€23.50 at $70 Brent, 35 % margin for a cyclical."
         }
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
-      "updatedAt": "2026-11-09T10:34:52.000Z",
+      "updatedAt": "2026-11-09T10:37:42.000Z",
       "symbol": "ENI.MI",
       "val": {
         "date": "2026-11-09",
@@ -162,7 +166,7 @@
       "symbol": "NG.L",
       "currentPrice": null,
       "currentDate": null,
-      "buyBelow": 1100,
+      "buyBelow": 928,
       "conviction": 3,
       "thesis": "Regulated grid owner whose profits grow with the networks it builds: RIIO-T3 is locked in to 2031, assets grow ~10% a year and EPS 8–10% a year. The dividend grows with UK CPIH and is untouched by withholding tax for a German investor. A buy only when the yield reaches ~4.6%, because at ~3.9% it pays less than gilts.",
       "bull": "H1 FY27: capex £6.7bn (+33%), underlying EPS +22% to 36.5p, FY27 EPS guidance raised to +15–16% (~90p). RIIO-T3 accepted (base RoE 5.70% real, management targets >9% incl. incentives). £70bn+ five-year plan. Joulent (35%, US data-centre power, Microsoft 20-yr PPA) adds growth. UK withholding tax 0%, beta ~0.6.",
@@ -175,10 +179,14 @@
         {
           "date": "2026-11-06",
           "text": "Logged 2026-11-06 after H1 FY27 results (5 Nov). loggedPrice = 5 Nov LSE close 1,285.50p (Sharecast/Barclays/AJ Bell). On 6 Nov it traded ~1,238p (−3.7%) in a global selloff after the BoE's first hike since 2023 (Bank Rate 4.0%), so 'since logged' starts negative. FY27 dividend est. ~50.3p (interim 16.97p, ex-div 19 Nov 2026). Buy-below 1,100p = ~4.6% yield, ~12x FY27 EPS, near the 52-week low of 1,096.5p. Review after FY27 results on 13 May 2027: dividend vs CPIH, net debt and gearing, any equity raise."
+        },
+        {
+          "date": "2026-11-09",
+          "text": "Level lowered from 1,100p to 928p: fair value ~1,160p, 20 % margin for a regulated network with negative FCF."
         }
       ],
       "createdAt": "2026-11-06T12:49:42.223Z",
-      "updatedAt": "2026-11-09T10:34:52.000Z",
+      "updatedAt": "2026-11-09T10:37:42.000Z",
       "val": {
         "date": "2026-11-09",
         "price": 1257.5,
