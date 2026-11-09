@@ -781,6 +781,8 @@ input[type=file]{display:none}
 .dfold .dbody>.inc>.shd:first-child,#incBox>.shd:first-child{display:none}
 #incBox .c2box b{font-size:19px}
 [hidden]{display:none!important}
+.wd{color:var(--ochre);font-weight:700}
+.wdbox{background:var(--ochre-soft);border-radius:var(--r2);padding:10px 12px;margin:8px 0}.wdbox p{margin:0 0 6px}.wdbox p:last-child{margin:0}
 /* v4.0.1: the company name leads, the ticker is the small label next to it; tags get their own line */
 .r1{flex-wrap:nowrap;gap:7px}
 .r1 .nm{flex:0 1 auto;font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
@@ -855,6 +857,7 @@ input[type=file]{display:none}
       <details class="dfold" id="dfStmt"><summary><span><b>Statement</b><small id="dsStmt"></small></span></summary><div class="dbody">
         <div class="pstrip" id="pStrip"></div>
         <p class="hint" id="depotStatus">No statement imported on this device.</p>
+        <p class="hint" style="margin:0 0 8px">Back up buy prices, dates and the statement: ⋯ → Your private data.</p>
         <div class="row">
           <button class="btn primary" id="btnDepot">Update from Trade Republic PDF</button>
           <button class="btn quiet" id="btnDepotForget">Forget statement</button>
@@ -975,10 +978,20 @@ input[type=file]{display:none}
     <div class="row"><button class="btn" id="btnPxRefresh">Refresh prices now</button><span class="hint">Starts the price update on GitHub, about a minute.</span></div>
   </div>
   <div class="msec">
-    <h4>Backup</h4>
+    <h4>Your private data</h4>
+    <p class="hint">Buy prices, "Bought around" dates, your statement and its history, your Pauschbetrag and the Next € amount live only in this browser. They never go to GitHub. Back them up to a file, so a new phone or a cleared browser doesn't lose them.</p>
+    <p class="hint" id="pvLast"></p>
     <div class="row">
-      <button class="btn" id="btnExport">Export JSON</button>
-      <button class="btn" id="btnImport">Import JSON (merge)</button>
+      <button class="btn primary" id="btnPvSave">Back up to a file</button>
+      <button class="btn" id="btnPvLoad">Restore from a file</button>
+      <input type="file" id="pvIn" accept="application/json,.json" hidden>
+    </div>
+  </div>
+  <div class="msec">
+    <h4>Backup of your ideas</h4>
+    <div class="row">
+      <button class="btn" id="btnExport">Export ideas</button>
+      <button class="btn" id="btnImport">Import ideas (merge)</button>
       <input type="file" id="fileIn" accept="application/json" hidden>
     </div>
   </div>
@@ -1011,8 +1024,14 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.0.1';
+const VERSION='4.1.0';
 const CHANGELOG=[
+  {v:'4.1.0',d:'2026-11-09',t:'Shaky valuations flagged, private backup',items:[
+    'When your two valuation methods are 30 % or more apart, Radar says so: "methods 85 % apart" in the row, on the card and in the Valuation section. The fair value is their average, and the average hides that one of them may be wrong.',
+    'Next € then counts only the lower method, so a stock with a soft fair value ranks lower. The breakdown says "(lower method)".',
+    'The Valuation section shows what your own margin of safety would give on the lower method, as a level to compare with yours. Your levels are not changed.',
+    'The buy and add checklist has a ninth point, "methods agree", filled in by itself.',
+    'New in ⋯: "Your private data". Back up buy prices, "Bought around" dates, your statement and its history to one file (on the iPhone: save it to Files or iCloud Drive), and restore it on a new phone. The Depot tab reminds you when there is no backup or it is over a month old.']},
   {v:'4.0.1',d:'2026-11-09',t:'Company names first',items:[
     'Every row now leads with the company name in bold; the ticker is the small label next to it. Same in the details and in the Next € pick.',
     'The tags (wonderful, fair, results in 3 d, your weight, red flag) moved to their own line under the numbers, so they no longer cut the name short.']},
@@ -1918,6 +1937,13 @@ function valNorm(v){ if(!v||typeof v!=='object') return null;
   const all=[...mv,base];
   return {...v,methods,base,discount:numOr(v.discount),bear:numOr(v.bear),price:numOr(v.price),lo:Math.min(...all),hi:Math.max(...all)};
 }
+// v4.1.0: how far apart the valuation methods are. The fair value is their average, and the average hides a method
+// that may be wrong. From VAL_WIDE % apart (highest / lowest − 1) a valuation counts as shaky: Next € then counts only
+// the lower method, the buy checklist flags it, and the sheet shows the level your margin would give on the lower one.
+const VAL_WIDE=30;
+function valSpread(v){ if(!v||!Array.isArray(v.methods)) return null; const mv=v.methods.map(m=>m.v).filter(x=>x>0); if(mv.length<2) return null;
+  const lo=Math.min(...mv), hi=Math.max(...mv), gap=(hi/lo-1)*100; return {lo,hi,gap,wide:gap>=VAL_WIDE,cautious:Math.min(v.base,lo)}; }
+const wideTag=sp=>sp&&sp.wide?`<b class="wd" title="Your two valuation methods are ${fmtN(sp.gap,0)} % apart">methods ${fmtN(sp.gap,0)} % apart</b>`:'';
 const levelFromVal=v=>v&&v.base>0&&v.discount!=null?v.base*(1-v.discount/100):null;
 function niceRound(x){ if(x==null) return null; const m=x>=10000?100:x>=1000?10:x>=100?1:x>=10?.5:.05; return Number((Math.round(x/m)*m).toFixed(2)); }
 // A holding uses its own valuation, else the one on a Radar card for the same symbol.
@@ -1941,7 +1967,7 @@ function valMove(v,c){ if(!v||!(c>0)) return null;
 // One line on the card: how far to fair value and to the bear case from today's price.
 function valLine(v,c,cur,sym){ const m=valMove(v,c); if(!m) return '';
   const a=valAge(v,sym);
-  return `<div class="c2val" title="Your fair value and bear case, from today's price">${m.up>=0?`<b class="up">${signPct(m.up)}</b> to fair ${mN(v.base,cur)}`:`<b class="dn">${fmtN(-m.up,0)} % above</b> fair ${mN(v.base,cur)}`}${m.dn!=null?` · <b class="dn">${signPct(m.dn)}</b> to bear ${mN(v.bear,cur)}`:''}${a&&a.stale?' · <span class="stl">estimate stale</span>':''}</div>`; }
+  return `<div class="c2val" title="Your fair value and bear case, from today's price">${m.up>=0?`<b class="up">${signPct(m.up)}</b> to fair ${mN(v.base,cur)}`:`<b class="dn">${fmtN(-m.up,0)} % above</b> fair ${mN(v.base,cur)}`}${m.dn!=null?` · <b class="dn">${signPct(m.dn)}</b> to bear ${mN(v.bear,cur)}`:''}${a&&a.stale?' · <span class="stl">estimate stale</span>':''}${(sp=>sp&&sp.wide?' · '+wideTag(sp):'')(valSpread(v))}</div>`; }
 // Scale: bear · your level · fair-value range with base · today's price.
 function valBar(v,c,lvl,cur){
   const pts=[v.lo,v.hi,v.base,v.bear,lvl,c].filter(x=>x>0), lo=Math.min(...pts)*.94, hi=Math.max(...pts)*1.04, P=x=>pct((x-lo)/(hi-lo));
@@ -1964,6 +1990,9 @@ function valHtml(v,c,cur,lvl,word,sym,src){
     </div>
     <div class="vtxt">
       ${v.methods.length?`<p><b>Fair value ${mP(v.base,cur)}${eurTag(v.base,cur)}</b>${v.methods.length>1?', the average of':' from'}:</p><ul>${v.methods.map(x=>`<li>${esc(x.t)||'method'}${x.v!=null?` → <b class="num">${mN(x.v,cur)}</b>`:''}</li>`).join('')}</ul>`:`<p><b>Fair value ${mP(v.base,cur)}</b></p>`}
+      ${(sp=>{ if(!sp||!sp.wide) return ''; const cl=v.discount!=null?niceRound(sp.lo*(1-v.discount/100)):null;
+        return `<div class="wdbox"><p><b>The methods are ${fmtN(sp.gap,0)} % apart</b> (${mN(sp.lo,cur)} and ${mN(sp.hi,cur)}). The average hides that one of them may be wrong, so treat the fair value as soft.</p>
+        <p>Next € counts only the lower one, ${mN(sp.lo,cur)}.${cl?` Your ${fmtN(v.discount,0)} % margin on the lower method would put the ${word} level at <b>${mN(cl,cur)}</b>${eurTag(cl,cur)}${lvl>0?(cl<lvl?`, ${fmtN((1-cl/lvl)*100,0)} % below today's ${mN(lvl,cur)}`:`; today's ${mN(lvl,cur)} is already at or below that`):''}.`:''}</p></div>`; })(valSpread(v))}
       ${v.discount!=null?`<p><b>${fmtN(v.discount,0)} % margin of safety</b>${v.why?`: ${esc(v.why)}`:''} → ${mN(niceRound(calc),cur)}.${hand?` Your ${word} level ${mN(lvl,cur)} is set by hand.`:''}</p>`:''}
       ${v.bear>0?`<p><b>Bear case ${mP(v.bear,cur)}</b>${v.bearWhy?`: ${esc(v.bearWhy)}`:''}</p>`:''}
       ${v.reverse?`<p><b>What the price implies:</b> ${esc(v.reverse)}</p>`:''}
@@ -2354,6 +2383,33 @@ $('#btnExport').onclick=()=>{
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ideas-${today()}.json`; a.click();
 };
 $('#btnImport').onclick=()=>$('#fileIn').click();
+// ---------- private backup (v4.1.0) ----------
+// Everything that never goes to GitHub, in one file the person keeps (Files / iCloud Drive). Restore replaces those keys.
+const PV_KEYS=['radar.cost.v1','radar.depot.v1','radar.depotHist.v1','radar.income.v1','radar.next.v1','radar.fxhist.v1'], LS_PVLAST='radar.pvBackup.v1';
+const pvHas=()=>PV_KEYS.slice(0,3).some(k=>{ try{ const v=localStorage.getItem(k); return v&&v!=='{}'&&v!=='[]'&&v!=='null'; }catch{ return false; } });
+function pvAge(){ let t=null; try{ t=localStorage.getItem(LS_PVLAST); }catch{} return t?Math.floor((Date.now()-Date.parse(t))/864e5):null; }
+function renderPvStatus(){ const e=$('#pvLast'); if(!e) return; const d=pvAge();
+  e.innerHTML=!pvHas()?'Nothing private stored on this device yet.':d==null?'<b class="dn">No backup yet.</b>':`Last backup ${d===0?'today':d===1?'yesterday':d+' days ago'}${d>30?' · <b class="dn">time for a new one</b>':''}.`; }
+$('#btnPvSave').onclick=async()=>{
+  const data={}; PV_KEYS.forEach(k=>{ try{ const v=localStorage.getItem(k); if(v!=null) data[k]=v; }catch{} });
+  const txt=JSON.stringify({app:'radar-private',v:1,at:now(),version:VERSION,data},null,1), name=`radar-private-${today()}.json`;
+  const file=new File([txt],name,{type:'application/json'});
+  try{ if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Radar backup'}); }
+    else { const a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+    try{ localStorage.setItem(LS_PVLAST,now()); }catch{} renderPvStatus(); renderDepotHint(); toast('Backup made. Keep the file somewhere safe, it holds your positions.'); }
+  catch(e){ if(e&&e.name!=='AbortError') toast('Could not make the backup'); } };
+$('#btnPvLoad').onclick=()=>$('#pvIn').click();
+$('#pvIn').onchange=async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  let j; try{ j=JSON.parse(await f.text()); }catch{ toast('That is not a Radar backup'); return; }
+  if(!j||j.app!=='radar-private'||!j.data||typeof j.data!=='object'){ toast('That is not a Radar backup'); return; }
+  const keys=Object.keys(j.data).filter(k=>PV_KEYS.includes(k)); if(!keys.length){ toast('The backup is empty'); return; }
+  if(!confirm(`Restore the backup from ${fmtDate(String(j.at||'').slice(0,10))}? It replaces the buy prices, dates and statement on this device.`)) return;
+  try{ keys.forEach(k=>localStorage.setItem(k,j.data[k])); localStorage.setItem(LS_PVLAST,j.at||now()); }catch{ toast('Could not restore'); return; }
+  toast('Restored'); setTimeout(()=>location.reload(),600); };
+// a quiet nudge on the Depot tab when private data exists without a recent backup
+function renderDepotHint(){ const e=$('#dsStmt'); if(!e) return; const d=pvAge(), need=pvHas()&&(d==null||d>30);
+  e.textContent=(depot?`${fmtDate(depot.asOf)} · import a new PDF`:'Import your Trade Republic PDF')+(need?' · back up your data':''); }
+$('#btnMenu').addEventListener('click',renderPvStatus);
 $('#fileIn').onchange=async e=>{
   const f=e.target.files[0]; if(!f) return;
   try{ const d=JSON.parse(await f.text()); const n=merge(d.ideas||d); persist(); toast(`Merged ${n} change${n===1?'':'s'}`); }catch{ toast('Could not read that file'); }
@@ -2660,6 +2716,7 @@ function checkItems(x){
   const biz=bizOf(x.sym), age=x.val?valAge(x.val,x.sym):null, e=earnOf(x.sym), w=x.word;
   return [
     {k:'level',s:'level',auto:1,ok:x.lvl>0&&x.c>0&&x.c<=x.lvl,t:!(x.lvl>0)?`No ${w} level set`:x.c<=x.lvl?`At or below your ${w} level ${mN(x.lvl,x.cur)}`:`${abv((x.c/x.lvl-1)*100)} % above your ${w} level ${mN(x.lvl,x.cur)}`},
+    {k:'agree',s:'methods agree',auto:1,ok:!(valSpread(x.val)||{}).wide,t:(sp=>sp&&sp.wide?`Your valuation methods are ${fmtN(sp.gap,0)} % apart (${mN(sp.lo,x.cur)} vs ${mN(sp.hi,x.cur)}): the fair value is soft`:'Valuation methods roughly agree')(valSpread(x.val))},
     {k:'val',s:'valuation current',auto:1,ok:!!x.val&&!(age&&age.stale),t:!x.val?'No valuation written down':age&&age.stale?'Valuation is stale, results came out since':'Valuation is current'},
     {k:'flag',s:'no red flag',auto:1,ok:!(biz&&biz.red.length),t:biz&&biz.red.length?`Open red flag: ${biz.red.map(f=>f.t).join('; ')}`:'No open red flag in the business'},
     {k:'kill',s:'"I\'m wrong if"',auto:1,ok:!!String(x.kill||'').trim(),t:String(x.kill||'').trim()?'"I\'m wrong if" is written down':'No "I\'m wrong if" written yet'},
@@ -2851,7 +2908,8 @@ function nextRank(amt){
     o.yNet=y*(1-leak); o.tax=y*leak; o.leak=leak;
     const vg=numOr(v.g), dg=o.biz&&o.biz.dg!=null?Math.max(0,Math.min(6,o.biz.dg)):null;
     o.g=vg??dg??0; o.gSrc=vg!=null?'val':dg!=null?'div':'none';
-    o.rr=(Math.pow(v.base/c,1/NX.years)-1)*100;
+    o.spread=valSpread(v); o.fv=o.spread&&o.spread.wide?o.spread.cautious:v.base;   // v4.1.0: shaky valuation → the lower method
+    o.rr=(Math.pow(o.fv/c,1/NX.years)-1)*100;
     o.er=NX.hurdle+o.rr-o.tax;
     o.pen=0; o.why=[];
     if(haveDepot){ const T2=T+amt;
@@ -2922,7 +2980,7 @@ const nextIncOf=r=>r&&r.y>0?nextAmt*r.y*(1-leakOf(r.cc,r.rc))/100:null;
 // v3.7.0: € a year of the next amount's dividend lost to withholding you can't credit
 const nextLeakOf=r=>r&&r.y>0?nextAmt*r.y*leakOf(r.cc,r.rc)/100:0;
 const nextIncTxt=r=>{ const v=nextIncOf(r); return v==null?(r&&r.c>0?'no dividend':''):`+${fmtN(v,0)} € a year in dividends`; };
-function erParts(r){ let t=`hurdle ${pp(NX.hurdle)} ${r.rr>=0?'+':'−'} fair ${pp(Math.abs(r.rr))}`;
+function erParts(r){ let t=`hurdle ${pp(NX.hurdle)} ${r.rr>=0?'+':'−'} fair ${pp(Math.abs(r.rr))}${r.spread&&r.spread.wide?' (lower method)':''}`;
   if(r.tax>=.05) t+=` − withholding ${pp(r.tax)}`;
   if(r.pen>=.05) t+=` − mix ${pp(r.pen)}`;
   return t; }
@@ -2935,6 +2993,7 @@ function nextRow(r,n){
   else if(r.st==='broken') bits.push('<b class="dn">thesis broken</b>');
   else if(r.st==='full') bits.push(`<b class="dn">would be ${fmtN(r.wAfter,1)} %</b>, max ${fmtN(r.cap,1)}`);
   if(r.age&&r.age.stale) bits.push('<span class="dn">valuation stale</span>');
+  if(r.spread&&r.spread.wide) bits.push(wideTag(r.spread));
   const extra=(r.flag?FLAG:'')+qualPill(r.sym,r.kind==='hold'?port.holdings.find(h=>h.id===r.id):data.ideas.find(i=>i.id===r.id))+earnPill(r.sym)+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
   const el=rowEl({tc:tone,tile:r.adj!=null?fmtN(r.adj,1):'–',tk:r.tk,nm:r.nm,extra,line2:bits.join(' · '),line3:nextIncTxt(r),px:pxCol(r.c,r.cur),onOpen:r.open});
   el.querySelector('.rsc').classList.add('nx'); el.title=`about ${pp(r.adj??0)} % a year expected`; return el; }
@@ -2972,7 +3031,7 @@ function renderNext(){
   ex.innerHTML=`<summary><b>How this is worked out</b></summary><div class="vtxt">
     <p>Each stock with a valuation gets an expected return a year over the next ${NX.years} years, in percent:</p>
     <ul><li><b>Hurdle</b>: ${NX.hurdle} %, the return your fair values are built on. A stock bought exactly at fair value should earn it, as dividends plus growth, whatever the split between the two. Growth and buybacks are already inside the fair value, so they aren't added again.</li>
-    <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value.</li>
+    <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value. When your two valuation methods are ${VAL_WIDE} % or more apart, only the lower one counts, because the average hides that one of them may be wrong.</li>
     <li><b>Withholding</b>: the part of the dividend yield that goes to tax Germany doesn't credit and you'd only get back by filing a reclaim yourself (Italy 11 of 26 %, Canada 10 of 25 %, Switzerland 20 of 35 %, Japan 0.3 %). US, Dutch, French, German and UK dividends lose nothing. If you tap "I reclaim this" in a holding's settings, the part you get back counts as yours (Canada, Switzerland); Italy's stays lost.</li>
     <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out. ⋯ → Portfolio x-ray shows where each sector and currency stands today.</li></ul>
     <p>Only stocks at or below your level count as "at your level". Above your max weight, with an open red flag, or after a review called the thesis broken, a stock is held back, however good the number. German tax (Abgeltungsteuer) is the same for all of them, so it's left out. The ${b?esc(b.nm)+' bond fund':'bond fund'} line is the low-risk alternative: a stock should beat it clearly to be worth the risk.</p>
@@ -3428,7 +3487,7 @@ function renderDepot(){
   else set('#dsLeak','What each country keeps');
   const B=holdings().filter(h=>hSym(h)&&hSym(h)!==BENCH.sym&&h.kind!=='bond'&&(!depot||posOf_(h))).map(benchOf).filter(o=>o&&o.gap!=null);
   set('#dsBench',B.length?`${B.filter(o=>o.gap>0).length} of ${B.length} holdings ahead`:'Set "Bought around" dates to see it');
-  set('#dsStmt',depot?`${fmtDate(depot.asOf)} · import a new PDF`:'Import your Trade Republic PDF');
+  renderDepotHint();
   if(!depot) $('#dfStmt').open=true;
 }
 function renderPort(){
