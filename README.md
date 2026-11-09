@@ -49,6 +49,10 @@ Radar → Researching → Watchlist → Bought → Passed / Sold
 - **Table** (Ideas → Table, on a computer) shows every idea with logged price vs. current price, day change and trailing dividend yield. Passed ideas show what you missed, Bought ideas show how it went. On the phone the same facts are in the rows and sheets.
 - Cards with an overdue review date are flagged.
 
+## Layout (v4.0.0)
+
+Built for the iPhone: a floating tab bar at the bottom (Ideas, Portfolio, Next €, Depot), a large title with + and ⋯ on top, and detail sheets in three parts (Overview, Business, Edit) with Save pinned at the bottom. The Depot tab holds income, withholding tax, x-ray, the EUNL comparison, the decision journal and the statement import; ⋯ only holds settings. Pastel blue glass theme, dark mode follows the system.
+
 ## Portfolio tab
 
 Separate from the idea tracking: what you actually own, and whether any of it is a good moment to add.

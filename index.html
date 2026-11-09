@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#eef0f3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f141a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eef6fe" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e2036" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Radar">
@@ -12,9 +12,6 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#eef0f3;--panel:#ffffff;--panel2:#f6f7f9;--ink:#15202b;--ink2:#4b5563;--mute:#687280;--line:#dfe3e8;--line2:#eceff2;
@@ -636,16 +633,172 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 .c2blk .bars{display:flex;flex-direction:column;gap:6px}
 .c2lvl{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}.c2lvl b{color:var(--ink);font-weight:800}
 .nxsec p{margin:0 0 6px}
+/* ================= v4.0.0: iPhone-first, pastel blue glass =================
+   Tokens first (most of the app is drawn from them), then the new pieces: large title, floating tab bar,
+   glass cards, three-part sheets, 44 px touch targets and 16 px inputs (below that iOS zooms into a field). */
+:root{
+  --bg:#dcebfa;--bg1:#eef6fe;--bg2:#cfe3f8;--panel:#ffffff;--panel2:#e9f2fc;--ink:#12304d;--ink2:#3a5876;--mute:#48678a;--line:#c5d9ee;--line2:#d9e7f5;
+  --research:#2f6fb3;--acc:#1763c6;--acc-ink:#ffffff;--acc-soft:rgba(23,99,198,.12);--out:#7f9bb8;
+  --glass:rgba(255,255,255,.58);--glass2:rgba(255,255,255,.5);--edge:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.5);--sh:0 6px 22px rgba(23,74,130,.10);--sh2:0 8px 28px rgba(23,74,130,.18);
+  --sheet:linear-gradient(180deg,#f1f7fe 0%,#e1eefb 60%,#d6e7f8 100%);--sheet-top:#f1f7fe;--dim:rgba(40,74,112,.45);
+  --r:24px;--r2:16px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0c1b2d;--bg1:#102540;--bg2:#0a1727;--panel:#142a44;--panel2:#18324f;--ink:#e9f2fc;--ink2:#b9cde3;--mute:#93aeca;--line:#27466a;--line2:#1e3a59;
+  --research:#6fa8e8;--acc:#7cb6ff;--acc-ink:#0c1b2d;--acc-soft:rgba(124,182,255,.16);--out:#6f89a6;
+  --glass:rgba(110,160,220,.13);--glass2:rgba(110,160,220,.18);--edge:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(255,255,255,.07);--sh:0 6px 22px rgba(0,0,0,.25);--sh2:0 8px 28px rgba(0,0,0,.4);
+  --sheet:linear-gradient(180deg,#14304f 0%,#0f2440 60%,#0c1d33 100%);--sheet-top:#14304f;--dim:rgba(3,10,20,.6);
+}}
+html{background:var(--bg2)}
+html,body{font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",sans-serif;font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+body{background:linear-gradient(180deg,var(--bg1) 0%,var(--bg) 55%,var(--bg2) 100%) fixed;min-height:100vh;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+/* header: large title, round glass buttons */
+header{position:static;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.bar{padding:12px 16px 0;gap:8px;align-items:center}
+.brand{display:none}
+#pgTitle{margin:0;font-size:32px;line-height:38px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ver{font-size:12px;color:var(--mute);align-self:flex-end;margin-bottom:5px;min-height:28px}
+.gbtn{flex:none;width:44px;height:44px;border:0;border-radius:22px;background:var(--glass2);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:var(--edge),var(--sh);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0;position:relative}
+.gbtn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.gbtn.new::after{content:"";position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--coral);box-shadow:0 0 0 2px var(--bg1)}
+.subbar{padding:0 20px 8px;font-size:15px;color:var(--ink2);min-height:30px}
+@media(max-width:700px){.subbar{padding:0 20px 6px}.bar{padding:10px 16px 0}}
+#btnSort,#btnTable{min-height:36px;padding:6px 14px;font-size:14px}
+.status{border:0;background:transparent;min-height:36px;padding:0 6px;font-size:13px;color:var(--mute)}
+.status span{display:inline!important}
+main{padding:6px 16px calc(128px + env(safe-area-inset-bottom))}
+@media(max-width:700px){main{padding:4px 16px calc(128px + env(safe-area-inset-bottom))}}
+/* floating glass tab bar */
+.tabbar.seg{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,calc(env(safe-area-inset-bottom) - 8px));width:min(calc(100% - 28px),430px);height:64px;z-index:8;display:flex;align-items:center;gap:0;padding:0 5px;border:0;border-radius:32px;background:var(--glass2);backdrop-filter:blur(28px) saturate(190%);-webkit-backdrop-filter:blur(28px) saturate(190%);box-shadow:var(--edge),var(--sh2)}
+.tabbar.seg button{flex:1;height:54px;min-width:0;border:0;border-radius:27px;background:transparent;box-shadow:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink2);font-size:11px;font-weight:600;position:relative}
+.tabbar.seg button svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tabbar.seg button.on{background:var(--acc-soft);color:var(--acc);font-weight:700;box-shadow:none}
+.tabbar.seg button.on svg{stroke-width:2.2}
+.tabbar .badge{position:absolute;top:4px;left:calc(50% + 8px);margin:0}
+.tabfade{position:fixed;left:0;right:0;bottom:0;height:calc(110px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg2) 78%);pointer-events:none;z-index:7}
+.toast{bottom:calc(98px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg1);font-size:14px;padding:11px 18px}
+/* Today: one line that scrolls sideways */
+.today{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:8px;margin:0 -16px 16px;padding:2px 16px 4px}
+.today::-webkit-scrollbar{display:none}
+.today button{flex:none;min-height:44px;padding:0 15px;border:0;font-size:15px;background:var(--glass2);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:var(--edge),var(--sh)}
+.today button.on{background:var(--acc);color:var(--acc-ink)}.today button.on b{color:var(--acc-ink)}
+.today .px{background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0 6px}
+/* groups and rows */
+.grp{margin:0 0 24px}
+.ghd{font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--ink);padding:0 4px 8px}
+.ghd span:last-child{font-size:15px;font-weight:500;color:var(--mute)}
+.rows,.card2,.nxhero,.pstrip>div,.addopts button,.empty,.tablewrap,.srow,.sum>div{background:var(--glass);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:0;box-shadow:var(--edge),var(--sh);border-radius:var(--r)}
+.empty{border:0}
+.row2{min-height:68px;padding:11px 16px;border-top:0;background:linear-gradient(var(--line),var(--line)) no-repeat 70px 0/100% 1px}
+.row2:first-child{background:transparent}
+.row2:hover{background-color:transparent}.row2:active{background-color:var(--acc-soft)}
+.rsc{width:42px;height:42px;border-radius:13px;font-weight:700}
+.row2.tclose .rsc{background:var(--research);color:#fff}
+@media (prefers-color-scheme:dark){.row2.tclose .rsc{background:#2f6fb3}}
+.r1 .tk{font-size:17px}.r1 .nm,.r1 .w{font-size:14px}.r2,.r3{font-size:14px}
+.rpx b{font-size:16px}.rpx small{font-size:12.5px}
+.rempty{padding:16px;font-size:15px;color:var(--ink2)}
+.rmore{min-height:48px;padding:12px 16px;font-size:15px;color:var(--acc);border-top:1px solid var(--line)}
+.grp.flash .rows{box-shadow:0 0 0 2px var(--acc),var(--sh)}
+.nxhero{border-left:0;padding:18px;box-shadow:inset 5px 0 0 var(--tc),var(--edge),var(--sh);overflow:hidden}
+.nxbond{background:var(--acc-soft);border-top:1px dashed var(--line)}
+.qpill,.epill,.own{font-size:11.5px;padding:2px 7px}
+/* buttons, chips, fields */
+.btn{min-height:44px;padding:9px 18px;border:0;background:var(--glass2);box-shadow:var(--edge),0 2px 8px rgba(23,74,130,.10);font-size:15px;display:inline-flex;align-items:center;justify-content:center}
+.btn.small{min-height:40px;padding:7px 14px;font-size:14px}
+.btn.primary{background:var(--acc);color:var(--acc-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 16px rgba(23,99,198,.28)}
+.btn.quiet{background:transparent;box-shadow:none}
+.btn.warnbtn{background:var(--coral);color:#fff}
+.chip{min-height:40px;padding:6px 14px;font-size:14px;border:0;background:var(--glass2);box-shadow:var(--edge),0 2px 8px rgba(23,74,130,.08)}
+.chip.on,.incpb .chip.on,#btnTable.on{background:var(--acc);color:var(--acc-ink);border-color:transparent}.chip.on b{color:var(--acc-ink)}
+.incpb .chip{border:0;min-height:40px;padding:6px 14px;font-size:14px}
+.stagebar .chip{padding:6px 12px}
+label{font-size:13px}
+input,select,textarea{font-size:16px;min-height:46px;border:0;border-radius:14px;padding:10px 13px;background:var(--acc-soft);box-shadow:inset 0 0 0 1px var(--acc-soft);font-weight:600}
+textarea{min-height:92px;font-weight:500}
+input[type=file]{display:none}
+.capl input,.incpb input{width:92px;min-height:42px;padding:6px 11px}
+.nxin input{font-size:18px;min-height:46px}
+.starpick{gap:0}.starpick span{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--line)}.starpick span.on{color:var(--acc)}
+.stars{color:var(--acc)}
+.hint{font-size:13.5px}
+.sortopts button{min-height:52px;font-size:16px}.sortopts button small{font-size:13px}
+.addopts button{min-height:64px;font-size:17px;padding:14px 18px}.addopts button small{font-size:14px}
+/* sheets */
+.modal{background:var(--dim)}
+.sheet{background:var(--sheet);border-radius:34px 34px 0 0;max-height:93vh;padding:0 16px calc(18px + env(safe-area-inset-bottom));box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 -10px 40px rgba(10,30,60,.25);overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@media(min-width:720px){.sheet{border-radius:34px;padding:0 26px 24px}}
+.grab{position:sticky;top:0;z-index:4;height:22px;margin:0 -16px;background:var(--sheet-top);border-radius:34px 34px 0 0;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab}
+.grab::before{content:"";width:38px;height:5px;border-radius:3px;background:color-mix(in srgb,var(--ink) 30%,transparent)}
+.sheet h3{font-size:20px;margin:0 0 10px;min-height:44px;gap:8px}
+.sheet h3 .sht{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sheet h3 .sht small{font-size:15px;font-weight:500;color:var(--ink2);margin-left:6px}
+.sheet h3 [data-close]{width:44px;height:44px;min-height:44px;padding:0;border-radius:22px;background:var(--glass2);box-shadow:var(--edge),var(--sh);font-size:17px;font-weight:700;color:var(--ink)}
+#btnEdit{display:none}
+.psegs{position:sticky;top:22px;z-index:3;display:flex;gap:2px;padding:3px;height:46px;border-radius:23px;background:color-mix(in srgb,var(--bg) 70%,var(--sheet-top));box-shadow:inset 0 0 0 1px var(--acc-soft),0 0 0 9px var(--sheet-top),0 16px 14px -6px var(--sheet-top)}
+.psegs button{flex:1;border:0;border-radius:20px;background:transparent;font-size:15px;font-weight:600;color:var(--ink2);min-height:40px}
+.psegs button.on{background:var(--panel);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(23,74,130,.22)}
+.dossier{gap:14px}
+.pane{display:flex;flex-direction:column;gap:12px;min-width:0}.pane[hidden]{display:none}
+.pane>.sec,.pane>.card2,.pane>.quote,.pane>.kpis,.pane>.folds,.pane>.dbox,.pane>.stagebar{background:var(--glass);box-shadow:var(--edge),var(--sh);border-radius:var(--r);padding:16px}
+.sheet .pane>.card2{background:var(--glass);padding:16px}
+.pane>.kpis{gap:8px}.pane>.dmeta{margin:0 4px;font-size:13px}
+.pane>.sec.folded{padding:0}
+.sfold>summary{list-style:none;display:flex;align-items:center;gap:8px;min-height:54px;padding:0 14px 0 16px;font-size:17px;font-weight:600;color:var(--ink);cursor:pointer}
+.sfold>summary::-webkit-details-marker{display:none}
+.sfold>summary::after{content:"";margin-left:auto;flex:none;width:9px;height:9px;border-right:2.4px solid var(--mute);border-bottom:2.4px solid var(--mute);transform:rotate(-45deg);transition:transform .15s}
+.sfold[open]>summary::after{transform:rotate(45deg)}
+.sfold .sfb{padding:0 16px 16px}
+.sfold>summary .bz,.sfold>summary .bzn,.sfold>summary .stl{font-size:12px}
+.pane .folds{padding:6px 16px;gap:0}
+.pane details.cs{border:0;border-radius:0;padding:12px 0;border-top:1px solid var(--line)}.pane details.cs:first-child{border-top:0}
+.pane details.cs summary{font-size:16px;min-height:28px}
+.sec h4{font-size:13px}
+.c2box,.c2blk,.kpi,.dbox,.quote,.verrow{background:var(--acc-soft);border-radius:var(--r2)}
+.kpi b{font-size:19px}.kpi span{font-size:12.5px}
+.goflag{border:0;width:100%;text-align:left;min-height:48px;font-size:15px}
+/* Save stays in reach */
+.pane-edit .foot2,#mEdit .foot2{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));z-index:3;margin:16px -16px calc(-18px - env(safe-area-inset-bottom));padding:12px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg2) 34%)}
+.pane-edit .foot2 .btn.primary,#mEdit .foot2 .btn.primary{min-height:50px;min-width:150px;font-size:17px;font-weight:700}
+.pane-edit>.sec>h4{display:none}
+@media(min-width:720px){.pane-edit .foot2,#mEdit .foot2{bottom:-24px;margin:16px -26px -24px;padding:12px 26px 20px;border-radius:0 0 34px 34px}.grab{margin:0 -26px}}
+/* Depot tab */
+#viewDepot{display:flex;flex-direction:column;gap:12px}#viewDepot[hidden]{display:none}
+#viewDepot .dcard{background:var(--glass);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);box-shadow:var(--edge),var(--sh);border-radius:var(--r);overflow:hidden}
+#viewDepot .dpad{padding:16px}
+#viewDepot .rows{background:var(--acc-soft);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:var(--r2)}
+.dfold{border-top:1px solid var(--line)}.dfold:first-child{border-top:0}
+.dfold>summary,.drow{list-style:none;display:flex;align-items:center;gap:10px;width:100%;min-height:60px;padding:8px 14px 8px 16px;border:0;background:transparent;text-align:left;color:var(--ink);cursor:pointer}
+.dfold>summary::-webkit-details-marker{display:none}
+.dfold>summary>span,.drow>span{flex:1;min-width:0;display:flex;flex-direction:column}
+.dfold>summary b,.drow b{font-size:17px;font-weight:600}
+.dfold>summary small,.drow small{font-size:14px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dfold>summary::after,.drow::after{content:"";flex:none;width:9px;height:9px;border-right:2.4px solid var(--mute);border-bottom:2.4px solid var(--mute);transform:rotate(-45deg);transition:transform .15s}
+.dfold[open]>summary::after{transform:rotate(45deg)}
+.drow{border-top:1px solid var(--line)}
+.dfold .dbody{padding:0 16px 16px}
+.dfold .dbody>.inc>.shd:first-child,#incBox>.shd:first-child{display:none}
+#incBox .c2box b{font-size:19px}
+[hidden]{display:none!important}
+.bztbl th:first-child{background:var(--sheet-top)}
+@media (prefers-color-scheme:dark){.psegs button.on{background:#2a4a70}}
+#sync{border:0;background:transparent}
+.c2st{font-size:13px;min-width:0}.c2st .stars{font-size:10.5px;letter-spacing:0}.c2px .s{font-size:12.5px;white-space:nowrap}
+.pane details.cs.kill{border-top:0;border-radius:14px;padding:12px;margin:6px 0}
+#viewDepot .ghd{font-size:16px;padding:0 2px 8px}
+#incBox .dfold{margin:4px -16px -16px;border-top:1px solid var(--line)}
+#incBox .dfold .dbody{padding:0 16px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <header>
   <div class="bar">
-    <div class="brand"><i></i><span>Radar</span><button class="ver num" id="verBtn" title="What's new"></button></div>
-    <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button><button data-v="next" title="Where your next money goes">Next €</button></div>
+    <h1 id="pgTitle">Ideas</h1><button class="ver num" id="verBtn" title="What's new"></button>
     <span class="sp"></span>
-    <button class="btn small quiet" id="btnMenu" title="Menu" aria-label="Menu">⋯</button>
+    <button class="gbtn" id="fab" title="Add" aria-label="Add: import from Claude or write an idea by hand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="gbtn" id="btnMenu" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></button>
   </div>
   <div class="subbar">
     <span id="subTxt"></span><span class="sp"></span>
@@ -654,6 +807,8 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
     <button class="btn small" id="btnSort" title="Sort and filter"></button>
   </div>
 </header>
+<div class="tabfade" aria-hidden="true"></div>
+<nav class="tabbar seg" aria-label="Tabs"><button class="on" data-v="board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.500 1 2.500h6c0-1 .3-1.800 1-2.500A6 6 0 0 0 12 3z"/></svg><span>Ideas</span></button><button data-v="port" title="Your holdings"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg><span>Portfolio</span><span class="badge" id="portBadge" hidden></span></button><button data-v="next" title="Where your next money goes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8.500 12.500 12 16l3.500-3.500"/></svg><span>Next €</span></button><button data-v="depot" title="Income, tax, mix and your statement"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Depot</span></button></nav>
 
 <main>
   <div class="stalebar" id="staleBar" hidden></div>
@@ -679,12 +834,33 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
     <div class="list" id="portBody"></div>
   </section>
   <section id="viewNext" hidden><div id="nextBody"></div></section>
+  <section id="viewDepot" hidden>
+    <div class="dcard dpad"><div class="inc" id="incBox"></div></div>
+    <div class="dcard">
+      <details class="dfold"><summary><span><b>Withholding tax</b><small id="dsLeak"></small></span></summary><div class="dbody"><div class="inc" id="leakBox"></div></div></details>
+      <details class="dfold"><summary><span><b>X-ray</b><small>Sector, currency, country, biggest stocks</small></span></summary><div class="dbody"><div class="inc" id="xrayBox"></div></div></details>
+      <details class="dfold"><summary><span><b>Your picks vs EUNL</b><small id="dsBench"></small></span></summary><div class="dbody"><div class="inc" id="benchBox"></div></div></details>
+      <button type="button" class="drow" id="btnDec2"><span><b>Decision journal</b><small>Every buy, add, sale and review</small></span></button>
+    </div>
+    <div class="dcard">
+      <details class="dfold" id="dfStmt"><summary><span><b>Statement</b><small id="dsStmt"></small></span></summary><div class="dbody">
+        <div class="pstrip" id="pStrip"></div>
+        <p class="hint" id="depotStatus">No statement imported on this device.</p>
+        <div class="row">
+          <button class="btn primary" id="btnDepot">Update from Trade Republic PDF</button>
+          <button class="btn quiet" id="btnDepotForget">Forget statement</button>
+          <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
+        </div></div></details>
+      <details class="dfold"><summary><span><b>Max weight and Add score</b><small>How "Full" and the score work</small></span></summary><div class="dbody">
+        <label class="capl" for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max weight per stock (3★)<span><input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</span></label>
+        <p class="hint"><span id="pAsOf"></span> The Add score works like the Buy score: 60 points for the distance to your add level, 30 for yield vs. its 5-year average, 10 for the 52-week range. Add zone only at or below your add level. Without an add level (your own, or the buy-below of a Radar card on the same symbol) a stock can't reach the add zone, so it is listed under "No add level yet". Stocks above your max weight are listed as full. The max moves 1.5 points per star of conviction (set in each holding: 5★ = +3, 1★ = −3), unless you give a holding its own max. An unchecked red flag holds a stock at Hold.</p></div></details>
+    </div>
+  </section>
 </main>
-<button class="fab" id="fab" title="Add" aria-label="Add: import from Claude or write an idea by hand">+</button>
 
 <!-- reading mode -->
 <div class="modal" id="mRead"><div class="sheet">
-  <h3><span class="sp"></span><button class="btn small" id="btnEdit">Edit</button><button class="btn small quiet" data-close>✕</button></h3>
+  <h3><span class="sht" id="readT"></span><span class="sp"></span><button class="btn small" id="btnEdit">Edit</button><button class="btn small quiet" data-close>✕</button></h3>
   <div class="dossier" id="dossier"></div>
 </div></div>
 
@@ -760,7 +936,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 
 <!-- holding sheet -->
 <div class="modal" id="mHold"><div class="sheet">
-  <h3><span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <h3><span class="sht" id="holdT"></span><span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
   <div class="dossier" id="holdBody"></div>
 </div></div>
 
@@ -782,24 +958,8 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 </div></div>
 
 <div class="modal" id="mMenu"><div class="sheet">
-  <h3>Menu<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <h3>Settings<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
   <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnDec">Decision journal</button><button class="btn small" id="btnLog">What's new</button></div>
-  <div class="msec">
-    <h4>Portfolio</h4>
-    <div class="inc" id="incBox"></div>
-    <div class="inc" id="leakBox"></div>
-    <div class="inc" id="xrayBox"></div>
-    <div class="inc" id="benchBox"></div>
-    <div class="pstrip" id="pStrip"></div>
-    <p class="hint" id="depotStatus">No statement imported on this device.</p>
-    <div class="row">
-      <button class="btn primary" id="btnDepot">Update from Trade Republic PDF</button>
-      <button class="btn quiet" id="btnDepotForget">Forget statement</button>
-      <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
-    </div>
-    <label class="capl" for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max weight per stock (3★)<span><input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</span></label>
-    <p class="hint"><span id="pAsOf"></span> The Add score works like the Buy score: 60 points for the distance to your add level, 30 for yield vs. its 5-year average, 10 for the 52-week range. Add zone only at or below your add level. Without an add level (your own, or the buy-below of a Radar card on the same symbol) a stock can't reach the add zone, so it is listed under "No add level yet". Stocks above your max weight are listed as full. The max moves 1.5 points per star of conviction (set in each holding: 5★ = +3, 1★ = −3), unless you give a holding its own max. An unchecked red flag holds a stock at Hold.</p>
-  </div>
   <div class="msec">
     <h4>Live prices</h4>
     <p class="hint" id="pxStatus">No price file loaded yet.</p>
@@ -842,8 +1002,18 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.12.1';
+const VERSION='4.0.0';
 const CHANGELOG=[
+  {v:'4.0.0',d:'2026-11-09',t:'Made for the iPhone',items:[
+    'New look: pastel light blue with frosted-glass cards, buttons and bars, in the iPhone system font. Dark mode follows your phone, in deep blue.',
+    'The tabs moved to a floating bar at the bottom, in thumb reach: Ideas, Portfolio, Next € and the new Depot.',
+    'Depot is a tab of its own: your dividend income on top, then withholding tax, the x-ray, your picks vs EUNL, the decision journal and your statement, one tap each. The ⋯ menu was seven screens long; it now only holds settings: prices, backup and GitHub sync.',
+    'The top is slimmer: a large title, + and ⋯ as round buttons, and the Today chips in one line you can swipe sideways. The floating + no longer sits on top of the prices.',
+    'A stock\'s details come in three parts: Overview, Business, Edit. Overview shows the verdict, your level, yield, return and review; valuation, Next €, position, EUNL, thesis and journal open with a tap. Business has the trend, quality, the figures and the yield history. Edit has your buy price, levels and texts, with Save always in reach at the bottom.',
+    'Sheets have a handle on top: drag it down to close. The ✕ is a proper button now.',
+    'Everything you tap is at least 40–44 px high, and input fields use 16 px text, so the iPhone no longer zooms in when you type.',
+    '"Getting close" has a solid blue tile so it stands out from Hold, which is pale blue instead of grey. Green, red and the quality tags keep their meaning.',
+    'Nothing changed in the numbers: scores, levels, Next € and income are the same as in v3.12.1.']},
   {v:'3.12.1',d:'2026-11-09',t:'Fix',items:[
     'The small red, green and blue marks and the ring that floated at the top of a stock\'s details are back where they belong: next to "bear", "level", "fair" and "now" under the valuation scale.']},
   {v:'3.12.0',d:'2026-11-09',t:'Next € ranks by discount to fair value',items:[
@@ -1586,16 +1756,18 @@ const mqWide=window.matchMedia('(min-width:720px)');
 const showTable=()=>view==='board'&&tableMode&&mqWide.matches;
 function applyVis(){ const tbl=showTable(), f=!!focus;
   $('#viewFocus').hidden=!f;
-  $('#viewBoard').hidden=f||view!=='board'||tbl; $('#viewScore').hidden=f||!tbl; $('#viewPort').hidden=f||view!=='port'; $('#viewNext').hidden=f||view!=='next';
+  $('#viewBoard').hidden=f||view!=='board'||tbl; $('#viewScore').hidden=f||!tbl; $('#viewPort').hidden=f||view!=='port'; $('#viewNext').hidden=f||view!=='next'; $('#viewDepot').hidden=f||view!=='depot';
+  $('#pgTitle').textContent=f?FOCUS_T[focus]:view==='port'?'Portfolio':view==='next'?'Next €':view==='depot'?'Depot':'Ideas';
   document.body.classList.toggle('wide',tbl&&!f); }
-function render(){ applyVis(); if(focus) renderFocus(); else view==='port'?renderPort():view==='next'?renderNext():showTable()?renderScore():renderBoard();
+function render(){ applyVis(); if(focus) renderFocus(); else view==='port'?renderPort():view==='next'?renderNext():view==='depot'?renderDepot():showTable()?renderScore():renderBoard();
   renderToday(); renderSub(); renderPxInfo(); renderBadge(); }
 // line under the tabs: what you're looking at, price age, sort
 function renderSub(){
   let t;
   if(view==='port'){ const H=holdings(), T=depotTotal();
     t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtEur(T)}`:''} · ${depot?'statement '+fmtDay(depot.asOf):'no statement yet'}`; }
-  else if(view==='next') t=`ideas and holdings, ranked by discount to your fair value${depot?'':' · no statement, so no mix check'}`;
+  else if(view==='next') t=`ranked by discount to your fair value${depot?'':' · no statement, so no mix check'}`;
+  else if(view==='depot'){ const T=depotTotal(); t=depot?`${T!=null?fmtEur(T)+' · ':''}statement ${fmtDay(depot.asOf)}`:'no statement on this device yet'; }
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
     t=showTable()?'':`${n} idea${n===1?'':'s'}${st?' · '+st.label:''}`; }
   $('#subTxt').textContent=t;
@@ -1643,7 +1815,7 @@ function pxCol(c,cur){
   return e!=null?{main:fmtP(e)+' €',sub:loc}:{main:loc,sub:''};
 }
 function rowEl({tc,tile,txt,tk,nm,extra='',line2,line3,px,onOpen}){
-  const el=document.createElement('button'); el.className='row2'; el.type='button';
+  const el=document.createElement('button'); el.className='row2'+(tc==='var(--t-close)'?' tclose':''); el.type='button';
   el.style.setProperty('--tc',tc||'var(--t-none)');
   el.innerHTML=`<span class="rsc ${txt?'txt':''} num">${tile}</span>
     <span class="rmid"><span class="r1"><span class="tk">${esc(tk)||'?'}</span>${extra}<span class="nm">${esc(nm||'')}</span></span><span class="r2">${line2}</span>${line3?`<span class="r3">${line3}</span>`:''}</span>
@@ -1945,10 +2117,38 @@ function renderScore(){
 $('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['score','toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
-function switchView(v){ view=v==='port'||v==='next'?v:'board'; focus=null; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
+function switchView(v){ view=v==='port'||v==='next'||v==='depot'?v:'board'; focus=null; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
   render(); }
 $$('.seg button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
+// ---------- detail sheets in three parts (v4.0.0) ----------
+// The sheet is still built as one list of sections; this sorts them into Overview / Business / Edit, folds the
+// Overview's sections behind a tap and remembers per stock which part and which folds were open.
+const paneSel={}, paneFor={}, foldOpen={};
+function segSheet(root,kind,id,onEdit){
+  if(paneFor[kind]!==id){ paneFor[kind]=id; paneSel[kind]='over'; foldOpen[kind]=new Set(); }
+  const P={}; for(const k of ['over','biz','edit']){ P[k]=document.createElement('div'); P[k].className='pane pane-'+k; }
+  const where=el=>{ const h=el.matches('.sec')?(el.querySelector(':scope>h4')?.textContent||''):'';
+    if(el.matches('.sec.biz,.quote')||/^(Yield vs|52-week)/.test(h)) return 'biz';
+    return /^Settings/.test(h)?'edit':'over'; };
+  [...root.children].forEach(el=>P[where(el)].appendChild(el));
+  [...P.over.children].forEach(el=>{ const h=el.matches('.sec')?el.querySelector(':scope>h4'):null; if(!h) return;
+    const key=h.textContent.trim().slice(0,24), d=document.createElement('details'), s=document.createElement('summary'), b=document.createElement('div');
+    d.className='sfold'; b.className='sfb'; s.innerHTML=h.innerHTML; h.remove(); while(el.firstChild) b.appendChild(el.firstChild);
+    d.append(s,b); d.open=foldOpen[kind].has(key); d.addEventListener('toggle',()=>{ d.open?foldOpen[kind].add(key):foldOpen[kind].delete(key); });
+    el.appendChild(d); el.classList.add('folded'); });
+  if(P.biz.querySelector('.bzwhy')){ const w=document.createElement('button'); w.type='button'; w.className='warnbox goflag'; w.dataset.p='biz';
+    w.textContent='Red flag in the business. Tap to look at it.'; P.over.insertBefore(w,P.over.children[1]||null); }
+  const segs=[['over','Overview'],['biz','Business'],['edit','Edit']].filter(([k])=>k==='edit'?(P.edit.children.length||onEdit):P[k].children.length);
+  const bar=document.createElement('div'); bar.className='psegs'; bar.setAttribute('role','tablist');
+  bar.innerHTML=segs.map(([k,l])=>`<button type="button" role="tab" data-p="${k}">${l}</button>`).join('');
+  const show=k=>{ if(k==='edit'&&onEdit){ onEdit(); return; } if(!P[k].children.length) k='over'; paneSel[kind]=k;
+    for(const x in P) P[x].hidden=x!==k; bar.querySelectorAll('button').forEach(b=>{ b.classList.toggle('on',b.dataset.p===k); b.setAttribute('aria-selected',b.dataset.p===k); }); };
+  root.addEventListener('click',e=>{ const b=e.target.closest('[data-p]'); if(!b||!root.contains(b)) return; show(b.dataset.p); const sh=root.closest('.sheet'); if(sh) sh.scrollTop=0; });
+  root.append(bar,P.over,P.biz,P.edit); show(paneSel[kind]);
+}
+// open a folded Overview section (the journal buttons scroll to their form)
+const sheetT=(tk,nm)=>`${esc(tk||'?')}<small>${esc(nm||'')}</small>`;
 // ---------- reading mode ----------
 function openRead(id){
   readingId=id; const i=data.ideas.find(x=>x.id===id); if(!i) return;
@@ -1986,6 +2186,7 @@ function openRead(id){
       ${i.status!=='out'?`<div class="dbtns"><button class="btn small" id="iRev">Review now</button></div>`:''}
       <div id="noteList"></div>
       <div class="add"><input id="f_note" placeholder="Add a dated note"><button class="btn" id="btnNote">Add</button></div></div>`;
+  $('#readT').innerHTML=sheetT(i.ticker,i.name); segSheet($('#dossier'),'read',i.id,()=>$('#btnEdit').click());
   renderNotes(i);
   renderStagebar(i);
   const revIdea=due=>reviewForm($('#buyform'),{due,kill:i.kill,months:3,onSave:r=>{
@@ -2079,6 +2280,13 @@ $$('[data-close]').forEach(b=>b.onclick=closeAll);
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeAll(); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeAll(); });
 function closeAll(){ $$('.modal').forEach(m=>m.classList.remove('on')); }
+// v4.0.0: a handle on every sheet; drag it down to close (only the handle, so a scroll or a form never closes it by accident)
+$$('.sheet').forEach(sh=>{ const g=document.createElement('div'); g.className='grab'; g.setAttribute('aria-hidden','true'); sh.prepend(g);
+  let y0=null, dy=0;
+  g.addEventListener('touchstart',e=>{ y0=e.touches[0].clientY; dy=0; sh.style.transition='none'; },{passive:true});
+  g.addEventListener('touchmove',e=>{ if(y0==null) return; e.preventDefault(); dy=Math.max(0,e.touches[0].clientY-y0); sh.style.transform=`translateY(${dy}px)`; },{passive:false});   // preventDefault: no native scroll or fling starts, which would swallow the next tap
+  const end=()=>{ if(y0==null) return; y0=null; const far=dy>90; sh.style.transition='transform .2s'; sh.style.transform=far?'translateY(100%)':''; if(far) setTimeout(()=>{ closeAll(); sh.style.transition='none'; sh.style.transform=''; },190); };
+  g.addEventListener('touchend',end); g.addEventListener('touchcancel',end); g.addEventListener('click',()=>{}); });
 
 // ---------- import from claude ----------
 const openClaude=()=>{ closeAll(); $('#claudeJson').value=''; $('#mClaude').classList.add('on'); };
@@ -2856,7 +3064,16 @@ function incChange(a){
 const sgnEur=v=>`${v>=0.5?'+':v<=-0.5?'−':'±'}${fmtEur(Math.abs(v))}`;
 function chgLine(c,lbl){ const pct=c.before>0?c.total/c.before*100:null;
   return `<p><b>${sgnEur(c.total)} a year</b>${pct!=null?` (${fmtPct(pct,1)})`:''} ${lbl} ${fmtDate(c.from)}: raises ${sgnEur(c.raise)}, new money ${sgnEur(c.newm)}.</p>`; }
-function renderIncome(){
+function renderIncome(){ renderIncome0();
+  // v4.0.0: the list of payers folds away, so the Depot tab starts with the three income figures
+  const box=$('#incBox'), g=box&&box.querySelector('.grp'); if(!g) return;
+  const d=document.createElement('details'), n=g.querySelectorAll('.row2').length, first=g.querySelector('.row2 .tk');
+  d.className='dfold'; d.open=!!folds['inc.open'];
+  d.innerHTML=`<summary><span><b>${depot?'Who pays it':'Yields after withholding'}</b><small>${n?`${g.querySelector('.ghd span:last-child').textContent} holdings${first?' · biggest: '+esc(first.textContent):''}`:'No dividends found'}</small></span></summary><div class="dbody"></div>`;
+  d.addEventListener('toggle',()=>{ folds={...folds,'inc.open':d.open?1:0}; try{ localStorage.setItem(LS_FOLD,JSON.stringify(folds)); }catch{} });
+  const wrap=g.parentElement; wrap.replaceWith(d); d.querySelector('.dbody').appendChild(wrap); g.querySelector('.ghd').hidden=true;
+  [...box.children].filter(e=>e!==d&&e.matches('p.hint')).forEach(e=>d.querySelector('.dbody').appendChild(e)); box.appendChild(d); }
+function renderIncome0(){
   const box=$('#incBox'); if(!box) return;
   histSync(); renderLeak(); renderXray(); renderBench();
   const I=incomeOf(), list=document.createElement('div');
@@ -3163,14 +3380,13 @@ function renderToday(){
   const parts=TODAY.filter(p=>p.k==='level'||D[p.k].length).map(p=>{ const n=D[p.k].length;
     const cls=[p.k==='level'?'lvl':'',p.k==='level'&&!n?'zero':'',p.k==='due'||p.k==='stale'?'warn':'',focus===p.k?'on':''].join(' ');
     return `<button type="button" data-k="${p.k}" class="${cls}" title="${p.title}"><b>${n}</b> ${n===1?p.one:p.many}</button>`; });
-  { const I=incomeOf(); parts.push(`<button type="button" class="inc" data-k="inc" title="Dividend income a year from your depot. Tap for the details.">${I?`<b>${fmtEur(I.G)}</b> income`:'income'}</button>`); }
   if(prices.updated){ const old=pxStaleH(); parts.push(`<button type="button" class="px ${old?'old':''}" data-k="px" title="Age of the last price change. Tap for details.">prices ${agoShort(prices.updated)}</button>`); }
   el.innerHTML=parts.join('');
   el.querySelectorAll('button').forEach(b=>b.onclick=()=>todayTap(b.dataset.k));
 }
 function todayTap(k){
   if(k==='px'){ $('#btnMenu').click(); return; }
-  if(k==='inc'){ $('#btnMenu').click(); requestAnimationFrame(()=>$('#incBox').scrollIntoView({block:'start'})); return; }
+  if(k==='inc'){ switchView('depot'); return; }
   if(focus===k){ focus=null; render(); return; }
   const L=(todayCache||todayData())[k]||[];
   if(k==='level'&&!L.length){ switchView('next'); return; }
@@ -3190,6 +3406,18 @@ function renderFocus(){
   hd.querySelector('button').onclick=()=>{ focus=null; render(); };
   b.appendChild(hd);
   b.appendChild(groupEl(FOCUS_T[focus],L.map(o=>o.kind==='idea'?ideaRow(o.i,focus==='due'):holdRow(o.r,focus==='due')),'Nothing here any more.'));
+}
+// ---------- Depot tab (v4.0.0): income, tax, mix, benchmark and the statement, out of the ⋯ menu ----------
+function renderDepot(){
+  renderPort(); renderIncome(); renderDepotStatus();
+  const set=(id,t)=>{ const e=$(id); if(e) e.textContent=t; }, I=incomeOf();
+  if(I){ const N=I.R.reduce((a,r)=>a+(r.lostEur||0),0), M=I.R.reduce((a,r)=>a+(r.backEur||0),0);
+    set('#dsLeak',N+M>=.5?`${fmtEur(N)} a year lost${M>=.5?` · ${fmtEur(M)} more without a reclaim`:''}`:'Nothing lost'); }
+  else set('#dsLeak','What each country keeps');
+  const B=holdings().filter(h=>hSym(h)&&hSym(h)!==BENCH.sym&&h.kind!=='bond'&&(!depot||posOf_(h))).map(benchOf).filter(o=>o&&o.gap!=null);
+  set('#dsBench',B.length?`${B.filter(o=>o.gap>0).length} of ${B.length} holdings ahead`:'Set "Bought around" dates to see it');
+  set('#dsStmt',depot?`${fmtDate(depot.asOf)} · import a new PDF`:'Import your Trade Republic PDF');
+  if(!depot) $('#dfStmt').open=true;
 }
 function renderPort(){
   const rows=portRows(), body=$('#portBody'), T=depotTotal();
@@ -3303,6 +3531,7 @@ function openHold(id){
     </div>
     <p class="hint">The buy price and date stay in this browser, like your share counts. For several purchases, take a date roughly in the middle: it starts the comparison with EUNL and, for foreign stocks, splits your € return into the stock's own move and the currency's. Everything else is saved to GitHub.</p>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
+  $('#holdT').innerHTML=sheetT(h.short||h.symbol,h.name); segSheet($('#holdBody'),'hold',h.id);
   const toIdea=e=>{ e&&e.preventDefault(); closeAll(); openRead(idea.id); };
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
   wireBiz($('#holdBody'),()=>openHold(h.id));
@@ -3478,7 +3707,7 @@ function openLog(){
 }
 $('#verBtn').onclick=openLog;
 $('#btnLog').onclick=openLog;
-$('#btnDec').onclick=openDecisions;
+$('#btnDec').onclick=openDecisions; $('#btnDec2').onclick=openDecisions;
 if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 renderVersion();
 
