@@ -89,8 +89,29 @@
         }
       ],
       "createdAt": "2026-11-06T11:45:00.000Z",
-      "updatedAt": "2026-11-06T11:50:00.000Z",
-      "symbol": "ENI.MI"
+      "updatedAt": "2026-11-09T10:34:52.000Z",
+      "symbol": "ENI.MI",
+      "val": {
+        "date": "2026-11-09",
+        "price": 25.01,
+        "methods": [
+          {
+            "t": "9× mid-cycle EPS ~€1.83 (adj. net profit ~€5.5bn at $70 Brent, ~3.0bn shares after buybacks; own history ~8–10×)",
+            "v": 16.5
+          },
+          {
+            "t": "Gordon on mid-cycle FCF/sh ~€1.80 (cash flow ~€12.4bn at $70 Brent − €7bn gross capex), g 2 %, 8 % hurdle",
+            "v": 30.6
+          }
+        ],
+        "base": 23.5,
+        "discount": 35,
+        "g": 2,
+        "why": "Cyclical: valued at $70 Brent, not today's ~$95, which inflates 2026 (≈7.2 % ordinary yield at the level)",
+        "bear": 8.4,
+        "bearWhy": "€1.20 EPS at $55 Brent × 7×",
+        "reverse": "At €25 the mid-cycle FCF view implies only ~1 %/yr growth, while the earnings view says the price assumes ~$90 Brent for years. The two methods disagree a lot."
+      }
     },
     {
       "id": "ko-20261105",
@@ -157,7 +178,28 @@
         }
       ],
       "createdAt": "2026-11-06T12:49:42.223Z",
-      "updatedAt": "2026-11-06T20:08:25.779Z"
+      "updatedAt": "2026-11-09T10:34:52.000Z",
+      "val": {
+        "date": "2026-11-09",
+        "price": 1257.5,
+        "methods": [
+          {
+            "t": "14× NTM underlying EPS ~94p (FY27 guided +15–16 % on 78.0p ≈ 90p, FY28 +8–10 %; own history ~14–15×)",
+            "v": 1316
+          },
+          {
+            "t": "Gordon on the dividend ~50p next 12m (48.49p FY26 + CPIH), g 3 %, 8 % hurdle",
+            "v": 1004
+          }
+        ],
+        "base": 1160,
+        "discount": 20,
+        "g": 3,
+        "why": "Regulated networks, but FCF negative for years (≈£13.5bn capex a year) and dividend only grows with CPIH (≈5.4 % yield at the level)",
+        "bear": 880,
+        "bearWhy": "80p EPS (tougher UK regulation, higher rates) × 11×",
+        "reverse": "At 1,258p the 3.9 % yield needs ~4.1 %/yr dividend growth forever for 8 %, above the CPIH policy."
+      }
     },
     {
       "id": "wluiammw52r9pl",
