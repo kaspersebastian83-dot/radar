@@ -11,6 +11,7 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 23.4,
       "currency": "EUR",
+      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 19.5,
@@ -40,6 +41,7 @@
       "loggedDate": "2026-11-05",
       "loggedPrice": 86.5,
       "currency": "USD",
+      "symbol": "",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 70,
@@ -139,8 +141,6 @@
       "bear": "~28x earnings for ~10% EPS growth, yield ~2.2% at the low end of its own range; 2027 refranchising headwind will flatter nothing; sugar taxes and tariff/aluminium costs; IRS transfer-pricing case with a potential $6 bn+ liability still on appeal.",
       "kill": "Global unit case volume negative for two consecutive quarters; dividend growth below 3% a year or payout ratio above 85%; operating margin falls back below 30%; adverse final IRS ruling funded by debt that pushes net leverage above 2.5x.",
       "nextReview": "2027-02-15",
-      "boughtDate": "",
-      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-05",
@@ -235,8 +235,6 @@
       "bear": "External-growth model: total AFFO grows ~10% but per-share only 3–4% because of constant share issuance; same-store rent growth of 1.1% is below inflation. Pivot into loans, preferred equity and a private fund adds credit risk (provisions up to $14.2m from $11.6m). Retail tenant concentration (dollar stores, pharmacies, convenience). Analysts cooling: Scotiabank downgrade to Sector Perform ($59 PT), Stifel PT cut to $63.75. Highly rate-sensitive; 52-week range $53–68.",
       "kill": "I'm wrong if: AFFO per share growth falls below 2% for a full year; occupancy drops below 97.5%; net debt/EBITDAre rises above 6.0x; credit-loss provisions on loans/preferred equity exceed $25m in a single quarter; or the monthly dividend is frozen for more than 12 months.",
       "nextReview": "2027-03-01",
-      "boughtDate": "",
-      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-06",
@@ -267,8 +265,6 @@
       "bear": "Bought at a 12-month high after +15% since October; P&C reinsurance pricing is softening (Jan renewals volume −8%) and 2026 earnings benefit from below-average cat losses; analyst average target €554 is below the price (RBC 530, UBS 515); one mega-cat or casualty reserve charge can cost 10–15% quickly; dividend growth will slow to EPS growth (high single digits), the 20% hikes are over.",
       "kill": "I'm wrong if: the dividend is cut or frozen; Solvency II falls below 200%; P&C reinsurance combined ratio exceeds 95% for two consecutive years; group ROE drops below 14% for a full year; or 2027 net profit guidance comes in below €6.3bn without a major cat event explaining it.",
       "nextReview": "2027-03-01",
-      "boughtDate": "",
-      "boughtPrice": null,
       "notes": [
         {
           "date": "2026-11-06",
