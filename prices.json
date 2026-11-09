@@ -1,23 +1,23 @@
 {
-  "updated": "2026-11-09T06:41:31+00:00",
+  "updated": "2026-11-09T06:58:27+00:00",
   "quotes": {
     "6367.T": {
-      "price": 22425.0,
+      "price": 22445.0,
       "prevClose": 21700.0,
       "currency": "JPY",
       "yearHigh": 26440.0,
       "yearLow": 17380.0,
       "divTTM": 360.0,
-      "yieldTTM": 1.61,
+      "yieldTTM": 1.6,
       "payFreq": 2,
       "avgYield5y": 1.31,
       "yieldLow5y": 0.65,
       "yieldHigh5y": 2.06,
       "yieldYears": 5.0,
-      "time": "2026-11-09T06:41:31+00:00"
+      "time": "2026-11-09T06:58:27+00:00"
     },
     "8053.T": {
-      "price": 1639.0,
+      "price": 1638.5,
       "prevClose": 1597.0,
       "currency": "JPY",
       "yearHigh": 1943.75,
@@ -29,22 +29,22 @@
       "yieldLow5y": 2.03,
       "yieldHigh5y": 6.8,
       "yieldYears": 5.0,
-      "time": "2026-11-09T06:41:31+00:00"
+      "time": "2026-11-09T06:58:27+00:00"
     },
     "8058.T": {
-      "price": 5165.0,
+      "price": 5170.0,
       "prevClose": 4926.0,
       "currency": "JPY",
       "yearHigh": 6012.0,
       "yearLow": 3507.0,
       "divTTM": 117.0,
-      "yieldTTM": 2.27,
+      "yieldTTM": 2.26,
       "payFreq": 2,
       "avgYield5y": 2.96,
       "yieldLow5y": 1.93,
       "yieldHigh5y": 3.93,
       "yieldYears": 5.0,
-      "time": "2026-11-09T06:41:31+00:00"
+      "time": "2026-11-09T06:58:27+00:00"
     },
     "ALV.DE": {
       "price": 451.1,
@@ -443,8 +443,8 @@
   },
   "errors": {},
   "fx": {
-    "GBP": 0.83407,
-    "JPY": 176.654999,
+    "GBP": 0.83408,
+    "JPY": 176.572998,
     "USD": 1.116819
   },
   "fxAt": {
