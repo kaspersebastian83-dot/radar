@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-09T07:41:07+00:00",
+ "updated": "2026-11-09T09:58:07+00:00",
  "companies": {
   "6367.T": {
    "sector": "Industrials",
@@ -214,7 +214,8 @@
     ]
    ],
    "nextEarnings": "2027-02-03",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-11-05",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "8053.T": {
    "sector": "Industrials",
@@ -430,7 +431,8 @@
     ]
    ],
    "nextEarnings": "2026-11-02",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-11-02",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "8058.T": {
    "sector": "Industrials",
@@ -646,7 +648,8 @@
     ]
    ],
    "nextEarnings": "2027-02-04",
-   "time": "2026-11-07T11:54:51+00:00"
+   "lastEarnings": "2026-11-04",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "ALV.DE": {
    "sector": "Financial Services",
@@ -862,7 +865,8 @@
     ]
    ],
    "nextEarnings": "2026-11-12",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-08-07",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "AMZN": {
    "sector": "Consumer Cyclical",
@@ -951,7 +955,8 @@
    ],
    "divYears": [],
    "nextEarnings": "2026-10-29",
-   "time": "2026-11-06T19:22:24+00:00"
+   "lastEarnings": "2026-10-29",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "ASML.AS": {
    "sector": "Technology",
@@ -1141,7 +1146,8 @@
     ]
    ],
    "nextEarnings": "2026-10-14",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-14",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "AXP": {
    "sector": "Financial Services",
@@ -1353,7 +1359,8 @@
     ]
    ],
    "nextEarnings": "2027-01-29",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-23",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "BEPC": {
    "sector": "Utilities",
@@ -1474,7 +1481,8 @@
     ]
    ],
    "nextEarnings": "2027-01-29",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-11-04",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "CVX": {
    "sector": "Energy",
@@ -1694,7 +1702,8 @@
     ]
    ],
    "nextEarnings": "2027-01-29",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-30",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "DG.PA": {
    "sector": "Industrials",
@@ -2134,7 +2143,8 @@
     ]
    ],
    "nextEarnings": "2026-11-12",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-07-31",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "ENI.MI": {
    "sector": "Energy",
@@ -2349,7 +2359,8 @@
     ]
    ],
    "nextEarnings": "2026-10-23",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-23",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "EOAN.DE": {
    "sector": "Utilities",
@@ -2557,7 +2568,8 @@
     ]
    ],
    "nextEarnings": "2026-11-11",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-08-12",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "GOOGL": {
    "sector": "Communication Services",
@@ -2662,7 +2674,8 @@
     ]
    ],
    "nextEarnings": "2026-10-28",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-28",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "JNJ": {
    "sector": "Healthcare",
@@ -2882,7 +2895,8 @@
     ]
    ],
    "nextEarnings": "2027-01-26",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-13",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "KO": {
    "sector": "Consumer Defensive",
@@ -3102,7 +3116,8 @@
     ]
    ],
    "nextEarnings": "2026-10-27",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-27",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "MAIN": {
    "sector": "Financial Services",
@@ -3276,7 +3291,8 @@
     ]
    ],
    "nextEarnings": "2026-11-05",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-11-05",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "META": {
    "sector": "Communication Services",
@@ -3381,7 +3397,8 @@
     ]
    ],
    "nextEarnings": "2027-01-27",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-21",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "MUV2.DE": {
    "sector": "Financial Services",
@@ -3597,7 +3614,8 @@
     ]
    ],
    "nextEarnings": "2026-11-12",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-08-07",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "NG.L": {
    "sector": "Utilities",
@@ -3816,7 +3834,8 @@
     ]
    ],
    "nextEarnings": "2026-11-05",
-   "time": "2026-11-07T11:54:51+00:00"
+   "lastEarnings": "2026-11-05",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "O": {
    "sector": "Real Estate",
@@ -4032,7 +4051,8 @@
     ]
    ],
    "nextEarnings": "2026-11-02",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-11-02",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "PLD": {
    "sector": "Real Estate",
@@ -4245,7 +4265,8 @@
     ]
    ],
    "nextEarnings": "2027-01-20",
-   "time": "2026-11-06T19:30:25+00:00"
+   "lastEarnings": "2026-10-15",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "SAN.PA": {
    "sector": "Healthcare",
@@ -4360,12 +4381,12 @@
     ],
     [
      2005,
-     1.4506,
+     1.4501,
      2
     ],
     [
      2006,
-     1.7974,
+     1.7969,
      2
     ],
     [
@@ -4465,7 +4486,8 @@
     ]
    ],
    "nextEarnings": "2027-01-28",
-   "time": "2026-11-09T07:41:07+00:00"
+   "lastEarnings": "2026-10-30",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "VICI": {
    "sector": "Real Estate",
@@ -4600,7 +4622,8 @@
     ]
    ],
    "nextEarnings": "2026-10-28",
-   "time": "2026-11-06T20:33:00+00:00"
+   "lastEarnings": "2026-10-28",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "WKL.AS": {
    "sector": "Industrials",
@@ -4820,7 +4843,8 @@
     ]
    ],
    "nextEarnings": null,
-   "time": "2026-11-06T20:33:00+00:00"
+   "lastEarnings": "2008-02-27",
+   "time": "2026-11-09T09:58:07+00:00"
   },
   "ZTS": {
    "sector": "Healthcare",
@@ -4980,7 +5004,8 @@
     ]
    ],
    "nextEarnings": "2026-11-05",
-   "time": "2026-11-07T11:54:51+00:00"
+   "lastEarnings": "2026-11-05",
+   "time": "2026-11-09T09:58:07+00:00"
   }
  },
  "errors": {}
