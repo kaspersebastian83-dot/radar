@@ -109,11 +109,16 @@
       "currency": "JPY",
       "kind": "stock",
       "sector": "Industrials – HVAC",
-      "addBelow": null,
+      "addBelow": 17000,
       "maxWeight": null,
       "idea": "6367",
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ ¥22,425 (9 Nov close). Base ~¥22,600 = avg of 22x (below its ~25x 5-yr median P/E) × NTM EPS ~¥1,000 (¥22,000) and Gordon on FCF/sh ~¥930 next yr, g 4 %, 8 % hurdle (¥23,250). Average uncertainty (8 % margins, yen, US tariffs/housing) → 25 % off = ¥17,000 (≈2.2 % yield on ¥370). Bear ¥12,800 = ¥800 EPS (strong yen + US slump) × 16x. Old Radar card had buy < ¥19,500 (~20x) — this is stricter.",
+      "updatedAt": "2026-11-09T08:00:12.592Z",
+      "thesis": "Global #1 in air conditioning, ~84 % of sales abroad; dividend-growth compounder, not income (DPS ¥200 FY3/22 → ¥370 FY3/27e). H1 FY3/27 sales +17 %, record OP; FY guide raised again, dividend +¥10 to ¥370. Fusion 30: 10 % OP margin, 12 % ROE by FY3/29; Elliott stake + ¥350bn buyback.",
+      "bull": "Heat pumps, data-centre chillers, India; pricing absorbed ~¥41bn of US tariffs; buyback ~5 % of market cap; held up on the −6 % Nikkei day (6 Nov).",
+      "bear": "~22x earnings for an 8–9 % operating margin; guide assumes a weak yen; US residential soft; chemicals OP −28 % last year and PFAS liability tail. Japan WHT 15.315 %, 15 % credited → ~0.3 pp lost (all 15 % lost if the dividend falls inside your Sparerpauschbetrag).",
+      "kill": "I'm wrong if OP margin stays below 9 % through FY3/28, the buyback is dropped, or the progressive dividend is broken.",
+      "nextReview": "2027-02-05"
     },
     {
       "id": "h-US02079K3059",
@@ -334,11 +339,16 @@
       "currency": "JPY",
       "kind": "stock",
       "sector": "Trading house",
-      "addBelow": null,
+      "addBelow": 2300,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ ¥5,165 (9 Nov close). Base ~¥3,565 = avg of 11x (its history ~9–10x plus some re-rating) × NTM adjusted EPS ~¥262 (¥2,880; FY3/27 adjusted net income ~¥930bn) and Gordon on normalised FCF/sh ~¥250, g 2 % (commodities), 8 % hurdle (¥4,250). Cyclical/complex → 35 % off = ¥2,300 (≈5.4 % yield on ¥125). Bear ¥1,600 = ¥200 EPS (commodity slump) × 8x. The two methods disagree a lot: the FCF view says today's price is roughly fair, the earnings multiple says it's ~2x its history. Reported FY3/27 EPS ¥330 includes one-off securities gains.",
+      "updatedAt": "2026-11-09T08:00:12.592Z",
+      "thesis": "Japan's largest trading house: LNG, metallurgical coal, copper, food, power, autos. H1 FY3/27 profit +74 % to ¥620bn; FY guide raised to ¥1.2tn (ROE ~12.7 %); DPS ¥110 → ¥125 progressive; buyback up to ¥1tn. Berkshire holding. Hold; add only in a commodity-led sell-off.",
+      "bull": "Huge shareholder returns (~¥1.4tn in FY3/26 incl. ¥1.0tn buyback, ~7 % of market cap in total); share count −8 % in two years; diversified cash flow; payout ≥40 % with progressive DPS.",
+      "bear": "At ¥5,165 ~20x adjusted earnings and 2.3 % yield vs 3.0 % 5-yr average; profit boosted by asset-sale gains; coal/LNG/copper prices and the yen drive it; Sakhalin/Russia exposure. Japan WHT 15.315 %, 15 % credited → ~0.3 pp lost.",
+      "kill": "I'm wrong if adjusted net income falls below ¥700bn, the progressive dividend is broken, or buybacks stop while the shares trade above 1.5x book.",
+      "nextReview": "2027-02-06"
     },
     {
       "id": "h-US30303M1027",
@@ -429,11 +439,16 @@
       "currency": "JPY",
       "kind": "stock",
       "sector": "Trading house",
-      "addBelow": null,
+      "addBelow": 1180,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ ¥1,639 (9 Nov close; post 4-for-1 split). Base ~¥1,820 = avg of 11x (history ~8–9x plus some re-rating) × NTM EPS ~¥145 (¥1,595; FY3/27 guide ¥670bn) and Gordon on normalised FCF/sh ~¥120, g 2 %, 8 % hurdle (¥2,040). Cyclical/complex → 35 % off = ¥1,180 (≈3.7 % yield on ¥44). Bear ¥630 = ¥90 EPS (FY3/24-type year) × 7x. Watch flag 'net debt 3.1x EBITDA' comes from the aircraft-leasing (Sumisho Air Lease) and SCSK stake build-up — leasing carries debt by design; not a red flag.",
+      "updatedAt": "2026-11-09T08:00:12.592Z",
+      "thesis": "Diversified trading house: metals, energy/LNG, autos, real estate, IT (SCSK), aircraft leasing. H1 FY3/27 profit +15.5 % to ¥348bn; FY guide raised 6 % to ¥670bn; DPS raised to ¥44 (post-split, ≈¥176 pre-split). ~11x earnings, PBR ~1.6, ROE ~14 %. Add only in a commodity sell-off.",
+      "bull": "Less commodity-heavy than peers; non-resource growth (leasing, SCSK, real estate); progressive dividend; Berkshire holding; buybacks.",
+      "bear": "Copper/LNG/aluminium and a weak yen flatter FY3/27; the Ambatovy nickel impairment hit FY3/24; leverage rising with leasing; yield 2.6 % vs 3.8 % 5-yr average. Japan WHT 15.315 %, 15 % credited → ~0.3 pp lost.",
+      "kill": "I'm wrong if core profit falls below ¥500bn without one-offs, another ¥100bn+ impairment hits, or net debt/equity goes above 1.0x.",
+      "nextReview": "2027-02-06"
     },
     {
       "id": "h-IE00B8GKDB10",
