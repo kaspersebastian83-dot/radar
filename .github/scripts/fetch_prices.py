@@ -4,6 +4,14 @@ Runs in GitHub Actions. Symbols are Yahoo Finance symbols: the card's `symbol`
 field if set, otherwise its `ticker` (e.g. KO, ENI.MI, SAP.DE, NESN.SW).
 prices.json is only rewritten when something changed, so a closed market
 doesn't produce empty commits.
+
+history.json (v3.11.0): month-end closes per symbol for the benchmark comparison
+(each stock vs EUNL since you bought it). Two series per symbol: `px` = close
+(split-adjusted) and `tr` = Yahoo's adjusted close (dividends reinvested, gross),
+plus month-end EUR rates per currency. Yahoo back-adjusts `tr` whenever a new
+dividend is paid, so a symbol's whole series is refetched each time a month
+completes; within one fetch the ratios are consistent. Written at most once a
+month per symbol (and when a new symbol appears).
 """
 import json
 import pathlib
@@ -15,6 +23,9 @@ import yfinance as yf
 IDEAS = pathlib.Path("ideas.json")
 PORT = pathlib.Path("portfolio.json")  # holdings: symbols and add levels only, never share counts
 PRICES = pathlib.Path("prices.json")
+HISTORY = pathlib.Path("history.json")
+BENCH = "EUNL.DE"   # iShares Core MSCI World (Acc), the benchmark Basti already owns
+HIST_YEARS = 15     # backfill depth
 
 
 def num(v, nd=4):
@@ -131,6 +142,84 @@ def fetch_fx(codes, dates):
     return fx, fx_at
 
 
+def ym(ts):
+    return f"{ts.year:04d}-{ts.month:02d}"
+
+
+def month_series(h, col):
+    """Month-end values keyed 'YYYY-MM', complete months only."""
+    if h is None or h.empty or col not in h:
+        return {}
+    s = h[col].dropna()
+    s.index = s.index.tz_localize(None) if s.index.tz is not None else s.index
+    cur = ym(pd.Timestamp.now())
+    out = {}
+    for ix, v in s.items():  # monthly bars can carry an extra partial row: the last one per month wins
+        k = ym(ix)
+        if k < cur:
+            out[k] = num(v, 4)
+    return out
+
+
+def pack(d, start, end):
+    """dict 'YYYY-MM' -> value  =>  list from start to end (None where missing)."""
+    out, y, m = [], int(start[:4]), int(start[5:])
+    while f"{y:04d}-{m:02d}" <= end:
+        out.append(d.get(f"{y:04d}-{m:02d}"))
+        m += 1
+        if m > 12:
+            y, m = y + 1, 1
+    return out
+
+
+def update_history(symbols, codes):
+    """Refresh history.json when a month has completed since the last write or a symbol / currency is new."""
+    try:
+        prev = json.loads(HISTORY.read_text(encoding="utf-8"))
+    except Exception:
+        prev = {}
+    n = pd.Timestamp.now()
+    last = f"{n.year - (n.month == 1):04d}-{(n.month - 2) % 12 + 1:02d}"   # last complete month
+    if (prev.get("month") == last and set(symbols) <= set(prev.get("series", {}))
+            and set(codes) <= set(prev.get("fx", {}))):
+        print("history: up to date")
+        return
+    start_ts = pd.Timestamp.now().normalize() - pd.DateOffset(years=HIST_YEARS)
+    series, fx, errs = {}, {}, {}
+    for s in symbols:
+        try:
+            t = yf.Ticker(s)
+            h = t.history(start=start_ts.strftime("%Y-%m-%d"), interval="1mo", auto_adjust=False, actions=False)
+            px, tr = month_series(h, "Close"), month_series(h, "Adj Close")
+            if not px:
+                raise ValueError("no monthly data")
+            first = min(px)
+            try:
+                cur = t.fast_info.currency
+            except Exception:
+                cur = None
+            series[s] = {"cur": cur, "from": first, "px": pack(px, first, last), "tr": pack(tr or px, first, last)}
+        except Exception as e:
+            errs[s] = str(e)[:200]
+            if s in prev.get("series", {}):
+                series[s] = prev["series"][s]   # keep the old series rather than lose it
+    for c in sorted(codes):
+        try:
+            h = yf.Ticker(f"EUR{c}=X").history(start=start_ts.strftime("%Y-%m-%d"), interval="1mo", auto_adjust=False, actions=False)
+            v = month_series(h, "Close")
+            if v:
+                first = min(v)
+                fx[c] = {"from": first, "v": pack(v, first, last)}
+        except Exception as e:
+            errs["fx:" + c] = str(e)[:200]
+            if c in prev.get("fx", {}):
+                fx[c] = prev["fx"][c]
+    out = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds"), "month": last,
+           "bench": BENCH, "series": series, "fx": fx, "errors": errs}
+    HISTORY.write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    print(f"history: wrote {len(series)} symbols, {len(fx)} currencies, {len(errs)} errors")
+
+
 def main():
     if not IDEAS.exists() and not PORT.exists():
         print("no ideas.json or portfolio.json yet")
@@ -223,6 +312,10 @@ def main():
                 quotes[s] = {**prev_q[s], "stale": True}
 
     codes = {fx_code(q.get("currency"))[0] for q in quotes.values()} - {"EUR", ""}
+    try:
+        update_history(sorted(set(symbols) | {BENCH}), codes)
+    except Exception as e:   # the benchmark data must never block the prices
+        print(f"history failed: {e}")
     fx, fx_at = fetch_fx(codes, sorted(log_dates))
     if not fx and prev.get("fx"):  # FX failed: keep the last good rates
         fx, fx_at = prev.get("fx", {}), prev.get("fxAt", {})
