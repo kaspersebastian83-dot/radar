@@ -336,6 +336,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .c2val{font-size:12.5px;line-height:1.35;color:var(--ink2);margin-top:-4px}
 .c2val b{font-weight:800}.c2val .up,.val .up{color:var(--teal)}.c2val .dn,.val .dn{color:var(--coral)}
 .stl{color:var(--coral);font-weight:700}
+.stalebar{background:var(--coral-soft);color:var(--ink);border-radius:var(--r2);padding:10px 12px;margin:0 0 14px;font-size:13px;line-height:1.45}.stalebar b{color:var(--coral)}
 .dbox{background:var(--panel2);border-radius:var(--r2);padding:12px 14px}.dbox[hidden]{display:none}
 .dform{display:flex;flex-direction:column;gap:10px}
 .dform .dh{font-size:15px;font-weight:800}
@@ -404,7 +405,7 @@ details.vform .form{margin-top:10px}
 .c2bar .rt{position:relative;flex:1;height:14px}
 .c2bar .tr{position:absolute;left:0;right:0;top:4px;height:6px;border-radius:3px;background:var(--line)}
 .c2bar .zn{position:absolute;left:0;top:4px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--teal) 32%,transparent)}
-.c2bar .bt{position:absolute;top:0;width:2px;height:14px;margin-left:-1px;background:var(--ink)}
+.c2bar .bt{position:absolute;top:0;width:2px;height:14px;margin-left:-1px;background:var(--ink)}.c2bar .bt.b2{background:var(--teal);width:3px}
 .c2bar .nw{position:absolute;top:1px;width:12px;height:12px;box-sizing:border-box;margin-left:-6px;border-radius:50%;background:var(--panel);border:3px solid var(--tc)}
 .c2box{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:var(--panel2);border-radius:var(--r2);padding:10px 12px}
 .c2box>div{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -577,6 +578,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 </header>
 
 <main>
+  <div class="stalebar" id="staleBar" hidden></div>
   <section id="viewBoard"><div class="list" id="grid"></div></section>
   <section id="viewScore" hidden>
     <div class="sum" id="summary"></div>
@@ -620,6 +622,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
     <label>Yahoo symbol<input id="f_symbol" placeholder="ENI.MI (blank = ticker)" style="text-transform:uppercase"></label>
     <label>Manual price<input id="f_currentPrice" type="number" step="any" inputmode="decimal" placeholder="only if no quote"></label>
     <label>Buy below<input id="f_buyBelow" type="number" step="any" inputmode="decimal"></label>
+    <label>2nd level (buy more)<input id="f_buyBelow2" type="number" step="any" inputmode="decimal" placeholder="optional"></label>
     <label>Next review<input id="f_nextReview" type="date"></label>
     <label>Bought on<input id="f_boughtDate" type="date"></label>
     <label>Bought at<input id="f_boughtPrice" type="number" step="any" inputmode="decimal" placeholder="price per share"></label>
@@ -709,8 +712,8 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
       <button class="btn quiet" id="btnDepotForget">Forget statement</button>
       <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
     </div>
-    <label class="capl" for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max weight per stock<span><input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</span></label>
-    <p class="hint"><span id="pAsOf"></span> The Add score works like the Buy score: 60 points for the distance to your add level, 30 for yield vs. its 5-year average, 10 for the 52-week range. Add zone only at or below your add level. Without an add level (your own, or the buy-below of a Radar card on the same symbol) a stock can't reach the add zone, so it is listed under "No add level yet". Stocks above your max weight are listed as full. An unchecked red flag holds a stock at Hold.</p>
+    <label class="capl" for="capIn" title="Stocks above this share of the depot are marked as full and don't get flagged as add candidates">Max weight per stock (3★)<span><input id="capIn" type="number" min="1" max="100" step="0.5" inputmode="decimal"> %</span></label>
+    <p class="hint"><span id="pAsOf"></span> The Add score works like the Buy score: 60 points for the distance to your add level, 30 for yield vs. its 5-year average, 10 for the 52-week range. Add zone only at or below your add level. Without an add level (your own, or the buy-below of a Radar card on the same symbol) a stock can't reach the add zone, so it is listed under "No add level yet". Stocks above your max weight are listed as full. The max moves 1.5 points per star of conviction (set in each holding: 5★ = +3, 1★ = −3), unless you give a holding its own max. An unchecked red flag holds a stock at Hold.</p>
   </div>
   <div class="msec">
     <h4>Live prices</h4>
@@ -754,8 +757,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.3.0';
+const VERSION='3.4.0';
 const CHANGELOG=[
+  {v:'3.4.0',d:'2026-11-09',t:'Second level, conviction, and trust',items:[
+    'Optional 2nd level ("back up the truck") on ideas (Edit) and holdings (settings). It shows as a second green tick on the 52-week bar, in the card, and the row says "at your 2nd level" once the price gets there, so you know when a bigger tranche is in order.',
+    'Conviction on holdings: set 1–5 stars in a holding\'s settings (or it takes the stars of its Radar card). The max weight moves with it: 3★ = your default 7 %, each star ±1.5 points (5★ = 10 %, 1★ = 4 %). Your own max per holding still wins.',
+    'Foreign levels now show the euro amount next to them, e.g. "2 % above buy at 88 (≈ 76 €)", and so does the fair value in the Valuation section.',
+    'If the automatic price update stops (GitHub pauses it after 60 days without activity), a red note on top says how old the prices are and how to restart it.',
+    'Radar now works offline from the home-screen icon: it opens with the last prices it saw, and fetches fresh ones as soon as there\'s a connection.',
+    'Coca-Cola and Brookfield (BEPC) are marked "Checked, it\'s fine" with the reasons (Fairlife one-off; Yahoo consolidation artifact), so they\'re no longer held back.']},
   {v:'3.3.0',d:'2026-11-09',t:'Decision journal',items:[
     'Moving an idea to Bought, or tapping "I added" on a holding, shows a checklist first. Five points fill in themselves: at or below your level, valuation current, no red flag, "I\'m wrong if" written, no results this week. Three you tick yourself: you can explain how it makes money, you buy because it\'s below fair value (not because it fell), and you\'d hold through a 30 % drop. If something is missing, the button says "anyway" and you tap why.',
     'When a review is due, the details open with it: your "I\'m wrong if" on top, and you tap what you looked at (results, dividend, business, valuation, "I\'m wrong if"), then Still holds, Changed or Broken, and if it changed, what changed. Next review date is pre-filled (3 months for ideas, 6 for holdings). A broken thesis on a holding shows in its row and keeps it out of Next € until a later review says it holds again. A broken idea is passed.',
@@ -1230,7 +1240,13 @@ function renderSub(){
 }
 $('#btnTable').onclick=()=>{ tableMode=!tableMode; try{localStorage.setItem(LS_TABLE,tableMode?'1':'0');}catch{} switchView('board'); };
 mqWide.addEventListener?.('change',()=>switchView(view));
+// Prices update every 2 h on weekdays. Older than that (weekends allowed for) = the update probably stopped.
+function pxStaleH(){ const u=prices.updated; if(!u) return null; const h=(Date.now()-new Date(u))/36e5, wd=new Date().getDay();
+  return h>(wd===1?78:wd===0?54:wd===6?30:28)?h:null; }
+function renderStale(){ const b=$('#staleBar'), h=pxStaleH(); b.hidden=!h; if(!h) return;
+  b.innerHTML=`<b>Prices are ${h<48?Math.round(h)+' hours':Math.round(h/24)+' days'} old.</b> The automatic price update may have stopped. On GitHub: Actions → prices → run it, or enable it again (GitHub pauses it after 60 days without activity). Levels and scores use these old prices.`; }
 function renderPxInfo(){
+  renderStale();
   const n=Object.keys(prices.quotes||{}).length, e=Object.keys(prices.errors||{});
   renderStatus();
   $('#pxStatus').innerHTML=n||e.length
@@ -1285,7 +1301,7 @@ function ideaRow(i,due){
   if(i.status==='out'&&i.passed){ const P=i.passed, since=P.price>0&&c>0?(c/P.price-1)*100:null;
     bits.push(`${P.reason==='sold'?'sold':passLabel(P.reason).toLowerCase()} ${fmtDay(P.date)}${P.price>0?` at ${lvl(P.price)}`:''}${since!=null?` · ${fmtPct(since,0)} since`:''}`); }
   else if(!c) bits.push(!q&&errOf(i)?`no quote for ${esc(symOf(i))}`:'waiting for the first price');
-  else if(bp) bits.push(bp.above<=0?`<b class="up">at your price</b> · below ${lvl(i.buyBelow)}`:`${fmtN(bp.above,0)} % above ${lvl(i.buyBelow)}`);
+  else if(bp) bits.push(bp.above<=0?(lvl2Of(i)&&c<=lvl2Of(i)?`<b class="up">at your 2nd level</b> · below ${lvl(lvl2Of(i))}`:`<b class="up">at your price</b> · below ${lvl(i.buyBelow)}`):`${fmtN(bp.above,0)} % above ${lvl(i.buyBelow)}`);
   else bits.push(rp&&rp.pos<=.15?'no buy price · near 52w low':rp&&rp.pos>=.85?'no buy price · near 52w high':'no buy price');
   if(y!=null) bits.push(yTxt(y,h));
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
@@ -1311,7 +1327,8 @@ function renderBoard(){
 function c2barHtml(i,what){
   const p=posOf(i), q=quoteOf(i), cur=curOfI(i); if(p==null) return '';
   const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
-  return `<div class="c2bar" title="52-week range${b!=null?`, your ${what} level (line)`:''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`;
+  const l2=lvl2Of(i), b2=l2?Math.min(1,Math.max(0,(l2-q.yearLow)/(q.yearHigh-q.yearLow))):null;
+  return `<div class="c2bar" title="52-week range${b!=null?`, your ${what} level (line)`:''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}${b2!=null?`<span class="bt b2" style="left:${pct(b2)}" title="2nd level"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`;
 }
 // ---------- results dates (v3.2.1) ----------
 // next = upcoming results date; last = most recent past one (Yahoo's history, or a "next" date that has passed)
@@ -1352,6 +1369,10 @@ function valAge(v,sym){ if(!v||!v.date) return null;
   else if(c.nextEarnings&&c.nextEarnings>v.date&&c.nextEarnings<=t) res=c.nextEarnings;
   const days=Math.round((Date.parse(t)-Date.parse(v.date))/864e5);
   return {res,days,stale:!!res||days>200}; }
+// Optional second level ("back up the truck"): below it you'd buy more than a normal tranche.
+const lvl2Of=i=>i.buyBelow2>0&&(!(i.buyBelow>0)||i.buyBelow2<i.buyBelow)?i.buyBelow2:null;
+function lvl2Txt(i,c,cur){ const l=lvl2Of(i); if(!l) return ''; return c>0&&c<=l?` · at your 2nd level ${mN(l,cur)}`:` · 2nd level ${mN(l,cur)}`; }
+const eurTag=(v,cur)=>{ if(!(v>0)||!cur||fxCode(cur)[0]==='EUR') return ''; const e=eurOf(v,cur); return e!=null?` (≈ ${fmtN(e,e>=10?0:2)} €)`:''; };
 const signPct=x=>(x>=0?'+':'−')+fmtN(Math.abs(x),0)+' %';
 function valMove(v,c){ if(!v||!(c>0)) return null;
   const up=(v.base/c-1)*100, dn=v.bear>0?(v.bear/c-1)*100:null;
@@ -1381,7 +1402,7 @@ function valHtml(v,c,cur,lvl,word,sym,src){
       ${atL?`<div class="kpi"><b class="num"><i class="up">${signPct(atL.up)}</i>${atL.dn!=null?` / <i class="dn">${signPct(atL.dn)}</i>`:''}</b><span>to fair${atL.dn!=null?' / bear':''} if bought at your level</span></div>`:''}
     </div>
     <div class="vtxt">
-      ${v.methods.length?`<p><b>Fair value ${mP(v.base,cur)}</b>${v.methods.length>1?', the average of':' from'}:</p><ul>${v.methods.map(x=>`<li>${esc(x.t)||'method'}${x.v!=null?` → <b class="num">${mN(x.v,cur)}</b>`:''}</li>`).join('')}</ul>`:`<p><b>Fair value ${mP(v.base,cur)}</b></p>`}
+      ${v.methods.length?`<p><b>Fair value ${mP(v.base,cur)}${eurTag(v.base,cur)}</b>${v.methods.length>1?', the average of':' from'}:</p><ul>${v.methods.map(x=>`<li>${esc(x.t)||'method'}${x.v!=null?` → <b class="num">${mN(x.v,cur)}</b>`:''}</li>`).join('')}</ul>`:`<p><b>Fair value ${mP(v.base,cur)}</b></p>`}
       ${v.discount!=null?`<p><b>${fmtN(v.discount,0)} % margin of safety</b>${v.why?`: ${esc(v.why)}`:''} → ${mN(niceRound(calc),cur)}.${hand?` Your ${word} level ${mN(lvl,cur)} is set by hand.`:''}</p>`:''}
       ${v.bear>0?`<p><b>Bear case ${mP(v.bear,cur)}</b>${v.bearWhy?`: ${esc(v.bearWhy)}`:''}</p>`:''}
       ${v.reverse?`<p><b>What the price implies:</b> ${esc(v.reverse)}</p>`:''}
@@ -1427,7 +1448,7 @@ function cardEl(i,inSheet){
   // decision line: tier · distance to the buy level (· near the 52-week high/low)
   const bp=sc?.parts.find(x=>x.k==='buy'), rp=sc?.parts.find(x=>x.k==='rng');
   const tier=sc?sc.tier:!q&&errOf(i)?'No quote':'No score yet';
-  let dist=i.buyBelow>0?(bp?(bp.above<=0?`in the buy zone, buy below ${mN(i.buyBelow,cur)}`:`${fmtN(bp.above,0)} % above buy at ${mN(i.buyBelow,cur)}`):`buy below ${mN(i.buyBelow,cur)}`)
+  let dist=i.buyBelow>0?(bp?(bp.above<=0?`in the buy zone, buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`:`${fmtN(bp.above,0)} % above buy at ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`):`buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`)+lvl2Txt(i,c,cur)
     :'no buy price set';
   if(!sc&&!q&&errOf(i)) dist=`no quote for ${symOf(i)}, set the Yahoo symbol in Edit`;
   else if(!sc&&!c) dist='waiting for the first price';
@@ -1632,7 +1653,7 @@ $('#f_status').innerHTML=STATUSES.map(s=>`<option value="${s.k}">${s.label}</opt
 let conv=3;
 $$('#f_conviction span').forEach((s,i)=>s.onclick=()=>setConv(i+1));
 function setConv(n){ conv=n; $$('#f_conviction span').forEach((s,i)=>s.classList.toggle('on',i<n)); }
-const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','symbol','currentPrice','buyBelow','nextReview','boughtDate','boughtPrice','source','thesis','bull','bear','kill'];
+const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','symbol','currentPrice','buyBelow','buyBelow2','nextReview','boughtDate','boughtPrice','source','thesis','bull','bear','kill'];
 function openEdit(id){
   editingId=id;
   const i=id?data.ideas.find(x=>x.id===id):blank();
@@ -1647,7 +1668,7 @@ function openEdit(id){
 $('#btnSave').onclick=()=>{
   const i=editingId?data.ideas.find(x=>x.id===editingId):blank();
   const prevCur=i.currentPrice;
-  F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow','boughtPrice'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
+  F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
   i.conviction=conv;
   { const nv=valRead('fv_',i.val,curOf(i)); if(nv) i.val=nv; else delete i.val; }
   if(i.currentPrice!=null && i.currentPrice!==prevCur) i.currentDate=today();
@@ -1685,7 +1706,7 @@ $('#btnClaudeGo').onclick=()=>{
     const o={...raw}; o.ticker=(o.ticker||'').toUpperCase(); o.currency=(o.currency||'EUR').toUpperCase();
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
     if(!o.id) o.id=uid();
-    ['loggedPrice','currentPrice','buyBelow','boughtPrice'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
+    ['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     if(!o.loggedDate) o.loggedDate=today();
     if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
     if(typeof o.notes==='string') o.notes=[{date:today(),text:o.notes}];
@@ -1813,7 +1834,10 @@ function savePortLocal(){ try{ localStorage.setItem(LS_PORT,JSON.stringify(port)
 function persistPort(){ savePortLocal(); render(); schedulePushP(); }
 const holdings=()=>port.holdings.filter(h=>!h.deletedAt);
 const capDefault=()=>Number(port.settings?.maxWeight)>0?Number(port.settings.maxWeight):7;
-const capOf=h=>h.maxWeight>0?h.maxWeight:capDefault();
+// Max weight: your own per holding, else the default (for 3 stars) ± 1.5 points per star of conviction.
+const CONV_STEP=1.5;
+const convOf=h=>{ const c=Number(h.conviction)||Number(ideaOf(h)?.conviction)||0; return c>=1&&c<=5?c:null; };
+const capOf=h=>h.maxWeight>0?h.maxWeight:Math.max(1,capDefault()+((convOf(h)??3)-3)*CONV_STEP);
 const isFund=h=>h.kind==='fund'||h.kind==='bond';
 const hSym=h=>String(h.symbol||'').trim().toUpperCase();
 function ideaOf(h){ const s=hSym(h), t=String(h.idea||'').trim().toUpperCase();
@@ -1822,7 +1846,7 @@ function ideaOf(h){ const s=hSym(h), t=String(h.idea||'').trim().toUpperCase();
 function addOf(h){ if(h.addBelow>0) return {v:h.addBelow,src:'own'};
   const i=ideaOf(h); if(i&&i.buyBelow>0&&symOf(i)===hSym(h)) return {v:i.buyBelow,src:'radar'}; return null; }
 // Shape the shared helpers (quoteOf, curOf, scoreOf, runwayHtml …) understand.
-const px=h=>({ticker:h.short,symbol:h.symbol,buyBelow:addOf(h)?.v??null,currency:h.currency,currentPrice:null});
+const px=h=>({ticker:h.short,symbol:h.symbol,buyBelow:addOf(h)?.v??null,buyBelow2:h.addBelow2>0?h.addBelow2:null,currency:h.currency,currentPrice:null});
 const posOf_=h=>depot&&h.isin?depot.pos[h.isin]||null:null;
 function valueOf(h){ const p=posOf_(h); if(!p) return null; const x=px(h), c=curOf(x), e=c?eurOf(c,curOfI(x)):null;
   return e?{eur:p.shares*e,live:true,unit:e}:{eur:p.valueEur,live:false,unit:p.priceEur}; }
@@ -1877,7 +1901,7 @@ function holdCard(r){
   let tier, dist;
   if(s){ tier=s.tier;
     dist=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} %`
-      :bp?(bp.above<=0?`at or below your add level ${mN(a.v,cur)}`:`${fmtN(bp.above,0)} % above add at ${mN(a.v,cur)}`)+(a.src==='radar'?' (Radar)':'')
+      :bp?(bp.above<=0?`at or below your add level ${mN(a.v,cur)}${eurTag(a.v,cur)}`:`${fmtN(bp.above,0)} % above add at ${mN(a.v,cur)}${eurTag(a.v,cur)}`)+(a.src==='radar'?' (Radar)':'')+lvl2Txt(x,c,cur)
       :'no add level set';
     if(s.cap==='flag') dist='held by a red flag · '+dist;
     if(rp&&rp.pos>=.85) dist+=' · near 52w high'; else if(rp&&rp.pos<=.15) dist+=' · near 52w low'; }
@@ -1936,7 +1960,7 @@ function holdRow(r,due){
   else if(fund&&!s) bits.push(h.kind==='bond'?'bond fund':'fund');
   else if(s&&s.full) bits.push(`full · max ${fmtN(capOf(h),1)} %`);
   else{
-    if(a&&bp) bits.push(bp.above<=0?`<b class="up">at your add level</b> ${lvl(a.v)}`:`${fmtN(bp.above,0)} % above ${lvl(a.v)}`);
+    if(a&&bp) bits.push(bp.above<=0?(lvl2Of(x)&&c<=lvl2Of(x)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(x))}`:`<b class="up">at your add level</b> ${lvl(a.v)}`):`${fmtN(bp.above,0)} % above ${lvl(a.v)}`);
     else if(p!=null&&(p<=.15||p>=.85)) bits.push(p<=.15?'near 52w low':'near 52w high');
   }
   if(y!=null) bits.push(yTxt(y,hi)+(!a&&!fund&&hi&&!(s&&s.full)?` · usual ${fmtN(hi.avg,1)} %`:''));
@@ -2150,7 +2174,7 @@ function erParts(r){ let t=`yield ${pp(r.yNet)}`;
   return t; }
 function nextRow(r,n){
   const bits=[]; const tone=r.st==='ready'?'var(--t-buy)':r.st==='wait'||r.st==='nolevel'?'var(--t-wait)':'var(--t-none)';
-  if(r.st==='ready') bits.push(`<b class="up">at your level</b>`);
+  if(r.st==='ready') bits.push(r.x&&lvl2Of(r.x)&&r.c<=lvl2Of(r.x)?`<b class="up">at your 2nd level</b>, a bigger tranche`:`<b class="up">at your level</b>`);
   else if(r.st==='wait') bits.push(`${fmtN(r.above,0)} % above ${lvl(r.lvl)}`);
   else if(r.st==='nolevel') bits.push('no level set');
   else if(r.st==='flag') bits.push('<b class="dn">red flag</b>');
@@ -2288,7 +2312,9 @@ function openHold(id){
     <div class="form">
       <label>Average buy price (EUR)<input id="h_cost" type="number" step="any" inputmode="decimal" value="${costOf(h)??''}" placeholder="as in Trade Republic"></label>
       <label>Add below (${esc(cur||'price')})<input id="h_addBelow" type="number" step="any" inputmode="decimal" value="${h.addBelow??''}" placeholder="${a&&a.src==='radar'?'Radar: '+a.v:''}"></label>
-      <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${capDefault()} (default)"></label>
+      <label>2nd add level<input id="h_addBelow2" type="number" step="any" inputmode="decimal" value="${h.addBelow2??''}" placeholder="optional, buy more"></label>
+      <label>Conviction<select id="h_conv"><option value="">${idea&&idea.conviction?`from Radar card (${idea.conviction}★)`:'not set (3★)'}</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(h.conviction)===n?'selected':''}>${'★'.repeat(n)} → max ${fmtN(Math.max(1,capDefault()+(n-3)*CONV_STEP),1)} %</option>`).join('')}</select></label>
+      <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${fmtN(Math.max(1,capDefault()+((convOf(h)??3)-3)*CONV_STEP),1)} (from stars)"></label>
       ${own?`<label>Next review<input id="h_review" type="date" value="${esc(h.nextReview||'')}"></label>`:''}
       <label>Short name<input id="h_short" value="${esc(h.short)}"></label>
       <label>Yahoo symbol<input id="h_symbol" value="${esc(h.symbol)}" style="text-transform:uppercase"></label>
@@ -2328,7 +2354,7 @@ function openHold(id){
     const num=v=>v===''?null:Number(v), val=id=>$(id)?$(id).value.trim():undefined;
     setCost(h,Number($('#h_cost').value));
     Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:val('#h_currency').toUpperCase(),
-      kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),maxWeight:num($('#h_maxWeight').value),idea:val('#h_idea').toUpperCase()||null,
+      kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),addBelow2:num($('#h_addBelow2').value),conviction:num($('#h_conv').value),maxWeight:num($('#h_maxWeight').value),idea:val('#h_idea').toUpperCase()||null,
       sector:val('#h_sector'),note:val('#h_note'),updatedAt:now()});
     if(!fund){ const nv=valRead('hv_',h.val,c); if(nv) h.val=nv; else delete h.val; }
     if(own){ h.nextReview=val('#h_review')||null; h.thesis=val('#h_thesis')||'';
@@ -2345,7 +2371,7 @@ function importHoldings(arr){
   for(const raw of arr){ if(!raw||typeof raw!=='object') continue;
     const o={...raw}; PRIVATE_KEYS.forEach(k=>delete o[k]);
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
-    ['addBelow','maxWeight'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
+    ['addBelow','addBelow2','maxWeight','conviction'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     const cur=port.holdings.find(h=>!h.deletedAt&&((o.id&&h.id===o.id)||(o.isin&&h.isin===o.isin)||(o.symbol&&hSym(h)===o.symbol)));
     let t=null;
     if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); t=cur; n++; }
@@ -2472,6 +2498,7 @@ function openLog(){
 $('#verBtn').onclick=openLog;
 $('#btnLog').onclick=openLog;
 $('#btnDec').onclick=openDecisions;
+if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 renderVersion();
 
 // ---------- misc ----------

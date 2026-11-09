@@ -69,6 +69,13 @@ Separate from the idea tracking: what you actually own, and whether any of it is
 
 Decisions are journal notes with a `kind` (`buy`, `add`, `trim`, `sell`, `pass`, `review`), the price and symbol at the time, and the tapped answers (`why`, `anyway`, `look`, `reason`, `checked`, `changed`, `checks`). Buying (idea → Bought, or "I added" on a holding) runs an 8-point checklist; reviews show "I'm wrong if" and record Still holds / Changed / Broken. A broken thesis (`broken` date on the card or holding) holds the stock back in Next €. Passing stores `passed: {date, price, reason}`. ⋯ → Decision journal lists them all with the price then and now.
 
+## Since v3.4.0
+
+- Optional second level: `buyBelow2` on idea cards, `addBelow2` on holdings ("back up the truck"); shown on the 52-week bar and in rows/cards.
+- Conviction on holdings (`conviction` 1–5, else the linked Radar card's stars): max weight = default (3★) ± 1.5 points per star, unless `maxWeight` is set.
+- `sw.js`: network-first service worker, so the home-screen app opens offline with the last data.
+- A red note on top when `prices.json` hasn't changed for longer than the weekday/weekend schedule allows.
+
 ## Import from Claude
 
 At the end of a stock discussion, ask Claude for "a Radar card" and paste the JSON into `Import from Claude`. Format (all fields optional except `ticker` or `name`):

@@ -551,7 +551,7 @@
       "maxWeight": null,
       "idea": "BEP",
       "note": "Red flags (OCF/sh down 2 yrs, net debt 26× EBITDA) are a Yahoo data artifact: BEPC's consolidated statements book the exchangeable shares as a liability and swing on its remeasurement. FFO/unit is the real measure and is rising. Simplification: BEPC → 1 BEP Inc. Class A share each (1:1), BEP vote 30 Nov, close Q4 → update symbol, level stays.",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
+      "updatedAt": "2026-11-09T10:30:06.000Z",
       "thesis": "Global hydro/wind/solar/storage owner run by Brookfield; contracted, inflation-linked cash flows. Q3 26 FFO $0.51/unit (+11 %), LTM $2.18. Targets 10 %+ FFO/unit growth, 5–9 % distribution growth (low end), building ~10 GW/yr from 2027. Distribution $0.392/q.",
       "bull": "New US hydro deals at ~$95/MWh vs $73 average; asset recycling funds growth without equity; one simple corporation after simplification → broader index inclusion.",
       "bear": "FFO leans on asset-sale gains; storage FFO −57 % y/y; GAAP net loss $314m in Q3; unit count +3.4 % y/y; BEP vote participation was below the 2/3 threshold. Canadian corp: 25 % WHT, only 15 % credited in DE → 10 pp to reclaim from CRA or lose.",
@@ -576,6 +576,18 @@
         "bear": 20,
         "bearWhy": "$2.00 FFO × 10×",
         "g": 4
+      },
+      "checks": {
+        "ps": {
+          "key": "2025-12-31",
+          "date": "2026-11-09",
+          "note": "Yahoo data artifact: the consolidated statements book the exchangeable shares as a liability and swing with its remeasurement. FFO per unit (the real measure) rose ~12 %."
+        },
+        "lev": {
+          "key": "2025-12-31",
+          "date": "2026-11-09",
+          "note": "Same artifact: 26× EBITDA comes from the consolidation, not from new borrowing. Debt is mostly non-recourse project debt at asset level."
+        }
       }
     },
     {
@@ -889,7 +901,7 @@
       "maxWeight": null,
       "idea": "KO",
       "note": "Red flag 'dividend > FCF 2024–25' is one-offs (2024 IRS deposit, 2025 $6.1bn Fairlife payment; FCF ex-Fairlife 2025 $11.4bn vs ~$8.8bn dividends).",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
+      "updatedAt": "2026-11-09T10:30:06.000Z",
       "thesis": "Global concentrate franchise: ~33 % op. margin, value-share gains, 60+ yrs of dividend raises. 2026 guide raised 3x: comparable EPS ≥+11 %, organic rev ≥+5 %, FCF ≥$13bn. Add only well below fair value; at $95 it trades ~28x forward, a full price for 4–7 % EPS growth.",
       "bull": "Q3 26 volume +5 % (Zero Sugar +16 % in Q2), op. margin 33.4 %; FCF ≥$13bn ≈ $3.0/sh covers the $2.12 dividend ~1.4x once Fairlife/IRS one-offs are gone. Refranchising makes it more asset-light; buybacks resume.",
       "bear": "At $95.67 yield 2.2 % vs 2.8 % 5-yr avg; ~28x fwd on mid-single-digit growth = multiple risk (19x at $3.55 is $67). 2027: ~8 % revenue headwind from deals, FX turning, GLP-1/affordability, open IRS transfer-pricing case. US 15 % WHT is credited in DE, no loss.",
@@ -915,6 +927,13 @@
         "bearWhy": "$3.00 EPS × 19×",
         "reverse": "$95.67 needs ~4.7 %/yr FCF growth forever",
         "g": 4
+      },
+      "checks": {
+        "pay": {
+          "key": "2025-12-31",
+          "date": "2026-11-09",
+          "note": "One-offs: 2024 IRS tax deposit and the 2025 $6.1bn Fairlife payment. FCF ex-Fairlife 2025 ≈ $11.4bn vs ~$8.8bn dividends, so the dividend is covered."
+        }
       }
     },
     {
