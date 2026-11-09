@@ -578,6 +578,23 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .xrsec h5{margin:0 0 2px;font-size:13.5px;font-weight:700}.xrsec .xv{margin:0 0 10px;font-size:12.5px;color:var(--ink2);line-height:1.45}.xrsec .xv b{color:var(--ink)}
 .xrsec .hint{margin:6px 0 0}.xrsec .rmore{display:block;width:100%;margin:2px 0 0;padding:8px 0 2px}
 .rclrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.rclrow .chip{cursor:pointer}.rclrow .hint{margin:0;flex:1 1 200px}
+/* quality tag (v3.9.0) */
+.qpill{flex:none;align-self:center;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:999px;white-space:nowrap;background:var(--qb);color:var(--qc)}
+.r1{flex-wrap:wrap;row-gap:3px;column-gap:6px}.r1 .nm{flex:1 1 0}   /* v3.9.0: on a crowded phone row (weight + quality + results) the pills wrap under the ticker instead of pushing the price */
+.qw{font-weight:700;color:var(--qc);white-space:nowrap;flex:none}
+.qbox{background:var(--panel2);border-radius:var(--r2);padding:10px 12px;margin:0 0 10px}
+.qhd{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;font-size:13px;color:var(--ink2)}.qhd>b:first-child{font-size:13.5px;color:var(--ink)}
+.qhd .qset{font-size:12px;color:var(--mute)}
+.qrows{margin:8px 0 2px;display:grid;gap:4px}
+.qr{display:grid;grid-template-columns:minmax(0,1fr) auto 62px;gap:8px;align-items:baseline;font-size:13px}
+.qr span{color:var(--ink2);min-width:0}.qr b{font-variant-numeric:tabular-nums;text-align:right}.qr i{font-style:normal;font-size:12px;font-weight:700;text-align:right}
+.qr i.strong{color:var(--teal)}.qr i.weak{color:var(--coral)}.qr i.ok{color:var(--mute)}
+.qr.out b,.qr.out span{color:var(--mute)}.qr.out i{color:var(--mute);font-weight:600}
+.qr small{grid-column:1/-1;font-size:11.5px;color:var(--mute);margin-top:-2px}
+.qbox .hint{margin:6px 0 0}
+.qbox details{margin-top:6px}.qbox summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--research)}
+.qbox details p,.qbox details li{font-size:13px;color:var(--ink2);margin:6px 0 0}.qbox details ul{margin:4px 0 0;padding-left:18px}
+.qchips{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.qchips .chip{cursor:pointer}.qchips>span{font-size:13px;font-weight:600;color:var(--mute);margin-right:2px}
 .today button.inc b{color:var(--teal)}
 .nxhero .inc{font-size:13px;color:var(--ink2);font-weight:600}
 .list .empty{display:block}
@@ -694,6 +711,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
     <label class="w2">Bull case<textarea id="f_bull"></textarea></label>
     <label class="w2">Bear case<textarea id="f_bear"></textarea></label>
     <label class="w4">I'm wrong if…<textarea id="f_kill"></textarea></label>
+    <div class="w4" id="f_qualBox"></div>
     <div class="w4" id="f_valBox"></div>
   </div>
   <div class="foot2">
@@ -822,8 +840,16 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.8.0';
+const VERSION='3.9.0';
 const CHANGELOG=[
+  {v:'3.9.0',d:'2026-11-09',t:'Quality tag',items:[
+    'Every stock now gets a quality tier next to its trend: wonderful, good or fair. Steady / Watch / Red flag says where a business is heading; quality says how good it is. ASML and E.ON no longer look the same when both are Expensive.',
+    'It\'s judged on the last 3–4 years, never one year alone, and against the company\'s own kind: most companies on return on capital, free cash flow margin, debt and how long they\'ve raised the dividend; utilities and REITs on cash per share growth and debt on their own scale; banks and insurers on return on equity and steady earnings.',
+    'Rows show a small "wonderful" or "fair" tag next to the ticker, on all three tabs. "Good" shows nothing, so the lists stay calm.',
+    'In a stock\'s sheet, the Business section has a Quality block: the tier, each test with its figure and verdict, which yardstick was used, the years, and Radar\'s reason. "How quality works" under it explains it in plain words.',
+    'Where the data isn\'t good enough, it says "–" with the reason instead of guessing: BEPC (the figures you marked as a data quirk) and ENI (Yahoo\'s tax figure is off).',
+    'Know a company better than its figures? Tap auto · wonderful · good · fair in the card editor or the holding\'s settings. The sheet then says "set by you". It syncs like your levels, and Import from Claude accepts it too.',
+    'Information only: the Buy and Add score, the tiers, the red flags and the Next € ranking are unchanged.']},
   {v:'3.8.0',d:'2026-11-09',t:'Portfolio x-ray',items:[
     'New "Portfolio x-ray" in ⋯ → Portfolio, under the withholding block: your depot by sector, by currency, by country, and your five biggest stocks, each as a share of the depot with bars.',
     'Sector and currency show the lines Next € already used without telling you: 20 % per sector, 40 % per foreign currency. A bar over its line turns red and says how many points Next € takes off new money there.',
@@ -1189,15 +1215,16 @@ const BZ={red:['Red flag','var(--coral)','var(--coral-soft)'],watch:['Watch','va
   checked:['Checked','var(--teal)','var(--teal-soft)'],ok:['Steady','var(--teal)','var(--teal-soft)'],none:['No data','var(--mute)','var(--panel2)']};
 const bzChip=st=>`<b class="bz" style="--bc:${BZ[st][1]};--bb:${BZ[st][2]}">${BZ[st][0]}</b>`;
 // one line for the board card
-function bizLine(b){
+function bizLine(b,q){
   if(!b) return '';
-  if(b.st==='red') return `${bzChip('red')}<span>${esc(b.red[0].t)}${b.red.length>1?` · +${b.red.length-1} more`:''}</span>`;
-  if(b.st==='watch') return `${bzChip('watch')}<span>${esc(b.W[0].t)}${b.W.length>1?` · +${b.W.length-1} more`:''}</span>`;
+  const qw=qualWord(q);
+  if(b.st==='red') return `${bzChip('red')}${qw}<span>${esc(b.red[0].t)}${b.red.length>1?` · +${b.red.length-1} more`:''}</span>`;
+  if(b.st==='watch') return `${bzChip('watch')}${qw}<span>${esc(b.W[0].t)}${b.W.length>1?` · +${b.W.length-1} more`:''}</span>`;
   const y0=b.ys[0], bits=[];
   if(b.psG!=null) bits.push(`${b.B.short} ${b.psG>=0?'▲':'▼'} ${fmtN(Math.abs(b.psG),0)} %/yr`);
   if(y0&&y0.pay!=null) bits.push(isFinite(y0.pay)?`payout ${fmtN(y0.pay,0)} %`:'payout n/a');
   if(b.lastRaise) bits.push(`raised ${b.lastRaise}`); else if(!b.dv.length) bits.push('no dividend');
-  return `${bzChip(b.st==='none'?'none':b.st)}<span>${b.st==='checked'?'flags checked by you · ':''}${esc(bits.join(' · ')||'too little data')}</span>`;
+  return `${bzChip(b.st==='none'?'none':b.st)}${qw}<span>${b.st==='checked'?'flags checked by you · ':''}${esc(bits.join(' · ')||'too little data')}</span>`;
 }
 // full section for the dossier and the holding sheet; owner = the card or holding that stores "checked" notes
 function bizHtml(sym,owner,kind){
@@ -1222,7 +1249,7 @@ function bizHtml(sym,owner,kind){
   return `<div class="sec biz" data-sym="${esc(sym)}" data-owner="${esc(owner?.id||'')}" data-kind="${kind}">
     <h4>Business ${bzChip(b.st)}${b.next?` <span class="bzn">next results ${fmtDate(b.next)}</span>`:''}</h4>
     ${b.st==='red'?`<p class="bzwhy">While ${b.red.length>1?'these red flags are':'this red flag is'} open, the Buy score can't go above <b>Wait</b>. If it has a harmless reason (a one-off payment, a known data quirk), mark it as checked.</p>`:''}
-    ${flags}${tbl}
+    ${flags}${qualHtml(sym,owner)}${tbl}
     <div class="bzdiv"><span><b>Dividend</b> ${esc(dtext)}</span>${bars}</div>
     <p class="hint">${esc(b.B.why)} Fiscal years from Yahoo Finance${b.c.finCurrency?`, in ${esc(b.c.finCurrency)}`:''}; updated ${b.time?fmtDate(b.time.slice(0,10)):'—'}${b.stale?' (last update failed)':''}.</p>
   </div>`;
@@ -1284,6 +1311,140 @@ function divBoxHtml(sym){
     <div title="${esc(pt)}"><span>Payout${s&&s.fy?' '+esc(s.fy):''}</span><b>${p1}</b>${p2}</div>
   </div>`;
 }
+// ---------- quality tag (v3.9.0) ----------
+// Steady/Watch/Flag says where the business is heading; this says how good it is. Each test is the median of the
+// last 3–4 fiscal years (never the latest year alone) and is judged against the company's own kind (modelOf).
+// Verdicts: strong / ok / weak. Tier: wonderful = main test strong, nothing weak, at least half strong;
+// fair = main test weak or two tests weak; good = the rest. Missing or broken input drops the test; too few → "–".
+const QUAL={
+  minYears:3,          // a test needs at least 3 fiscal years, so one odd year can't decide it
+  roic:[15,10],        // FCF basis, main test: EBIT × (1 − tax) / invested capital, %. ≥15 strong (well above a normal 8–9 % cost of capital — the classic quality line), ≥10 ok (earns its cost of capital), below weak. Goodwill stays in: what was paid for acquisitions is the owners' capital too
+  fcfm:[20,8],         // FCF basis: free cash flow / revenue, %. ≥20 strong (franchise economics), ≥8 ok, below weak (thin margins or capex-hungry)
+  lev:[1.5,3],         // FCF basis: net debt / EBITDA, ×. ≤1.5 strong, ≤3 ok (3× is where the trend card starts to watch), above weak; net cash counts as strong
+  ocfg:[4,0],          // OCF basis (utilities, REITs), main test: median yearly change of operating cash flow per share (rough FFO/share), %. ≥4 strong, ≥0 ok, shrinking weak
+  levC:[4.5,6],        // OCF basis: net debt / EBITDA on the trend card's OCF scale (watch 6×, red flag 7×). ≤4.5 strong, ≤6 ok, above weak — 5–6× is normal for a REIT or a grid
+  roe:[15,10],         // earnings basis (banks, insurers, BDCs), main test: net income / equity, %. ≥15 strong, ≥10 ok, below weak. No leverage test
+  epsDrop:10,          // earnings basis: a year counts as a setback when EPS fell more than 10 % (or was a loss)
+  eps:[0,1],           // earnings basis: setbacks in the window. 0 strong, 1 ok, 2+ weak
+  streak:[10,3],       // dividend raised in a row (divStats): ≥10 yrs strong, ≥3 ok; shorter is neutral (ok) unless the run ended in a real cut (weak) — a drop when the number of payments changed is a schedule switch, not a cut. No dividend → test drops
+  nopatMax:2.5,        // FCF basis: a year where after-tax operating profit is more than 2.5× net income has a broken tax or EBIT figure in Yahoo (ENI: 24 % tax on oil profits taxed at ~60 %) and is left out
+  minTests:{std:3,cash:2,fin:2},   // the main test plus at least this many tests in total, else "–"
+  sane:{roic:[-50,100],fcfm:[-100,100],lev:[-10,20],roe:[-50,100],ocfg:[-60,100]},  // yearly values outside these are data errors and are left out
+};
+const QUAL_TIER={wonderful:['wonderful','var(--teal)','var(--teal-soft)'],good:['good','var(--ink2)','var(--panel)'],fair:['fair','var(--ochre)','var(--ochre-soft)']};
+const QUAL_YARD={std:'free cash flow',cash:'operating cash flow',fin:'earnings'};
+// which checked red flag ("Checked, it's fine") takes which test out: a known artifact must not make a company look fair
+const QUAL_CK={std:{fcfm:['ps','pay'],lev:['lev'],streak:['cut']},cash:{ocfg:['ps','pay','dil'],lev:['lev'],streak:['cut']},fin:{eps:['ps'],streak:['cut']}};
+const QUAL_SET=['wonderful','good','fair'];
+const QUAL_FLAG={ps:'cash per share',pay:'dividend cover',lev:'debt',cut:'dividend cut',dil:'share count'};
+const qPct=v=>`${fmtN(v,Math.abs(v)<20?1:0)} %`;
+const median=a=>{ const s=a.slice().sort((x,y)=>x-y), n=s.length; return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):null; };
+// own setting first (card or holding), then any card/holding on the same symbol
+function qualSetOf(sym,owner){
+  if(owner&&QUAL_SET.includes(owner.quality)) return owner.quality;
+  try{ for(const h of holdings()) if(hSym(h)===sym&&QUAL_SET.includes(h.quality)) return h.quality;
+       for(const i of live()) if(symOf(i)===sym&&QUAL_SET.includes(i.quality)) return i.quality; }catch{}
+  return null; }
+function qualOf(sym,owner){
+  const b=sym?bizOf(sym):null, set=sym?qualSetOf(sym,owner):null;
+  const res=(o)=>({...o,set,tier:set||o.auto});
+  if(!b||!b.ys.length) return res({auto:null,m:b?b.m:null,tests:[],dropped:[],why:b?'Yahoo has no statements for this one.':'No business data yet.'});
+  const m=b.m, raw=b.c.years||[];
+  const okF=b.F.filter(f=>f.ok).map(f=>f.id);
+  const tests=[], dropped=[];
+  const vd=(v,[s,o],low)=>low?(v<=s?'strong':v<=o?'ok':'weak'):(v>=s?'strong':v>=o?'ok':'weak');
+  // per-year series, newest first, sane values only
+  const ser=(k,f)=>{ const out=[]; let bad=0;
+    for(const y of b.ys.slice(0,4)){ const v=f(y); if(v==='bad'){ bad++; continue; } if(v==null||!isFinite(v)) continue;
+      const S=QUAL.sane[k]; if(S&&(v<S[0]||v>S[1])){ bad++; continue; } out.push({fy:y.fy,v}); }
+    return {out,bad}; };
+  const rawOf=y=>raw.find(r=>r.end===y.end)||{};
+  const years=b.ys.slice(0,4).map(y=>y.fy), yrs=years.length?`${years[years.length-1]}–${years[0]}`:'';
+  const add=(k,lbl,fmt,f,T,low,main)=>{
+    const ckIds=(QUAL_CK[m][k]||[]).filter(id=>okF.includes(id));
+    if(ckIds.length){ dropped.push({k,lbl,main,why:`left out: you marked the ${ckIds.map(id=>QUAL_FLAG[id]||id).join(' and ')} flag as checked (data quirk or one-off)`}); return; }
+    const {out,bad}=ser(k,f);
+    if(out.length<QUAL.minYears){ dropped.push({k,lbl,main,why:bad?(k==='roic'?`left out: in ${bad} of the years Yahoo's tax or operating profit doesn't fit net income`:`left out: ${bad} year${bad>1?'s look':' looks'} broken in Yahoo's figures`):`left out: fewer than ${QUAL.minYears} years of data`}); return; }
+    const v=median(out.map(o=>o.v)); tests.push({k,lbl,main,v,txt:fmt(v),verdict:vd(v,T,low),n:out.length,bad}); };
+  if(m==='std'){
+    add('roic','Return on capital',qPct,y=>{ const r=rawOf(y), t=Math.min(.5,Math.max(0,r.taxRate??.25));
+      return r.netIncome>0&&r.ebit>0&&r.ebit*(1-t)>QUAL.nopatMax*r.netIncome?'bad':y.roc; },QUAL.roic,false,true);
+    add('fcfm','Free cash flow margin',qPct,y=>{const r=rawOf(y); return r.fcf!=null&&r.revenue>0?r.fcf/r.revenue*100:null;},QUAL.fcfm);
+    add('lev','Net debt / EBITDA',v=>v<0?'net cash':`${fmtN(v,1)}×`,y=>y.lev,QUAL.lev,true);
+  } else if(m==='cash'){
+    // yearly change of OCF per share; needs consecutive years
+    const ps=b.ys.slice(0,4).map(y=>y.ps);
+    const chg=ps.slice(0,-1).map((v,k)=>v!=null&&ps[k+1]>0?(v/ps[k+1]-1)*100:null);
+    const S=QUAL.sane.ocfg, ok=chg.filter(v=>v!=null&&v>=S[0]&&v<=S[1]), bad=chg.filter(v=>v!=null).length-ok.length;
+    const ckIds=QUAL_CK.cash.ocfg.filter(id=>okF.includes(id));
+    if(ckIds.length) dropped.push({k:'ocfg',lbl:'Cash per share growth',main:true,why:`left out: you marked the ${ckIds.map(id=>QUAL_FLAG[id]||id).join(' and ')} flag as checked (data quirk or one-off)`});
+    else if(ok.length<QUAL.minYears-1) dropped.push({k:'ocfg',lbl:'Cash per share growth',main:true,why:bad?`left out: ${bad} year${bad>1?'s look':' looks'} broken in Yahoo's figures`:`left out: fewer than ${QUAL.minYears} years of data`});
+    else { const v=median(ok); tests.push({k:'ocfg',lbl:'Cash per share growth',main:true,v,txt:`${fmtPct(v,1)}/yr`,verdict:vd(v,QUAL.ocfg),n:ok.length+1,bad}); }
+    add('lev','Net debt / EBITDA',v=>v<0?'net cash':`${fmtN(v,1)}×`,y=>y.lev,QUAL.levC,true);
+  } else {
+    add('roe','Return on equity',qPct,y=>y.roc,QUAL.roe,false,true);
+    const ckIds=QUAL_CK.fin.eps.filter(id=>okF.includes(id));
+    const e=b.ys.slice(0,4).map(y=>y.ps).filter(v=>v!=null);
+    if(ckIds.length) dropped.push({k:'eps',lbl:'Earnings stability',why:'left out: you marked the earnings flag as checked'});
+    else if(e.length<QUAL.minYears) dropped.push({k:'eps',lbl:'Earnings stability',why:`left out: fewer than ${QUAL.minYears} years of data`});
+    else { let n=0; for(let k=0;k<e.length-1;k++) if(e[k]<=0||(e[k+1]>0&&e[k]<e[k+1]*(1-QUAL.epsDrop/100))) n++;
+      tests.push({k:'eps',lbl:'Earnings stability',v:n,txt:n?`${n} setback${n>1?'s':''}`:'no setback',verdict:n<=QUAL.eps[0]?'strong':n<=QUAL.eps[1]?'ok':'weak',n:e.length}); }
+  }
+  // dividend streak (all three kinds)
+  const ds=divStats(sym), sck=(QUAL_CK[m].streak||[]).filter(id=>okF.includes(id));
+  if(sck.length) dropped.push({k:'streak',lbl:'Dividend raised in a row',why:'left out: you marked the dividend cut as checked'});
+  else if(!ds||ds.none) dropped.push({k:'streak',lbl:'Dividend raised in a row',why:'left out: pays no dividend (not a weakness by itself)'});
+  else if(ds.n==null) dropped.push({k:'streak',lbl:'Dividend raised in a row',why:'left out: too little dividend history'});
+  else { const n=ds.n; let stop=ds.stop||'short';
+    if(stop==='cut'){ const cy=new Date().getFullYear(), fd=b.dv.filter(d=>d.y<cy&&d.v>0&&(d.n==null||b.typ==null||d.n>=b.typ)), a=fd[fd.length-1-n], pr=fd[fd.length-2-n];
+      if(a&&pr&&a.n!=null&&pr.n!=null&&a.n!==pr.n) stop='payment schedule changed'; }
+    const v=n>=QUAL.streak[0]?'strong':n>=QUAL.streak[1]?'ok':stop==='cut'?'weak':'ok';
+    tests.push({k:'streak',lbl:'Dividend raised in a row',v:n,txt:`${n}${ds.all?'+':''} yr${n===1&&!ds.all?'':'s'}${n<QUAL.streak[1]?` (${stop})`:''}`,verdict:v}); }
+  const main=tests.find(t=>t.main), mainD=dropped.find(t=>t.main);
+  const base={m,yard:QUAL_YARD[m],years:yrs,tests,dropped};
+  if(!main||tests.length<QUAL.minTests[m]){
+    const why=mainD?`${mainD.lbl}: ${mainD.why.replace(/^left out: /,'')}`:!main?'no main test':'too few tests left';
+    return res({...base,auto:null,why}); }
+  const W=tests.filter(t=>t.verdict==='weak'), S=tests.filter(t=>t.verdict==='strong');
+  let auto, why;
+  if(main.verdict==='weak'){ auto='fair'; why=`${main.lbl.toLowerCase()} only ${main.txt}`; }
+  else if(W.length>=2){ auto='fair'; why=`two weak: ${W.map(t=>`${t.lbl.toLowerCase()} ${t.txt}`).join(', ')}`; }
+  else if(main.verdict==='strong'&&!W.length&&S.length*2>=tests.length){ auto='wonderful'; why=`${main.lbl.toLowerCase()} ${main.txt}, nothing weak`; }
+  else { auto='good';
+    why=main.verdict==='strong'?`${main.lbl.toLowerCase()} ${main.txt}, but ${W.length?W.map(t=>`${t.lbl.toLowerCase()} ${t.txt} is weak`).join(', '):'the other tests are only ok'}`
+      :`${main.lbl.toLowerCase()} ${main.txt} (ok)${W.length?`, ${W[0].lbl.toLowerCase()} ${W[0].txt} weak`:''}`; }
+  return res({...base,auto,why});
+}
+const qVar=t=>{ const q=QUAL_TIER[t]; return q?`--qc:${q[1]};--qb:${q[2]}`:''; };
+// row tag: only wonderful and fair, so the rows stay calm
+function qualPill(sym,owner){ if(!sym) return ''; const q=qualOf(sym,owner);
+  return q.tier==='wonderful'||q.tier==='fair'?`<span class="qpill" style="${qVar(q.tier)}" title="Quality: ${q.tier}${q.set?' (set by you)':''}">${q.tier}</span>`:''; }
+// one word for the card's business line
+const qualWord=q=>q&&q.tier?`<b class="qw" style="${qVar(q.tier)}" title="Quality${q.set?', set by you':''}">${q.tier}</b>`:'';
+const QUAL_HOW=`<details class="qhow"><summary>How quality works</summary>
+  <p>The trend chip (Steady, Watch, Red flag) says where a business is heading. Quality says how good it is. Radar looks at the last 3–4 years, never one year alone, and judges each company against its own kind:</p>
+  <ul><li><b>Most companies</b>: how much profit they earn on the money tied up in the business, how much of their sales ends up as free cash, how much debt they carry, and how many years in a row they've raised the dividend.</li>
+  <li><b>Utilities and REITs</b>: whether cash per share keeps growing, debt measured on the scale that is normal for them, and the dividend record. Their return on capital is low by design, so it isn't used.</li>
+  <li><b>Banks, insurers and BDCs</b>: return on equity, whether earnings held up without setbacks, and the dividend record. No debt test, because borrowing is part of their business.</li></ul>
+  <p><b>Wonderful</b>: the main test is strong, nothing is weak, and at least half the tests are strong. <b>Fair</b>: the main test is weak, or two tests are. <b>Good</b>: everything in between. <b>–</b>: too little reliable data, or a figure you marked as a data quirk ("Checked, it's fine"), so Radar doesn't guess.</p>
+  <p>A company that pays no dividend isn't marked down for it, and a short dividend record only counts against it after a real cut.</p>
+  <p>It's information only: the Buy and Add score, the tiers and Next € don't use it. If you know the company better, set it yourself in the card editor or the holding's settings.</p></details>`;
+// Quality block inside the business section of the sheet
+function qualHtml(sym,owner){
+  const q=qualOf(sym,owner);
+  const word=q.tier?`<b class="bz" style="--bc:${QUAL_TIER[q.tier][1]};--bb:${QUAL_TIER[q.tier][2]}">${q.tier}</b>`:'<b class="bz" style="--bc:var(--mute);--bb:var(--panel)">–</b>';
+  const set=q.set?`<span class="qset">set by you${q.auto&&q.auto!==q.set?` · Radar says ${q.auto}`:!q.auto?' · Radar can\'t judge it':''}</span>`:'';
+  const ORD=['roic','roe','ocfg','fcfm','eps','lev','streak'], by=(a,b)=>ORD.indexOf(a.k)-ORD.indexOf(b.k);
+  const rows=[...q.tests.map(t=>({...t,out:0})),...q.dropped.map(t=>({...t,out:1}))].sort(by).map(t=>t.out?`<div class="qr out"><span>${esc(t.lbl)}</span><b>–</b><i>left out</i><small>${esc(t.why.replace(/^left out: /,''))}</small></div>`:`<div class="qr"><span>${esc(t.lbl)}</span><b>${esc(t.txt)}</b><i class="${t.verdict}">${t.verdict}</i></div>`).join('');
+  const yard=q.m?`Measured on ${QUAL_YARD[q.m]}${q.years?`, medians of ${q.years}`:''}.`:'';
+  const mainOut=q.dropped.find(t=>t.main);
+  const why=q.auto?`Radar's reason: ${q.why}.`:mainOut?`Radar can't judge it without ${mainOut.lbl.toLowerCase()}, so it shows –.`:q.tests.length||q.dropped.length?`Radar can't judge it: too few tests left, so it shows –.`:q.why;
+  return `<div class="qbox"><div class="qhd"><b>Quality</b>${word}${set}</div>
+    ${rows?`<div class="qrows">${rows}</div>`:''}
+    <p class="hint">${esc(yard)} ${esc(why)}</p>${QUAL_HOW}</div>`;
+}
+// override chips: auto · wonderful · good · fair (stored as `quality` on the card or holding, synced)
+const qualChips=(id,cur,inh)=>`<div class="qchips" id="${id}"><span>Quality</span>${['auto',...QUAL_SET].map(k=>`<button type="button" class="chip ${(cur||'auto')===k?'on':''}" data-q="${k}">${k}</button>`).join('')}</div>${inh?`<p class="hint" style="margin:4px 0 0">${esc(inh)}</p>`:''}`;
 function wireBiz(root,rerender){
   const box=root.querySelector('.sec.biz[data-sym]'); if(!box) return;
   const sym=box.dataset.sym, kind=box.dataset.kind, oid=box.dataset.owner;
@@ -1478,7 +1639,7 @@ function ideaRow(i,due){
   if(y!=null) bits.push(yTxt(y,h));
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
   if(t&&(daysSince(t.base.date)>30||Math.abs(t.best)>=5)) bits.push(`<span class="${t.best>=0?'up':'dn'}">${fmtPct(t.best,0)}</span>`);
-  const extra=(biz&&biz.red.length?FLAG:'')+earnPill(symOf(i))+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?`<span class="own out">${i.passed?.reason==='toohard'?'too hard':i.passed?.reason==='sold'?'sold':'passed'}</span>`:'');
+  const extra=(biz&&biz.red.length?FLAG:'')+qualPill(symOf(i),i)+earnPill(symOf(i))+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?`<span class="own out">${i.passed?.reason==='toohard'?'too hard':i.passed?.reason==='sold'?'sold':'passed'}</span>`:'');
   return rowEl({tc:sc?sc.c:'var(--t-none)',tile:sc?sc.score:'–',tk:i.ticker,nm:i.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openRead(i.id)});
 }
 function renderBoard(){
@@ -1672,7 +1833,7 @@ function cardEl(i,inSheet){
     </div>
     ${inSheet?divBoxHtml(symOf(i)):''}
     ${inSheet&&symOf(i)?whtLine(ccOf(null,symOf(i)),recOf(i),q,c,cur):''}
-    ${(b=>b?`<div class="c2biz" title="Business trend, tap the card for details">${bizLine(b)}</div>`:'')(sc?sc.biz:bizOf(symOf(i)))}
+    ${(b=>b?`<div class="c2biz" title="Business trend and quality, tap the card for details">${bizLine(b,qualOf(symOf(i),i))}</div>`:'')(sc?sc.biz:bizOf(symOf(i)))}
     <p class="c2th">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>`;
   if(inSheet){ el.removeAttribute('tabindex'); return el; }
   el.onclick=()=>openRead(i.id);
@@ -1843,6 +2004,9 @@ function openEdit(id){
   $('#eTitle').textContent=id?`Edit ${i.ticker||'idea'}`:'New idea';
   F.forEach(k=>$('#f_'+k).value=i[k]??'');
   setConv(i.conviction||3);
+  { const sym=i.symbol||i.ticker, q=sym?qualOf(sym,i):null;
+    $('#f_qualBox').innerHTML=qualChips('f_qual',QUAL_SET.includes(i.quality)?i.quality:'auto',q&&q.auto?`Auto says ${q.auto}. Pick a tier only if you know the company better than its figures.`:'Auto: Radar judges it from the fundamentals once they are there.');
+    $$('#f_qual .chip').forEach(b=>b.onclick=()=>$$('#f_qual .chip').forEach(x=>x.classList.toggle('on',x===b))); }
   $('#f_valBox').innerHTML=valForm('fv_',i.val,i.currency||'');
   valWire('fv_','#f_buyBelow',i.currency||'');
   $('#btnDelete').style.visibility=id?'visible':'hidden';
@@ -1853,6 +2017,7 @@ $('#btnSave').onclick=()=>{
   const prevCur=i.currentPrice;
   F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
   i.conviction=conv;
+  { const qb=document.querySelector('#f_qual .chip.on'), qv=qb?qb.dataset.q:'auto'; if(QUAL_SET.includes(qv)) i.quality=qv; else delete i.quality; }
   { const nv=valRead('fv_',i.val,curOf(i)); if(nv) i.val=nv; else delete i.val; }
   if(i.currentPrice!=null && i.currentPrice!==prevCur) i.currentDate=today();
   if(!i.ticker && !i.name){ toast('Give it a ticker or a name'); return; }
@@ -1891,6 +2056,7 @@ $('#btnClaudeGo').onclick=()=>{
     if(!o.id) o.id=uid();
     ['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     if('reclaim' in o) o.reclaim=o.reclaim===true||o.reclaim==='true';
+    if('quality' in o){ const q=String(o.quality||'').toLowerCase().trim(); if(QUAL_SET.includes(q)) o.quality=q; else delete o.quality; }   // v3.9.0; "auto" = no override
     if(!o.loggedDate) o.loggedDate=today();
     if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
     if(typeof o.notes==='string') o.notes=[{date:today(),text:o.notes}];
@@ -2153,7 +2319,7 @@ function holdCard(r){
     </div>
     ${fund||!hSym(h)?'':divBoxHtml(hSym(h))}
     ${fund||!hSym(h)?'':whtLine(ccOf(h.isin,hSym(h)),hRec(h),q,c,cur)}
-    ${b?`<div class="c2biz" title="Business trend, tap for details">${bizLine(b)}</div>`:''}
+    ${b?`<div class="c2biz" title="Business trend and quality, tap for details">${bizLine(b,qualOf(hSym(h),h))}</div>`:''}
     <p class="c2th">${src.thesis?esc(src.thesis):`<i>${fund?'No note yet.':'No thesis yet. Why do you own it?'}</i>`}</p>`;
   el.onclick=()=>openHold(h.id);
   el.onkeydown=e=>{ if(e.key==='Enter') openHold(h.id); };
@@ -2190,7 +2356,7 @@ function holdRow(r,due){
   if(!bits.length) bits.push('no dividend');
   const biz=fund?null:(s?s.biz:bizOf(hSym(h)));
   const over=!fund&&w!=null&&w>capOf(h);
-  const extra=(w!=null?`<span class="w ${over?'over':''}" title="share of the depot">${fmtN(w,1)} %</span>`:'')+(biz&&biz.red.length?FLAG:'')+(fund?'':earnPill(hSym(h)));
+  const extra=(w!=null?`<span class="w ${over?'over':''}" title="share of the depot">${fmtN(w,1)} %</span>`:'')+(biz&&biz.red.length?FLAG:'')+(fund?'':qualPill(hSym(h),h)+earnPill(hSym(h)));
   return rowEl({tc:hTone(h,s),tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
     tk:h.short||h.symbol,nm:h.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
 }
@@ -2439,7 +2605,7 @@ function nextRow(r,n){
   else if(r.st==='broken') bits.push('<b class="dn">thesis broken</b>');
   else if(r.st==='full') bits.push(`<b class="dn">would be ${fmtN(r.wAfter,1)} %</b>, max ${fmtN(r.cap,1)}`);
   if(r.age&&r.age.stale) bits.push('<span class="dn">valuation stale</span>');
-  const extra=(r.flag?FLAG:'')+earnPill(r.sym)+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
+  const extra=(r.flag?FLAG:'')+qualPill(r.sym,r.kind==='hold'?port.holdings.find(h=>h.id===r.id):data.ideas.find(i=>i.id===r.id))+earnPill(r.sym)+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
   const el=rowEl({tc:tone,tile:r.adj!=null?fmtN(r.adj,1):'–',tk:r.tk,nm:r.nm,extra,line2:bits.join(' · '),line3:nextIncTxt(r),px:pxCol(r.c,r.cur),onOpen:r.open});
   el.querySelector('.rsc').classList.add('nx'); el.title=`about ${pp(r.adj??0)} % a year expected`; return el; }
 function renderNext(){
@@ -2920,6 +3086,7 @@ function openHold(id){
       <label>2nd add level<input id="h_addBelow2" type="number" step="any" inputmode="decimal" value="${h.addBelow2??''}" placeholder="optional, buy more"></label>
       <label>Conviction<select id="h_conv"><option value="">${idea&&idea.conviction?`from Radar card (${idea.conviction}★)`:'not set (3★)'}</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(h.conviction)===n?'selected':''}>${'★'.repeat(n)} → max ${fmtN(Math.max(1,capDefault()+(n-3)*CONV_STEP),1)} %</option>`).join('')}</select></label>
       ${hcc&&backOf(hcc)>0?`<div class="w4 rclrow"><button type="button" class="chip ${hRec(h)?'on':''}" id="h_reclaim">${hRec(h)?'✓ ':''}I reclaim this</button><p class="hint">${esc(CC_NAME[hcc]||hcc)} withholds ${pcW(WHT[hcc].rate)}, Germany credits ${pcW(WHT[hcc].cred)}. The other ${pcW(WHT[hcc].back)} only comes back if you file with ${WHT[hcc].auth}. Tap if you do: Radar then stops counting it as lost${h.reclaim==null&&recOf(idea)?' (now taken from the Radar card)':''}.</p></div>`:''}
+      ${fund||!hSym(h)?'':(q=>`<div class="w4">${qualChips('h_qual',QUAL_SET.includes(h.quality)?h.quality:'auto',!QUAL_SET.includes(h.quality)&&q.set?`Now taken from the Radar card: ${q.set}. Radar alone says ${q.auto||'–'}.`:`Auto: Radar says ${q.auto||'– (too little data)'}. Pick a tier only if you know the company better than its figures.`)}</div>`)(qualOf(hSym(h),h))}
       <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${fmtN(Math.max(1,capDefault()+((convOf(h)??3)-3)*CONV_STEP),1)} (from stars)"></label>
       ${own?`<label>Next review<input id="h_review" type="date" value="${esc(h.nextReview||'')}"></label>`:''}
       <label>Short name<input id="h_short" value="${esc(h.short)}"></label>
@@ -2970,6 +3137,9 @@ function openHold(id){
   if($('#h_reclaim')) $('#h_reclaim').onclick=()=>{ const sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0;
     h.reclaim=!hRec(h); if(!h.reclaim&&!recOf(idea)) delete h.reclaim; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
     toast(h.reclaim?'Counted as reclaimed':'Counted as lost again'); };
+  $$('#h_qual .chip').forEach(b=>b.onclick=()=>{ const sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0, k=b.dataset.q;
+    if(QUAL_SET.includes(k)) h.quality=k; else delete h.quality; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
+    toast(QUAL_SET.includes(k)?`Quality set to ${k}`:'Quality back to auto'); });
   $('#hDel').onclick=()=>{ if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
   $('#mHold').classList.add('on');
 }
@@ -2982,9 +3152,10 @@ function importHoldings(arr){
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
     ['addBelow','addBelow2','maxWeight','conviction'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     if('reclaim' in o) o.reclaim=o.reclaim===true||o.reclaim==='true';   // v3.7.0: I file the reclaim for this one
+    let qAuto=false; if('quality' in o){ const q=String(o.quality||'').toLowerCase().trim(); if(QUAL_SET.includes(q)) o.quality=q; else { delete o.quality; qAuto=q==='auto'; } }   // v3.9.0
     const cur=port.holdings.find(h=>!h.deletedAt&&((o.id&&h.id===o.id)||(o.isin&&h.isin===o.isin)||(o.symbol&&hSym(h)===o.symbol)));
     let t=null;
-    if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); t=cur; n++; }
+    if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); if(qAuto) delete cur.quality; t=cur; n++; }
     else if(o.symbol||o.isin){ t={id:o.isin?'h-'+o.isin:uid(),kind:'stock',addBelow:null,maxWeight:null,idea:null,note:'',...o,updatedAt:now()}; port.holdings.push(t); n++; }
     if(t&&t.val&&typeof t.val==='object'){ if(!t.val.date) t.val.date=today(); if(t.val.price==null){ const c=curOf(px(t)); if(c) t.val.price=c; }
       if(!(raw.addBelow>0)){ const l=levelFromVal(valNorm(t.val)); if(l) t.addBelow=niceRound(l); } }
