@@ -1024,8 +1024,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.1';
+const VERSION='4.1.2';
 const CHANGELOG=[
+  {v:'4.1.2',d:'2026-11-09',t:'Counts match the lists, broken theses stay out of the zone',items:[
+    'A stock at your level whose review is due now shows in Add zone (or Buy zone) with "review due" on the row, instead of under Review due. So "2 in the add zone" really lists two. The Today line still counts it as a review.',
+    'A broken thesis now holds a stock at Hold (Wait on Ideas), like a red flag does: it no longer shows in Add zone or Buy zone, and the card says "would be N". Next € already held it back.',
+  ]},
   {v:'4.1.1',d:'2026-11-09',t:'Tidier inside, nothing new to see',items:[
     'Which group a stock lands in, the counts above the lists, the tab badge, the Today line and the Portfolio tile colour now come from one rule each for ideas and holdings. Before, six places worked it out separately. Everything should look exactly as it did.',
   ]},
@@ -1734,6 +1738,7 @@ function scoreOf(i){
   // buy level, yield and range alone can't reach the buy zone.
   let score=raw, cap=null; const biz=bizOf(symOf(i));
   if(biz&&biz.red.length&&score>54){ score=54; cap='flag'; }
+  if(brokenOf(i)&&score>54){ score=54; cap=cap||'broken'; }   // v4.1.2: a broken thesis never reaches Buy/Add zone
   if(!(i.buyBelow>0)&&score>74){ score=74; cap=cap||'level'; }
   const ab=parts.find(x=>x.k==='buy');
   if(ab&&ab.above>0&&score>74){ score=74; cap=cap||'above'; }
@@ -1744,6 +1749,7 @@ function whyOf(i,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng');
   if(i.status==='bought') out.push('Holding');
   if(s.cap==='flag') out.push(`held at Wait by a red flag (would be ${s.raw})`);
+  if(s.cap==='broken') out.push(`held at Wait by a broken thesis (would be ${s.raw})`);
   out.push(b?(b.above<=0?'in the buy zone':`${abv(b.above)} % above buy`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:'')):s.cap==='level'?`no buy price set, so it stops at Getting close (would be ${s.raw})`:'no buy price set');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
@@ -1899,7 +1905,7 @@ function renderBoard(){
   if(boardSort!=='score'){ g.appendChild(groupEl(sortOf().label,ideas.map(i=>ideaRow(i,ideaState(i).due)))); return; }
   const gi=k=>ideas.filter(i=>ideaState(i).group===k);   // groups: see ideaState
   for(const k of ['due','Buy zone','Getting close','Wait','Expensive','noprice','out']){ const l=gi(k);
-    if(l.length||k==='Buy zone') g.appendChild(groupEl(I_GROUP[k],l.map(i=>ideaRow(i,k==='due')),k==='Buy zone'?'Nothing at your price yet.':undefined)); }
+    if(l.length||k==='Buy zone') g.appendChild(groupEl(I_GROUP[k],l.map(i=>ideaRow(i,k==='due'||k==='Buy zone'&&ideaState(i).due)),k==='Buy zone'?'Nothing at your price yet.':undefined)); }
 }
 // Idea card (v2.3.0). Every fact of the old card is here once: score + tier + distance to buy in one
 // line, range bar with its ends, then yield / return / review, then two lines of thesis.
@@ -2054,6 +2060,7 @@ function cardEl(i,inSheet){
   if(inSheet){ const l2=lvl2Of(i);
     if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':'at your buy level'):`${abv(bp.above)} % above your buy level`):'no buy price set';
       if(sc.cap==='flag') dec=`held at Wait by a red flag (would be ${sc.raw}) · `+dec;
+      else if(sc.cap==='broken') dec=`held at Wait by a broken thesis (would be ${sc.raw}) · `+dec;
       else if(sc.cap==='above'||sc.cap==='level') dec+=`, so it stops at Getting close (would be ${sc.raw})`;
       dec+=rngTxt(rp); }
     else if(!(!q&&errOf(i))&&c) dec='not enough data for a score';
@@ -2548,7 +2555,7 @@ function ideaOf(h){ const s=hSym(h), t=String(h.idea||'').trim().toUpperCase();
 function addOf(h){ if(h.addBelow>0) return {v:h.addBelow,src:'own'};
   const i=ideaOf(h); if(i&&i.buyBelow>0&&symOf(i)===hSym(h)) return {v:i.buyBelow,src:'radar'}; return null; }
 // Shape the shared helpers (quoteOf, curOf, scoreOf, runwayHtml …) understand.
-const px=h=>({ticker:h.short,symbol:h.symbol,buyBelow:addOf(h)?.v??null,buyBelow2:h.addBelow2>0?h.addBelow2:null,currency:h.currency,currentPrice:null});
+const px=h=>({ticker:h.short,symbol:h.symbol,broken:brokenOf(textSrc(h)),buyBelow:addOf(h)?.v??null,buyBelow2:h.addBelow2>0?h.addBelow2:null,currency:h.currency,currentPrice:null});
 const posOf_=h=>depot&&h.isin?depot.pos[h.isin]||null:null;
 function valueOf(h){ const p=posOf_(h); if(!p) return null; const x=px(h), c=curOf(x), e=c?eurOf(c,curOfI(x)):null;
   return e?{eur:p.shares*e,live:true,unit:e}:{eur:p.valueEur,live:false,unit:p.priceEur}; }
@@ -2573,6 +2580,7 @@ function hWhy(h,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng'), a=addOf(h);
   if(s.full) out.push(`would be ${s.rawTier.toLowerCase()} (${s.score}), but already ${fmtN(s.w,1)} % of the depot`);
   if(s.cap==='flag') out.push(`held at Hold by a red flag (would be ${s.raw})`);
+  if(s.cap==='broken') out.push(`held at Hold by a broken thesis (would be ${s.raw})`);
   out.push(b?(b.above<=0?'at or below your add level':`${abv(b.above)} % above add level`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:''))+(a&&a.src==='radar'?' (from Radar card)':''):s.capped||s.cap==='level'?'set an add level to reach the add zone':'no add level yet');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
@@ -2610,7 +2618,7 @@ function holdCard(r){
     dist=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} %`
       :bp?(bp.above<=0?`at or below your add level ${mN(a.v,cur)}${eurTag(a.v,cur)}`:`${abv(bp.above)} % above add at ${mN(a.v,cur)}${eurTag(a.v,cur)}`)+(a.src==='radar'?' (Radar)':'')+lvl2Txt(x,c,cur)
       :'no add level set';
-    if(s.cap==='flag') dist='held by a red flag · '+dist;
+    if(s.cap==='flag') dist='held by a red flag · '+dist; else if(s.cap==='broken') dist='held by a broken thesis · '+dist;
     if(rp&&rp.pos>=.85) dist+=' · near 52w high'; else if(rp&&rp.pos<=.15) dist+=' · near 52w low'; }
   else if(!hSym(h)){ tier='No symbol'; dist='open it and set the Yahoo symbol'; }
   else if(!q&&errOf(x)){ tier='No quote'; dist=`no quote for ${hSym(h)}, check the Yahoo symbol`; }
@@ -2626,7 +2634,7 @@ function holdCard(r){
     if(!s.full&&s.cap==='flag') dec=`held at Hold by a red flag (would be ${s.raw}) · `+dec;
     else if(!s.full&&s.cap==='above'&&bp) dec+=`, so it stops at Getting close (would be ${s.raw})`;
     dec+=rngTxt(rp); }
-  if(!fund&&brokenOf(textSrc(h))) dec='thesis broken · '+dec;
+  if(!fund&&brokenOf(textSrc(h))) dec='thesis broken'+(s&&!s.full&&s.cap==='broken'?` (would be ${s.raw})`:'')+' · '+dec;   // v4.1.2: the broken cap
   const lvlLine=a?lvlLineHtml('Add',a.v,cur,lvl2Of(x),a.src==='radar'?' (from the Radar card)':''):'';
   const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
   const yArr=hi?(hi.v==='cheap'?['▲','up']:hi.v==='expensive'?['▼','dn']:['≈','']):null;
@@ -2672,9 +2680,9 @@ function holdCard(r){
 // ---------- "Can I act on this stock?" in one place (v4.1.1) ----------
 // The Portfolio and Ideas lists, the counts above them, the tab badge, the Today strip and the
 // Portfolio tile colour all read holdState / ideaState. Change a rule here, nowhere else.
-// Known on purpose (Basti decides, see the state-machine audit): the counts use `zone`, which
-// includes stocks whose review is due, while the list puts those under Review due (`group`).
-// A broken thesis doesn't block the zone either; it only turns the tile red.
+// Basti's rules (v4.1.2): a stock at its level whose review is due is listed in Add/Buy zone with
+// "review due" on the row (the Today line still counts it as a review), so the counts match the list.
+// A broken thesis caps the score like a red flag (scoreOf), so it never reaches the zone.
 // Next € keeps its own status (o.st in nextRank): its "full" means full after the amount you add.
 const H_GROUP={due:'Review due',zone:'Add zone',close:'Getting close',nolevel:'No add level yet',hold:'Hold',full:'Full',funds:'Funds and bonds',nosym:'Needs a symbol or quote',gone:'Not in your last statement'};
 function holdState(r){   // r: {h, s = hScore(h), inDepot}, as portRows() builds it
@@ -2683,7 +2691,7 @@ function holdState(r){   // r: {h, s = hScore(h), inDepot}, as portRows() builds
     level:!!addOf(h),full:!!(s&&s.full),zone:!!(s&&s.zone)};
   st.close=!!(s&&!s.full&&!s.zone&&s.score>=55&&st.level);
   // where the row is listed: first match wins
-  st.group=!st.inDepot?'gone':st.due?'due':!s?(fund?'funds':'nosym'):st.full?'full':st.zone?'zone':st.close?'close':!st.level?'nolevel':'hold';
+  st.group=!st.inDepot?'gone':st.zone?'zone':st.due?'due':!s?(fund?'funds':'nosym'):st.full?'full':st.zone?'zone':st.close?'close':!st.level?'nolevel':'hold';
   // tile colour: red only for a red flag or a broken thesis; colour only in Add zone / Getting close
   st.tone=st.flag||st.broken?'var(--t-exp)':!s||st.full||!st.level?'var(--t-none)':s.tier==='Add zone'||s.tier==='Getting close'?s.c:'var(--t-none)';
   return st;
@@ -2693,7 +2701,7 @@ const I_GROUP={due:'Review due','Buy zone':'Buy zone','Getting close':'Getting c
 function ideaState(i,sc=scoreOf(i)){
   const out=i.status==='out', tier=sc?sc.tier:null;
   const st={kind:'idea',out,due:!out&&reviewDue(i),tier,zone:!out&&tier==='Buy zone',broken:brokenOf(i)};
-  st.group=out?'out':st.due?'due':tier||'noprice';
+  st.group=out?'out':st.zone?'Buy zone':st.due?'due':tier||'noprice';
   return st;
 }
 // One row per holding (v3.0.0). Line 2 answers "can I add?": distance to the add level, or what's
@@ -3484,7 +3492,8 @@ function todayTap(k){
   const kinds=new Set(L.map(o=>o.kind));
   if((k==='level'||k==='due')&&kinds.size===1){
     const tab=kinds.has('idea')?'board':'port';
-    const ok=tab==='port'||(boardSort==='score'&&filter==='all'&&!(tableMode&&mqWide.matches));
+    const ok=(tab==='port'||(boardSort==='score'&&filter==='all'&&!(tableMode&&mqWide.matches)))
+      &&(k!=='due'||L.every(o=>(o.kind==='idea'?ideaState(o.i):o.r.st).group==='due'));   // a due stock at its level sits in the zone group: then show the list instead
     if(ok){ switchView(tab);
       const sec=$(`#${tab==='board'?'viewBoard':'viewPort'} .grp[data-g="${k==='due'?'Review due':tab==='board'?'Buy zone':'Add zone'}"]`);
       if(sec){ sec.scrollIntoView({block:'start',behavior:'smooth'}); sec.classList.add('flash'); setTimeout(()=>sec.classList.remove('flash'),1200); return; } } }
@@ -3540,7 +3549,7 @@ function renderPort(){
     [H_GROUP.gone,g('gone')],
   ];
   for(const [t,list,empty,isDue,fk] of groups){ if(!list.length&&!empty) continue;
-    body.appendChild(groupEl(t,list.map(r=>holdRow(r,isDue)),empty,fk)); }
+    body.appendChild(groupEl(t,list.map(r=>holdRow(r,isDue||r.st.due&&r.st.group==='zone')),empty,fk)); }
 }
 $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.target.value=capDefault(); return; }
   port.settings={...(port.settings||{}),maxWeight:v,updatedAt:now()}; persistPort(); toast(`Max per stock: ${fmtN(v,1)} %`); };
