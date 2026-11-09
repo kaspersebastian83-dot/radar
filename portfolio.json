@@ -49,11 +49,16 @@
       "currency": "USD",
       "kind": "stock",
       "sector": "REIT – logistics",
-      "addBelow": null,
+      "addBelow": 104,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ $126.96. Base ~$122.5 = avg of 20x (below its ~23x long-run P/FFO; ~20x since 2023) × 2027e core FFO ~$6.70 ($134) and Gordon on dividend $4.45 next yr, g 4 %, 8 % hurdle ($111). Wide moat (best logistics land, scale, cost of capital) → 15 % off = $104 (≈4.1 % yield, above its 3.8 % 5-yr high). Bear $90 = $6.00 FFO × 15x. Reverse DCF: at $127 the 3.3 % yield + ~4.7 %/yr growth = 8 %.",
+      "updatedAt": "2026-11-09T07:40:44.321Z",
+      "thesis": "World's largest logistics REIT. Q3 26 core FFO $1.60 (+7 %), 2026 guide $6.25–6.29, occupancy 95.6 %, same-store NOI +5.5–6 %, data-centre suppliers ~17 % of US new leasing. Buying SEGRO (£14bn, mostly in shares) to deepen Europe.",
+      "bull": "Rents marking up as leases roll; development starts raised to $6–6.75bn at ~6.6 % yields; power/data-centre conversions of land bank; dividend +12 %/yr 2020–25.",
+      "bear": "SEGRO paid at 14 % above NAV, mostly with new PLD shares (+ Aug equity raise) → dilution/integration risk; rate-sensitive (−17 % from July high); GAAP 2026 EPS guide cut to $4.05–4.15; tariffs/trade could slow leasing. US 15 % WHT credited.",
+      "kill": "I'm wrong if core FFO/share growth falls below 3 % for 2027, occupancy drops under 94 %, or SEGRO's integration needs more equity at a discount to NAV.",
+      "nextReview": "2027-01-22"
     },
     {
       "id": "h-NL0010273215",
@@ -189,11 +194,16 @@
       "currency": "EUR",
       "kind": "stock",
       "sector": "Infrastructure – concessions, construction",
-      "addBelow": null,
+      "addBelow": 103,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ €111.60. Base ~€137.5 = avg of 13.5x (below its usual ~14–15x, for French tax risk) × 2027e EPS ~€9.8 (€132) and Gordon on FCF/sh ~€10.0 (2026 target ~€6bn FCF), g only 1 % because French motorway concessions run off in the 2030s (€143). Average uncertainty → 25 % off = €103 (≈4.9 % yield). Bear €75 = €7.5 EPS (new transport tax + recession) × 10x. App note: yield 20 % above its 5-yr average + price near the 52w low → shows Add zone ~8 % above the level.",
+      "updatedAt": "2026-11-09T07:40:44.321Z",
+      "thesis": "Concessions (airports, motorways) + Energy Solutions + Construction. 9M 26 revenue +3.1 % to €56.0bn, order book €75.4bn (14 months), 2026 guide: higher revenue, Ebit and net income, FCF ~€6bn. 2025 FCF record €7.0bn, net debt 1.4x Ebitda. ~11–12x earnings, 4.5 % yield.",
+      "bull": "Airports (Budapest, Edinburgh, Mexico) and Energy Solutions (+7 %) growing; ~60 % of revenue outside France; dividend €4.75 → €5.05; strong liquidity (€15.5bn cash).",
+      "bear": "France: exceptional profit tax cost €449m in 2025, a heavier long-distance transport tax is in Parliament; ASF/Cofiroute concessions end 2030s; Q3 airport traffic −0.6 % (geopolitics, kerosene). French WHT: 12.8 % for private investors and fully credited — but check TR: if 25 % was withheld, 12.2 pp must be reclaimed in France.",
+      "kill": "I'm wrong if FCF falls below €5bn without a one-off, net debt goes above 2x Ebitda, or the dividend is cut.",
+      "nextReview": "2027-02-06"
     },
     {
       "id": "h-DE0008430026",
@@ -284,11 +294,16 @@
       "currency": "USD",
       "kind": "stock",
       "sector": "Utilities – renewables",
-      "addBelow": null,
+      "addBelow": 23.5,
       "maxWeight": null,
       "idea": "BEP",
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ $31.74. Base ~$36 = avg of 13x × 2027e FFO/unit ~$2.40 ($31; LTM $2.18, +10 %/yr target) and Gordon on distribution $1.63 next yr, g 4 %, 8 % hurdle ($41). Complex structure + asset-sale-dependent FFO → 35 % off = $23.50 (≈6.7 % yield). Bear $20 = $2.00 FFO × 10x. Red flags (OCF/sh down 2 yrs, net debt 26x EBITDA) are a Yahoo data artifact: BEPC's consolidated statements book the exchangeable shares as a liability and swing on its remeasurement — FFO/unit is the real measure and is rising. Simplification: BEPC → 1 BEP Inc. Class A share each (1:1), BEP vote 30 Nov, close Q4 → update symbol, level stays.",
+      "updatedAt": "2026-11-09T07:40:44.321Z",
+      "thesis": "Global hydro/wind/solar/storage owner run by Brookfield; contracted, inflation-linked cash flows. Q3 26 FFO $0.51/unit (+11 %), LTM $2.18. Targets 10 %+ FFO/unit growth, 5–9 % distribution growth (low end), building ~10 GW/yr from 2027. Distribution $0.392/q.",
+      "bull": "New US hydro deals at ~$95/MWh vs $73 average; asset recycling funds growth without equity; one simple corporation after simplification → broader index inclusion.",
+      "bear": "FFO leans on asset-sale gains; storage FFO −57 % y/y; GAAP net loss $314m in Q3; unit count +3.4 % y/y; BEP vote participation was below the 2/3 threshold. Canadian corp: 25 % WHT, only 15 % credited in DE → 10 pp to reclaim from CRA or lose.",
+      "kill": "I'm wrong if FFO/unit growth (ex asset-sale gains) drops below 6 %, the payout exceeds 80 % of FFO, or the simplification fails and they issue equity below $28.",
+      "nextReview": "2026-12-05"
     },
     {
       "id": "h-US7561091049",
@@ -354,11 +369,16 @@
       "currency": "EUR",
       "kind": "stock",
       "sector": "Utilities – power networks, renewables",
-      "addBelow": null,
+      "addBelow": 7.1,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ €9.693. Base ~€9.45 = avg of 11x × 2027e EPS ~€0.77 (€8.47) and Gordon on dividend ~€0.52 next yr (70 % payout), g 3 %, 8 % hurdle (€10.4). Average uncertainty (Italian politics, €61bn net debt) → 25 % off = €7.10 (≈7.3 % yield). Bear €4.80 = €0.60 EPS × 8x. Today's price is already ~3 % above my base.",
+      "updatedAt": "2026-11-09T07:40:44.321Z",
+      "thesis": "Europe's largest utility by customers; grids now ~half of the story (Italy, Spain, Brazil). H1 26 ordinary EBITDA €11.8bn (+3.2 %), ordinary EPS €0.40; 2026 EPS ~€0.74 (top of €0.72–0.74 guide), €0.80–0.82 by 2028; €53bn capex plan, dividend +6 %, €1bn buyback.",
+      "bull": "Regulated grid growth + Endesa (+22 % net income 9M) and LatAm; buybacks lift EPS; payout 70 % of ordinary income; FFO/net debt ~26 %.",
+      "bear": "Net debt up ~€4bn to €61bn in H1; Italy's 'Bollette' decree and generation margins squeezed; Italian state as shareholder sets the agenda. Italian WHT 26 %, only 15 % credited in DE → 11 pp of every dividend lost unless reclaimed in Italy (rarely worth it) — net yield ~4.5 % at today's price.",
+      "kill": "I'm wrong if ordinary EPS falls below €0.70, net debt/EBITDA goes above 3x, or the dividend floor is cut.",
+      "nextReview": "2027-03-01"
     },
     {
       "id": "h-DE000ENAG999",
@@ -369,11 +389,16 @@
       "currency": "EUR",
       "kind": "stock",
       "sector": "Utilities – power networks",
-      "addBelow": null,
+      "addBelow": 11.1,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ €19.085. Base ~€13.9 = avg of 14x × 2027e adj. EPS ~€1.13 (€15.8) and Gordon on dividend €0.60 next yr, g 3 %, 8 % hurdle (€12.0). Regulated networks → 20 % off = €11.10 (≈5.4 % yield). Bear €9 = €0.90 EPS (bad regulatory reset) × 10x. Reverse DCF: at €19 the 3 % yield needs ~5 %/yr dividend growth forever. Watch flag 'OCF/sh −11 %/yr since 2022' = 2022 energy-crisis peak, harmless; FCF is negative by design (grid capex).",
+      "updatedAt": "2026-11-09T07:40:44.321Z",
+      "thesis": "Germany's largest distribution-grid owner (+ UK/central Europe retail). 2026 guide adj. EBITDA €9.4–9.6bn, adj. net income €2.7–2.9bn (EPS €1.03–1.11) after a record 2025 (€9.8bn / €1.16); target €13bn EBITDA and €3.8bn net income by 2030. Dividend €0.57 (+~4 %/yr). Hold for the grid build-out; add only far lower.",
+      "bull": "€8.7bn/yr capex grows the regulated asset base; EPS ~7 %/yr to 2030 if regulation cooperates; low-risk earnings.",
+      "bear": "At €19 it trades ~18x 2026 EPS and 3.0 % yield vs 4.1 % 5-yr average; 2026 earnings dip; German regulator (BNetzA) return-on-equity reset for the next period is the swing factor; capex delays in H1. German stock — no foreign WHT.",
+      "kill": "I'm wrong if the regulatory reset cuts allowed returns enough that 2030 targets are withdrawn, or net debt/EBITDA goes above 5.5x.",
+      "nextReview": "2027-03-20"
     },
     {
       "id": "h-FR0000120578",
@@ -384,11 +409,16 @@
       "currency": "EUR",
       "kind": "stock",
       "sector": "Healthcare – pharma",
-      "addBelow": null,
+      "addBelow": 75,
       "maxWeight": null,
       "idea": null,
-      "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "note": "Valuation 2026-11-09 @ €83.74. Base ~€107.5 = avg of 12x × 2027e business EPS ~€9.5 (€114) and Gordon on FCF/sh ~€7.0, g only 1 % for the Dupixent patent cliff ~2031 (€101). Big pharma with ~40 % of sales in one drug → 30 % off = €75 (≈5.5 % yield). Bear €58.5 = €6.5 post-cliff EPS × 9x. Reverse DCF: at €84 the FCF yield ~8.4 % implies slight shrinkage forever — the market prices the cliff.",
+      "updatedAt": "2026-11-09T07:40:44.321Z",
+      "thesis": "Immunology (Dupixent €5.7bn/q, +35 %), rare diseases, vaccines. Q3 26 sales +14.3 % CER, business EPS €3.55 (+19.6 %); 2026 guide raised to low-teens sales and mid-teens EPS growth. ~9x 2026 business EPS, 4.9 % yield, progressive dividend.",
+      "bull": "Dupixent target €25bn by 2030; launches +31 % (Altuviiio, Ayvakit, Rezurock); 9M FCF €7.0bn (+28 %); bolt-on M&A to fill the gap; costs falling.",
+      "bear": "Dupixent loss of exclusivity ~2031 is the whole debate; Q4 implied ~3 % sales growth / −11 % EPS; vaccines −6.6 %; divestments cut 2027 sales ~€1.3bn; US drug-pricing (MFN). French WHT 12.8 % fully credited — check TR in case 25 % was withheld.",
+      "kill": "I'm wrong if the post-Dupixent pipeline fails 2 major Phase 3s in a row, business EPS falls in 2027 ex divestments, or the dividend isn't raised.",
+      "nextReview": "2027-01-30"
     },
     {
       "id": "h-JP3404600003",
