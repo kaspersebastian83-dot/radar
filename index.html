@@ -1024,8 +1024,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.3';
+const VERSION='4.1.4';
 const CHANGELOG=[
+  {v:'4.1.4',d:'2026-11-09',t:'No more lost edits, the dot covers the portfolio',items:[
+    'An edit you make while a save to GitHub is still running is now saved right after it, instead of waiting until you next open the app. The dot keeps saying "saving" until it is really done.',
+    'The dot now covers portfolio.json too. If your add levels or notes fail to save or load, it turns red and says "save failed (portfolio)", instead of a toast you might miss.',
+  ]},
   {v:'4.1.3',d:'2026-11-09',t:'Tidier sync inside, nothing new to see',items:[
     'Saving to and loading from GitHub now keeps its state in one record per file (ideas and portfolio) instead of loose flags. Everything should work exactly as before. This prepares the next fixes: an edit made while a save is running gets lost, and the dot does not show when the portfolio fails to save.',
   ]},
@@ -2437,22 +2441,33 @@ const hdr=()=>({Authorization:`Bearer ${sync.token}`,Accept:'application/vnd.git
 // v3.11.1: in chunks. One call with a byte per argument fails above 65,536 bytes in Safari (≈110,000 in Chrome), so a grown ideas.json or portfolio.json could no longer be saved.
 const b64enc=s=>{ const b=new TextEncoder().encode(s); let o=''; for(let k=0;k<b.length;k+=8192) o+=String.fromCharCode.apply(null,b.subarray(k,k+8192)); return btoa(o); };
 const b64dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,'')),c=>c.charCodeAt(0)));
-// ---------- sync state (v4.1.3) ----------
+// ---------- sync state (v4.1.3, v4.1.4) ----------
 // One record per file in the repo. Only syncEv() changes it; the code below just reports what happened.
 //   sha     GitHub's version of the file we last saw (sent with a save, so GitHub can refuse a stale one)
 //   timer   the 1.5 s wait before a save
-//   saving  a save is on its way (a second one is skipped, not queued: see the state-machine audit)
-//   last    the last thing that happened: pull · got · pullNew · pullOk · pullFail · save · saveOk · saveFail · off
-// A pull and a save can run at the same time, so `saving` is its own field next to `last`.
-// The dot (#sync) shows ideas.json only; portfolio.json events are recorded but don't move it (yet).
-const SYNC={ideas:{sha:null,timer:null,saving:false,last:null},port:{sha:null,timer:null,saving:false,last:null}};
-const SYNC_DOT={pull:['busy','syncing'],pullNew:['ok','repo (new file)'],pullOk:['ok','synced'],pullFail:['err','sync failed'],
-  save:['busy','saving'],saveOk:['ok','synced'],saveFail:['err','save failed'],off:['','local']};
+//   saving  a save is on its way; it stays set through a conflict's pull, so only one save runs at a time
+//   dirty   something asked to save while one was on its way: save again when it ends (v4.1.4)
+//   last    the last thing that happened: pull · pullNew · pullOk · pullFail · save · saveOk · saveFail
+// A pull can run during a save, so `saving` is its own field next to `last`.
+// The dot (#sync) shows the worse of the two files (v4.1.4; before, ideas.json only).
+const SYNC={ideas:{sha:null,timer:null,saving:false,dirty:false,last:null},port:{sha:null,timer:null,saving:false,dirty:false,last:null}};
+// [dot class, text, rank]: the higher rank wins when the two files differ
+const SYNC_DOT={pull:['busy','syncing',2],pullNew:['ok','repo (new file)',1],pullOk:['ok','synced',1],pullFail:['err','sync failed',4],
+  save:['busy','saving',3],saveOk:['ok','synced',1],saveFail:['err','save failed',5]};
 function syncEv(f,ev,sha){ const S=SYNC[f];
   if(sha!==undefined) S.sha=sha;                                     // got / pullNew / saveOk carry GitHub's version
-  if(ev==='save') S.saving=true; else if(ev==='saveConflict'||ev==='saveEnd') S.saving=false;
-  if(ev!=='saveConflict'&&ev!=='saveEnd'&&ev!=='got') S.last=ev;
-  if(f==='ideas'&&SYNC_DOT[ev]) setSync(...SYNC_DOT[ev]); }
+  if(ev==='off'){ for(const k in SYNC) Object.assign(SYNC[k],{last:null,dirty:false}); }
+  else if(ev==='skip') S.dirty=true;                                 // a save was asked for during a save
+  else if(ev==='save'){ S.saving=true; S.dirty=false; }              // this save sends everything there is now
+  else if(ev==='saveEnd') S.saving=false;
+  if(SYNC_DOT[ev]) S.last=ev;
+  paintSync();
+  return ev==='saveEnd'&&S.dirty; }                                  // saveEnd: true = save again
+function fileDot(f){ const S=SYNC[f]; return S.saving||S.dirty?SYNC_DOT.save:SYNC_DOT[S.last]||null; }
+function paintSync(){ if(!cfg()){ setSync('','local'); return; }
+  const a=fileDot('ideas'), b=fileDot('port'); if(!a&&!b) return;
+  const w=!a||(b&&b[2]>a[2])?b:a, port=w===b&&(!a||a[2]<b[2]);
+  setSync(w[0],w[1]+(a&&b&&a[0]==='err'&&b[0]==='err'?' (ideas and portfolio)':port?' (portfolio)':'')); }
 function syncLater(f,fn){ const S=SYNC[f]; clearTimeout(S.timer); S.timer=setTimeout(fn,1500); }
 let syncTxt='saved on this device';
 function setSync(cls,txt){ const s=$('#sync'); s.className='status '+cls; syncTxt=txt==='local'?'saved on this device':txt; renderStatus(); }
@@ -2483,16 +2498,16 @@ async function pull(thenPush){
 }
 function schedulePush(){ if(!cfg()) return; syncLater('ideas',push); }
 async function push(retry=true){
-  if(!cfg()||SYNC.ideas.saving) return; syncEv('ideas','save');
+  if(!cfg()) return; if(SYNC.ideas.saving){ syncEv('ideas','skip'); return; } syncEv('ideas','save');
   try{
     const body={message:`radar: update ${today()}`,content:b64enc(JSON.stringify(data,null,2)),branch:sync.branch};
     if(SYNC.ideas.sha) body.sha=SYNC.ideas.sha;
     const r=await fetch(api(),{method:'PUT',headers:{...hdr(),'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if((r.status===409||r.status===422)&&retry){ syncEv('ideas','saveConflict'); await pull(); return; }
+    if((r.status===409||r.status===422)&&retry){ await pull(); return; }   // pull merges GitHub's copy; its save request comes back as `dirty`
     if(!r.ok) throw new Error(r.status);
     const j=await r.json(); syncEv('ideas','saveOk',j.content.sha);
   }catch(e){ console.error(e); syncEv('ideas','saveFail'); }
-  finally{ syncEv('ideas','saveEnd'); }
+  finally{ if(syncEv('ideas','saveEnd')) schedulePush(); }
 }
 
 // ---------- price file ----------
@@ -3794,18 +3809,18 @@ async function pullP(){
 }
 function schedulePushP(){ if(!cfg()) return; syncLater('port',pushP); }
 async function pushP(retry=true){
-  if(!cfg()||SYNC.port.saving) return; syncEv('port','save');
+  if(!cfg()) return; if(SYNC.port.saving){ syncEv('port','skip'); return; } syncEv('port','save');
   try{
     // belt and braces: nothing private leaves the browser
     const clean={...port,holdings:port.holdings.map(h=>{ const o={...h}; PRIVATE_KEYS.forEach(k=>delete o[k]); return o; })};
     const body={message:`portfolio: update ${today()}`,content:b64enc(JSON.stringify(clean,null,2)+'\n'),branch:sync.branch};
     if(SYNC.port.sha) body.sha=SYNC.port.sha;
     const r=await fetch(apiP(),{method:'PUT',headers:{...hdr(),'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if((r.status===409||r.status===422)&&retry){ syncEv('port','saveConflict'); await pullP(); return; }
+    if((r.status===409||r.status===422)&&retry){ await pullP(); return; }
     if(!r.ok) throw new Error(r.status);
     syncEv('port','saveOk',(await r.json()).content.sha);
   }catch(e){ console.warn(e); syncEv('port','saveFail'); toast('Saving portfolio.json failed'); }
-  finally{ syncEv('port','saveEnd'); }
+  finally{ if(syncEv('port','saveEnd')) schedulePushP(); }
 }
 
 // ---------- version and changelog ----------
