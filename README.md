@@ -55,7 +55,7 @@ Separate from the idea tracking: what you actually own, and whether any of it is
 
 - `portfolio.json` (in the repo, public): one entry per holding with ISIN, Yahoo symbol, type (stock / fund / bond fund), optional `addBelow` and `maxWeight`, optional `idea` (Radar ticker it links to), note. **No share counts, no values.**
 - Share counts come from the Trade Republic *Vermögensübersicht* PDF: Portfolio → "Update from Trade Republic PDF". It's parsed in the browser (pdf.js) and kept in that browser's localStorage only. Import it once per device; re-import when you've bought or sold.
-- **Add score** = the Buy score with `addBelow` in place of `buyBelow` (50 / 30 / 20). Without an own add level, a Radar card on the same symbol lends its buy-below. Without any level a stock tops out at "Getting close", never "Add zone".
+- **Add score** = the Buy score with `addBelow` in place of `buyBelow` (60 / 30 / 10; Add zone only at or below the level). Without an own add level, a Radar card on the same symbol lends its buy-below. Without any level a stock tops out at "Getting close", never "Add zone".
 - **Max weight** (default 7 %, editable in the tab, overridable per holding): a stock above it is listed as *Full* and not flagged, however cheap. Funds are shown for weight and yield, not scored unless you give them an add level.
 - A live quote more than 20 % off the statement price is flagged: usually the wrong Yahoo symbol.
 - The badge on the Portfolio tab counts holdings in the add zone.
@@ -77,6 +77,13 @@ At the end of a stock discussion, ask Claude for "a Radar card" and paste the JS
   "loggedPrice": 142.30,
   "currency": "USD",
   "buyBelow": 135,
+  "val": {
+    "date": "2026-11-05", "price": 142.30,
+    "methods": [{"t": "18× 2027e EPS $8.40", "v": 151}, {"t": "Gordon on FCF/sh $7.20, g 3 %, 8 % hurdle", "v": 148}],
+    "base": 150, "discount": 10, "why": "wide moat",
+    "bear": 110, "bearWhy": "$7 EPS × 16×",
+    "reverse": "today's price implies ~4 %/yr growth"
+  },
   "conviction": 3,
   "thesis": "…",
   "bull": "…",
@@ -87,7 +94,9 @@ At the end of a stock discussion, ask Claude for "a Radar card" and paste the JS
 }
 ```
 
-`status` is one of `radar`, `researching`, `watchlist`, `bought`, `out`. An array of several objects is fine too. Code fences around the JSON are stripped automatically.
+`status` is one of `radar`, `researching`, `watchlist`, `bought`, `out`.
+
+`val` (optional, since v3.1.0) is the valuation behind the level: `base` defaults to the average of the method values, `discount` is the margin of safety in %, `bear` the bear-case value. Without `buyBelow`, the import sets it to base × (1 − discount). The card shows how far today's price is from fair value and from the bear case; the detail sheet shows the whole valuation and marks it stale once results came out after `date` (or after ~6 months). Holdings take the same `val` object in a `{"holdings":[…]}` block; `addBelow` is then derived the same way unless given. An array of several objects is fine too. Code fences around the JSON are stripped automatically.
 
 ## Sync details
 

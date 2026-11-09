@@ -333,6 +333,28 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .c2px .s b{font-weight:700}
 .c2dec{font-size:13.5px;line-height:1.35;color:var(--ink2)}
 .c2dec b{color:var(--ti);font-weight:800}
+.c2val{font-size:12.5px;line-height:1.35;color:var(--ink2);margin-top:-4px}
+.c2val b{font-weight:800}.c2val .up,.val .up{color:var(--teal)}.c2val .dn,.val .dn{color:var(--coral)}
+.stl{color:var(--coral);font-weight:700}
+.vbar{margin:4px 0 10px}
+.vbar .rt{position:relative;height:18px}
+.vbar .tr{position:absolute;left:0;right:0;top:6px;height:6px;border-radius:3px;background:var(--line)}
+.vbar .zn{position:absolute;left:0;top:6px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--teal) 32%,transparent)}
+.vbar .fr{position:absolute;top:4px;height:10px;border-radius:5px;background:color-mix(in srgb,var(--research) 35%,transparent)}
+.vbar .bs{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--research)}
+.vbar .lv{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--teal)}
+.vbar .br{position:absolute;top:1px;width:2px;height:16px;margin-left:-1px;background:var(--coral)}
+.vbar .nw{position:absolute;top:3px;width:12px;height:12px;box-sizing:border-box;margin-left:-6px;border-radius:50%;background:var(--panel);border:3px solid var(--ink)}
+.vbar .lg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.vbar .k{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.vbar .k.br{background:var(--coral)}.vbar .k.lv{background:var(--teal)}.vbar .k.fr{background:color-mix(in srgb,var(--research) 55%,transparent)}.vbar .k.nw{border-radius:50%;border:2.5px solid var(--ink);box-sizing:border-box;background:var(--panel)}
+.val .kpis{margin:6px 0 8px}.val .kpi b{font-size:18px}.val .kpi b i{font-style:normal}
+.vtxt p{margin:6px 0 0;white-space:normal}.vtxt ul{margin:4px 0 0;padding-left:18px;line-height:1.5}
+.val>.hint{margin:8px 0 0;white-space:normal}
+details.vform{border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px}
+details.vform summary{cursor:pointer;font-size:14px}
+details.vform .form{margin-top:10px}
+.vcalc{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
 .c2bar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
 .c2bar .rt{position:relative;flex:1;height:14px}
 .c2bar .tr{position:absolute;left:0;right:0;top:4px;height:6px;border-radius:3px;background:var(--line)}
@@ -561,6 +583,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
     <label class="w2">Bull case<textarea id="f_bull"></textarea></label>
     <label class="w2">Bear case<textarea id="f_bear"></textarea></label>
     <label class="w4">I'm wrong if…<textarea id="f_kill"></textarea></label>
+    <div class="w4" id="f_valBox"></div>
   </div>
   <div class="foot2">
     <button class="btn danger quiet" id="btnDelete">Delete idea</button><span class="sp"></span>
@@ -679,8 +702,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.0.1';
+const VERSION='3.1.0';
 const CHANGELOG=[
+  {v:'3.1.0',d:'2026-11-09',t:'Valuation behind every level',items:[
+    'Every stock with a valuation now shows one more line on its card: how far today\'s price is from your fair value and from the bear case, e.g. "+30 % to fair 117 · −29 % to bear 64".',
+    'In the details there is a new Valuation section: a scale with bear case, your level, the fair-value range and today\'s price, then upside and downside from today, upside per 1 of downside, and what you\'d have to fair value and to the bear case if you buy at your level.',
+    'Below it, how the fair value was built (both methods and their values), the margin of safety and why, the bear case and what today\'s price implies.',
+    'A valuation is marked stale once the company has reported results after the estimate date, or after about 6 months. That\'s your cue to redo it.',
+    'Edit (ideas) and the holding settings have a Valuation block: two methods, fair value, margin of safety, bear case. "Use as level" sets the buy or add level to fair value × (1 − margin).',
+    'All 21 stock holdings and Zoetis, Wolters Kluwer and VICI already have their valuations filled in. The holding notes keep only the remarks that aren\'t part of the valuation.']},
   {v:'3.0.1',d:'2026-11-09',t:'Buy zone means at your price',items:[
     'Buy zone and Add zone now only show when the price is at or below your level. Before, a high yield plus a price near the 52-week low could put a stock in the top group while it was still ~8 % above your level (Danone and Alphabet were). Above your level, the score now stops at 74 (Getting close) and the details say what it would have been.',
     'The 52-week range counts less: 10 points instead of 20, the distance to your level 60 instead of 50. A stock sitting near its low is often cheap for a reason, so it shouldn\'t climb the board on that alone.']},
@@ -1209,6 +1239,96 @@ function c2barHtml(i,what){
   const b=i.buyBelow>0?Math.min(1,Math.max(0,(i.buyBelow-q.yearLow)/(q.yearHigh-q.yearLow))):null;
   return `<div class="c2bar" title="52-week range${b!=null?`, your ${what} level (line)`:''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`;
 }
+// ---------- valuation (v3.1.0) ----------
+// val = {date, price (at the estimate), methods:[{t,v}], base, discount (%), why, bear, bearWhy, reverse}
+// Base defaults to the average of the methods. Level = base × (1 − discount).
+const numOr=x=>x===''||x==null||isNaN(Number(x))?null:Number(x);
+function valNorm(v){ if(!v||typeof v!=='object') return null;
+  const methods=(Array.isArray(v.methods)?v.methods:[]).map(m=>({t:String(m?.t||'').trim(),v:numOr(m?.v)})).filter(m=>m.t||m.v!=null);
+  const mv=methods.map(m=>m.v).filter(x=>x>0);
+  const base=numOr(v.base)??(mv.length?mv.reduce((a,b)=>a+b,0)/mv.length:null);
+  if(!(base>0)) return null;
+  const all=[...mv,base];
+  return {...v,methods,base,discount:numOr(v.discount),bear:numOr(v.bear),price:numOr(v.price),lo:Math.min(...all),hi:Math.max(...all)};
+}
+const levelFromVal=v=>v&&v.base>0&&v.discount!=null?v.base*(1-v.discount/100):null;
+function niceRound(x){ if(x==null) return null; const m=x>=10000?100:x>=1000?10:x>=100?1:x>=10?.5:.05; return Number((Math.round(x/m)*m).toFixed(2)); }
+// A holding uses its own valuation, else the one on a Radar card for the same symbol.
+function valOfH(h){ const o=valNorm(h.val); if(o) return {v:o,src:'own'};
+  const i=ideaOf(h), v=i&&symOf(i)===hSym(h)?valNorm(i.val):null; return v?{v,src:'radar'}:null; }
+// Stale once results came out after the estimate (or it is older than ~6 months).
+function valAge(v,sym){ if(!v||!v.date) return null;
+  const c=(fund.companies||{})[sym]||{}, t=today(); let res=null;
+  if(c.lastEarnings&&c.lastEarnings>v.date&&c.lastEarnings<=t) res=c.lastEarnings;
+  else if(c.nextEarnings&&c.nextEarnings>v.date&&c.nextEarnings<=t) res=c.nextEarnings;
+  const days=Math.round((Date.parse(t)-Date.parse(v.date))/864e5);
+  return {res,days,stale:!!res||days>200}; }
+const signPct=x=>(x>=0?'+':'−')+fmtN(Math.abs(x),0)+' %';
+function valMove(v,c){ if(!v||!(c>0)) return null;
+  const up=(v.base/c-1)*100, dn=v.bear>0?(v.bear/c-1)*100:null;
+  return {up,dn,ratio:up>0&&dn!=null&&dn<0?up/-dn:null}; }
+// One line on the card: how far to fair value and to the bear case from today's price.
+function valLine(v,c,cur,sym){ const m=valMove(v,c); if(!m) return '';
+  const a=valAge(v,sym);
+  return `<div class="c2val" title="Your fair value and bear case, from today's price">${m.up>=0?`<b class="up">${signPct(m.up)}</b> to fair ${mN(v.base,cur)}`:`<b class="dn">${fmtN(-m.up,0)} % above</b> fair ${mN(v.base,cur)}`}${m.dn!=null?` · <b class="dn">${signPct(m.dn)}</b> to bear ${mN(v.bear,cur)}`:''}${a&&a.stale?' · <span class="stl">estimate stale</span>':''}</div>`; }
+// Scale: bear · your level · fair-value range with base · today's price.
+function valBar(v,c,lvl,cur){
+  const pts=[v.lo,v.hi,v.base,v.bear,lvl,c].filter(x=>x>0), lo=Math.min(...pts)*.94, hi=Math.max(...pts)*1.04, P=x=>pct((x-lo)/(hi-lo));
+  return `<div class="vbar" style="--tc:var(--ink)"><div class="rt"><span class="tr"></span>
+    ${lvl>0?`<span class="zn" style="width:${P(lvl)}"></span><span class="lv" style="left:${P(lvl)}"></span>`:''}
+    <span class="fr" style="left:${P(v.lo)};width:${pct((v.hi-v.lo)/(hi-lo))}"></span><span class="bs" style="left:${P(v.base)}"></span>
+    ${v.bear>0?`<span class="br" style="left:${P(v.bear)}"></span>`:''}${c>0?`<span class="nw" style="left:${P(c)}"></span>`:''}</div>
+    <div class="lg">${v.bear>0?`<span><i class="k br"></i>bear ${mN(v.bear,cur)}</span>`:''}${lvl>0?`<span><i class="k lv"></i>level ${mN(lvl,cur)}</span>`:''}<span><i class="k fr"></i>fair ${v.lo<v.hi?`${mN(v.lo,cur)}–${mN(v.hi,cur)}`:mN(v.base,cur)}</span>${c>0?`<span><i class="k nw"></i>now ${mN(c,cur)}</span>`:''}</div></div>`; }
+function valHtml(v,c,cur,lvl,word,sym,src){
+  if(!v) return `<div class="sec val"><h4>Valuation</h4><p class="none">No valuation yet. Add fair value, discount and bear case in ${word==='add'?'the settings below':'Edit'}, and the ${word} level follows from them.</p></div>`;
+  const m=valMove(v,c), a=valAge(v,sym), calc=levelFromVal(v), atL=lvl>0?{up:(v.base/lvl-1)*100,dn:v.bear>0?(v.bear/lvl-1)*100:null}:null;
+  const hand=lvl>0&&calc&&Math.abs(lvl/calc-1)>.02;
+  return `<div class="sec val"><h4>Valuation${src==='radar'?' <span class="bzn">from the Radar card</span>':''}${a&&a.stale?' <span class="stl">stale</span>':''}</h4>
+    ${valBar(v,c,lvl,cur)}
+    <div class="kpis">
+      ${m?`<div class="kpi"><b class="num ${m.up>=0?'up':'dn'}">${signPct(m.up)}</b><span>to fair value ${mN(v.base,cur)}</span></div>`:''}
+      ${m&&m.dn!=null?`<div class="kpi"><b class="num dn">${signPct(m.dn)}</b><span>to the bear case ${mN(v.bear,cur)}</span></div>`:''}
+      ${m&&m.dn!=null?`<div class="kpi"><b class="num">${m.ratio!=null?(m.ratio<.1?'&lt; 0,1':m.ratio.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}))+' : 1':'—'}</b><span>${m.ratio!=null?'upside per 1 of downside, from today':'no upside left from today'}</span></div>`:''}
+      ${atL?`<div class="kpi"><b class="num"><i class="up">${signPct(atL.up)}</i>${atL.dn!=null?` / <i class="dn">${signPct(atL.dn)}</i>`:''}</b><span>to fair${atL.dn!=null?' / bear':''} if bought at your level</span></div>`:''}
+    </div>
+    <div class="vtxt">
+      ${v.methods.length?`<p><b>Fair value ${mP(v.base,cur)}</b>${v.methods.length>1?', the average of':' from'}:</p><ul>${v.methods.map(x=>`<li>${esc(x.t)||'method'}${x.v!=null?` → <b class="num">${mN(x.v,cur)}</b>`:''}</li>`).join('')}</ul>`:`<p><b>Fair value ${mP(v.base,cur)}</b></p>`}
+      ${v.discount!=null?`<p><b>${fmtN(v.discount,0)} % margin of safety</b>${v.why?`: ${esc(v.why)}`:''} → ${mN(niceRound(calc),cur)}.${hand?` Your ${word} level ${mN(lvl,cur)} is set by hand.`:''}</p>`:''}
+      ${v.bear>0?`<p><b>Bear case ${mP(v.bear,cur)}</b>${v.bearWhy?`: ${esc(v.bearWhy)}`:''}</p>`:''}
+      ${v.reverse?`<p><b>What the price implies:</b> ${esc(v.reverse)}</p>`:''}
+    </div>
+    <p class="hint">${v.date?`Estimate from ${fmtDate(v.date)}${v.price>0?` at ${mP(v.price,cur)}`:''}.`:'No estimate date.'} ${a&&a.res?`<span class="stl">Results came out on ${fmtDate(a.res)}, after this estimate. Time to redo it.</span>`:a&&a.stale?`<span class="stl">${Math.round(a.days/30)} months old. Time to redo it.</span>`:''}</p></div>`; }
+// Edit form block, shared by the idea editor and the holding settings (p = id prefix).
+function valForm(p,v,cur){ v=v||{}; const m=v.methods||[], vv=x=>x==null?'':esc(String(x)), c=esc(cur||'');
+  return `<details class="vform" ${v.base||m.length?'open':''}><summary><b>Valuation</b><span class="hint"> fair value, margin of safety, bear case</span></summary><div class="form">
+    <label class="w2">Method 1<input id="${p}m1t" value="${vv(m[0]?.t)}" placeholder="20× 2027e EPS $6.70"></label>
+    <label class="w2">Value 1 ${c}<input id="${p}m1v" type="number" step="any" inputmode="decimal" value="${vv(m[0]?.v)}"></label>
+    <label class="w2">Method 2<input id="${p}m2t" value="${vv(m[1]?.t)}" placeholder="Gordon on FCF/sh $5, g 3 %, 8 % hurdle"></label>
+    <label class="w2">Value 2 ${c}<input id="${p}m2v" type="number" step="any" inputmode="decimal" value="${vv(m[1]?.v)}"></label>
+    <label>Fair value (base)<input id="${p}base" type="number" step="any" inputmode="decimal" value="${vv(v.base)}" placeholder="average"></label>
+    <label>Margin of safety %<input id="${p}disc" type="number" step="any" inputmode="decimal" value="${vv(v.discount)}" placeholder="25"></label>
+    <label class="w2">Why this margin<input id="${p}why" value="${vv(v.why)}" placeholder="wide moat 10–20 · average 25–30 · cyclical 35–50"></label>
+    <label>Bear value<input id="${p}bear" type="number" step="any" inputmode="decimal" value="${vv(v.bear)}"></label>
+    <label>Estimate date<input id="${p}date" type="date" value="${vv(v.date)}"></label>
+    <label class="w2">Bear case, how<input id="${p}bearWhy" value="${vv(v.bearWhy)}" placeholder="trough EPS × trough multiple"></label>
+    <label class="w4">What today's price implies<input id="${p}rev" value="${vv(v.reverse)}" placeholder="reverse DCF, optional"></label>
+    <div class="w4 vcalc"><span id="${p}calc"></span><button class="btn small" type="button" id="${p}use">Use as level</button></div>
+  </div></details>`; }
+function valRead(p,prev,price){
+  const g=k=>$('#'+p+k)?$('#'+p+k).value.trim():'';
+  const raw={methods:[{t:g('m1t'),v:g('m1v')},{t:g('m2t'),v:g('m2v')}],base:numOr(g('base')),discount:numOr(g('disc')),why:g('why'),bear:numOr(g('bear')),bearWhy:g('bearWhy'),reverse:g('rev')};
+  const n=valNorm(raw); if(!n) return undefined;
+  const date=g('date')||today();
+  const out={date,price:prev&&prev.date===date&&prev.price!=null?prev.price:(price>0?price:null),methods:n.methods,base:numOr(g('base'))??niceRound(n.base),discount:n.discount,why:raw.why,bear:n.bear,bearWhy:raw.bearWhy,reverse:raw.reverse};
+  Object.keys(out).forEach(k=>{ if(out[k]===''||out[k]==null) delete out[k]; });
+  return out; }
+function valWire(p,levelSel,cur){
+  const upd=()=>{ const n=valNorm({methods:[{v:$('#'+p+'m1v').value},{v:$('#'+p+'m2v').value}],base:$('#'+p+'base').value,discount:$('#'+p+'disc').value});
+    const l=levelFromVal(n); $('#'+p+'calc').textContent=n?(l?`${mN(n.base,cur)} × (1 − ${fmtN(n.discount,0)} %) = ${mN(niceRound(l),cur)}`:`fair value ${mN(n.base,cur)}, add a margin of safety`):'Fill in a method value or the fair value.';
+    $('#'+p+'use').disabled=!l; return l; };
+  $$(`[id^="${p}"]`).forEach(el=>{ if(el.tagName==='INPUT') el.addEventListener('input',upd); });
+  $('#'+p+'use').onclick=()=>{ const l=upd(); if(l){ $(levelSel).value=niceRound(l); toast('Level set, save to keep it'); } };
+  upd(); }
 const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
 function cardEl(i,inSheet){
   const st=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), h=histOf(i), sc=scoreOf(i), cur=curOfI(i), t=totalOf(i);
@@ -1243,6 +1363,7 @@ function cardEl(i,inSheet){
       </div>
     </div>
     <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
+    ${valLine(valNorm(i.val),c,cur,symOf(i))}
     ${bar}
     <div class="c2box num">
       <div><span>Yield</span><b>${y!=null?fmtN(y,2)+' %':'—'}</b><span class="${yArr?yArr[1]:''}">${h?`${yArr[0]} usual ${fmtN(h.avg,2)} %`:y!=null?'no 5-yr history':'no data'}</span></div>
@@ -1344,6 +1465,7 @@ function openRead(id){
       <div class="kpi"><b class="num ${tb!=null&&tb>=0?'up':''}">${tb==null?(i.buyBelow?mN(i.buyBelow,curOfI(i)):'—'):tb>=0?'In zone':'−'+fmtN(-tb,0)+' %'}</b><span>${i.buyBelow?'to buy below '+mN(i.buyBelow,curOfI(i)):'no buy level'}</span></div>
       ${(h=>h?`<div class="kpi"><b class="num">${h.fair?mP(h.fair,curOfI(i)):'—'}</b><span>price at its usual yield</span></div>`:'')(histOf(i))}
     </div>
+    ${valHtml(valNorm(i.val),c,curOfI(i),i.buyBelow,'buy',symOf(i))}
     ${(t=>t?`<div class="sec"><h4>Return ${sinceLabel(i)}</h4>
       <div class="kpis">
         <div class="kpi"><b class="num ${t.price>=0?'up':'dn'}">${fmtPct(t.price)}</b><span>price, ${fmtP(t.base.price,curOfI(i))} to ${fmtP(curOf(i),curOfI(i))}</span></div>
@@ -1423,6 +1545,8 @@ function openEdit(id){
   $('#eTitle').textContent=id?`Edit ${i.ticker||'idea'}`:'New idea';
   F.forEach(k=>$('#f_'+k).value=i[k]??'');
   setConv(i.conviction||3);
+  $('#f_valBox').innerHTML=valForm('fv_',i.val,i.currency||'');
+  valWire('fv_','#f_buyBelow',i.currency||'');
   $('#btnDelete').style.visibility=id?'visible':'hidden';
   $('#mEdit').classList.add('on');
 }
@@ -1431,6 +1555,7 @@ $('#btnSave').onclick=()=>{
   const prevCur=i.currentPrice;
   F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow','boughtPrice'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
   i.conviction=conv;
+  { const nv=valRead('fv_',i.val,curOf(i)); if(nv) i.val=nv; else delete i.val; }
   if(i.currentPrice!=null && i.currentPrice!==prevCur) i.currentDate=today();
   if(!i.ticker && !i.name){ toast('Give it a ticker or a name'); return; }
   i.updatedAt=now();
@@ -1470,6 +1595,8 @@ $('#btnClaudeGo').onclick=()=>{
     if(!o.loggedDate) o.loggedDate=today();
     if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
     if(typeof o.notes==='string') o.notes=[{date:today(),text:o.notes}];
+    if(o.val&&typeof o.val==='object'){ if(o.val.price==null&&o.loggedPrice>0) o.val.price=o.loggedPrice; if(!o.val.date) o.val.date=o.loggedDate;
+      if(!(o.buyBelow>0)){ const l=levelFromVal(valNorm(o.val)); if(l) o.buyBelow=niceRound(l); } }
     o.updatedAt=now(); if(!o.createdAt) o.createdAt=o.updatedAt;
     n+=merge([o]);
   }
@@ -1685,6 +1812,7 @@ function holdCard(r){
       </div>
     </div>
     <div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>
+    ${fund?'':(z=>z?valLine(z.v,c,cur,hSym(h)):'')(valOfH(h))}
     ${c2barHtml(x,'add')}
     ${mm!=null?`<div class="warnbox">Quote is ${fmtPct(mm*100,0)} off the statement price. Probably the wrong Yahoo symbol.</div>`:''}
     <div class="c2box num">
@@ -1783,6 +1911,7 @@ function openHold(id){
       ${hi?`<div class="kpi"><b class="num">${hi.fair?mP(hi.fair,cur):'—'}</b><span>price at its usual yield</span></div>`:''}
       ${rt?`<div class="kpi"><b class="num">${fmtP(rt.cost,'EUR')}</b><span>your average buy price</span></div>`:''}
     </div>`}
+    ${fund?'':(z=>valHtml(z?z.v:null,c,cur,a?a.v:null,'add',hSym(h),z?z.src:null))(valOfH(h))}
     <div class="sec"><h4>Position</h4><div class="kpis">
       <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
       <div class="kpi"><b class="num ${!fund&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${fund?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
@@ -1820,12 +1949,14 @@ function openHold(id){
       <label class="w4">Bear case<textarea id="h_bear">${esc(h.bear)}</textarea></label>
       <label class="w4">I'm wrong if<textarea id="h_kill">${esc(h.kill)}</textarea></label>`}`:''}
       <label class="w4">Note<textarea id="h_note">${esc(h.note)}</textarea></label>
+      ${fund?'':`<div class="w4">${valForm('hv_',h.val,cur)}${!h.val&&valOfH(h)?'<p class="hint">Empty here means the valuation on the Radar card is used.</p>':''}</div>`}
     </div>
     <p class="hint">The buy price stays in this browser, like your share counts. Everything else is saved to GitHub.</p>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
   const toIdea=e=>{ e&&e.preventDefault(); closeAll(); openRead(idea.id); };
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
   wireBiz($('#holdBody'),()=>openHold(h.id));
+  if(!fund) valWire('hv_','#h_addBelow',cur);
   const notes=()=>{ $('#hNoteList').innerHTML=(src.notes||[]).slice().reverse().map(n=>`<div class="note"><small>${fmtDate(n.date)}</small><div>${esc(n.text)}</div></div>`).join('')||'<p class="none" style="margin:0;color:var(--mute);font-style:italic">No notes yet.</p>'; };
   notes();
   $('#hNoteBtn').onclick=()=>{ const t=$('#h_noteIn').value.trim(); if(!t) return;
@@ -1838,6 +1969,7 @@ function openHold(id){
     Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:val('#h_currency').toUpperCase(),
       kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),maxWeight:num($('#h_maxWeight').value),idea:val('#h_idea').toUpperCase()||null,
       sector:val('#h_sector'),note:val('#h_note'),updatedAt:now()});
+    if(!fund){ const nv=valRead('hv_',h.val,c); if(nv) h.val=nv; else delete h.val; }
     if(own){ h.nextReview=val('#h_review')||null; h.thesis=val('#h_thesis')||'';
       if($('#h_bull')) Object.assign(h,{bull:val('#h_bull'),bear:val('#h_bear'),kill:val('#h_kill')}); }
     persistPort(); openHold(h.id); toast('Saved');
@@ -1854,8 +1986,11 @@ function importHoldings(arr){
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
     ['addBelow','maxWeight'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     const cur=port.holdings.find(h=>!h.deletedAt&&((o.id&&h.id===o.id)||(o.isin&&h.isin===o.isin)||(o.symbol&&hSym(h)===o.symbol)));
-    if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); n++; }
-    else if(o.symbol||o.isin){ port.holdings.push({id:o.isin?'h-'+o.isin:uid(),kind:'stock',addBelow:null,maxWeight:null,idea:null,note:'',...o,updatedAt:now()}); n++; }
+    let t=null;
+    if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); t=cur; n++; }
+    else if(o.symbol||o.isin){ t={id:o.isin?'h-'+o.isin:uid(),kind:'stock',addBelow:null,maxWeight:null,idea:null,note:'',...o,updatedAt:now()}; port.holdings.push(t); n++; }
+    if(t&&t.val&&typeof t.val==='object'){ if(!t.val.date) t.val.date=today(); if(t.val.price==null){ const c=curOf(px(t)); if(c) t.val.price=c; }
+      if(!(raw.addBelow>0)){ const l=levelFromVal(valNorm(t.val)); if(l) t.addBelow=niceRound(l); } }
   }
   return n;
 }

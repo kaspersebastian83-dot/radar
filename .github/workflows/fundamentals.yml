@@ -27,7 +27,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install
-        run: pip install --quiet yfinance pandas
+        run: pip install --quiet yfinance pandas lxml
 
       - name: Fetch fundamentals
         run: python .github/scripts/fetch_fundamentals.py

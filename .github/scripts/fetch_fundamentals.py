@@ -7,7 +7,7 @@ Funds and bond funds are skipped. Per fiscal year (Yahoo gives about 4–5 years
   investedCapital, equity, shares (diluted average), eps
 
 plus dividend history per calendar year from the full payout record, the
-sector/industry, the statement currency and the next earnings date.
+sector/industry, the statement currency and the next and last earnings dates.
 
 The app derives the per-share trends, payout ratios, leverage and red flags
 from these raw figures, so the rules can be tuned without re-running this.
@@ -124,6 +124,20 @@ def next_earnings(t):
     return None
 
 
+def last_earnings(t):
+    """Most recent past results date, if Yahoo has it (needs lxml; fine to miss)."""
+    try:
+        d = t.get_earnings_dates(limit=8)
+        if d is not None and len(d):
+            idx = d.index.tz_convert("UTC") if d.index.tz is not None else d.index.tz_localize("UTC")
+            past = [x for x in idx if x <= pd.Timestamp.now(tz="UTC")]
+            if past:
+                return max(past).strftime("%Y-%m-%d")
+    except Exception:
+        pass
+    return None
+
+
 def main():
     ideas = json.loads(IDEAS.read_text(encoding="utf-8")).get("ideas", []) if IDEAS.exists() else []
     holds = json.loads(PORT.read_text(encoding="utf-8")).get("holdings", []) if PORT.exists() else []
@@ -160,6 +174,15 @@ def main():
             if not c["years"] and not c["divYears"]:
                 raise ValueError("no statements or dividends returned")
             old = prev_c.get(s, {})
+            # Last results date: Yahoo's history, else the previous "next" date once it has passed.
+            # The app marks a valuation stale when results came out after its estimate date.
+            today_s = pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d")
+            last = last_earnings(t) or old.get("lastEarnings")
+            on = old.get("nextEarnings")
+            if on and on <= today_s and (not last or on > last):
+                last = on
+            if last:
+                c["lastEarnings"] = last
             same = {k: v for k, v in old.items() if k != "time"} == c
             c["time"] = old.get("time") if same and old.get("time") else now
             companies[s] = c

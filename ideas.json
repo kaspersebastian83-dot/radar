@@ -316,7 +316,27 @@
         }
       ],
       "createdAt": "2026-11-06T20:32:30.021Z",
-      "updatedAt": "2026-11-06T20:32:30.021Z"
+      "updatedAt": "2026-11-09T09:55:40.000Z",
+      "val": {
+        "date": "2026-11-06",
+        "price": 82.11,
+        "methods": [
+          {
+            "t": "17× 2026e adj. EPS $6.30",
+            "v": 107
+          },
+          {
+            "t": "Gordon on FCF/sh $5.61, g 3 %, 8 % hurdle",
+            "v": 116
+          }
+        ],
+        "base": 110,
+        "discount": 25,
+        "why": "Average uncertainty: US vet-visit slowdown, dermatology competition",
+        "bear": 63,
+        "bearWhy": "$5.25 EPS × 12×",
+        "reverse": "At $82 the market implies ~1 % FCF growth forever"
+      }
     },
     {
       "id": "0yl3edmw5fl079",
@@ -347,7 +367,27 @@
         }
       ],
       "createdAt": "2026-11-06T20:32:30.021Z",
-      "updatedAt": "2026-11-06T20:32:30.021Z"
+      "updatedAt": "2026-11-09T09:55:40.000Z",
+      "val": {
+        "date": "2026-11-06",
+        "price": 90.11,
+        "methods": [
+          {
+            "t": "20× 2026e adj. EPS ~€5.60",
+            "v": 112
+          },
+          {
+            "t": "Gordon on adj. FCF ~€5.95/sh, g 3 %, 8 % hurdle",
+            "v": 123
+          }
+        ],
+        "base": 117,
+        "discount": 25,
+        "why": "Average uncertainty: AI could commoditise research content",
+        "bear": 64,
+        "bearWhy": "~€5.3 EPS × 12× (growth slips to 0–2 %)",
+        "reverse": "At €90 the market implies ~1.3 % growth forever"
+      }
     },
     {
       "id": "gxanqmmw5fl079",
@@ -378,7 +418,26 @@
         }
       ],
       "createdAt": "2026-11-06T20:32:30.021Z",
-      "updatedAt": "2026-11-06T20:32:30.021Z"
+      "updatedAt": "2026-11-09T09:55:40.000Z",
+      "val": {
+        "date": "2026-11-06",
+        "price": 25.21,
+        "methods": [
+          {
+            "t": "12× 2027e AFFO ~$2.56",
+            "v": 31
+          },
+          {
+            "t": "Gordon on $1.84 dividend, g 2.5 %, 8 % hurdle",
+            "v": 34
+          }
+        ],
+        "base": 30,
+        "discount": 25,
+        "why": "Average uncertainty; base cut below the methods for the Caesars lease (~38 % of rent)",
+        "bear": 21,
+        "bearWhy": "25 % cut on the Caesars lease → AFFO $2.30 × 9×"
+      }
     }
   ]
 }
