@@ -553,6 +553,20 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .incgr{background:var(--panel2);border-radius:var(--r2);padding:10px 12px;margin:0 0 12px;font-size:13px;color:var(--ink2);line-height:1.45}
 .incgr b{color:var(--ink)}.incgr p{margin:0}.incgr p+p{margin-top:6px}
 #incBox .grp{margin:0 0 10px}
+/* v3.7.0 tax leak */
+#leakBox{margin:0 0 16px}#leakBox .grp{margin:0 0 10px}
+#leakBox .ink{font-size:12.5px;color:var(--ink2);margin:0 0 10px;line-height:1.45}
+.lkhd{background:var(--panel2);border-radius:var(--r2);padding:10px 12px;margin:0 0 8px;font-size:13.5px;color:var(--ink2);line-height:1.4}
+.lkhd p{margin:0}.lkhd p+p{margin-top:4px}.lkhd b{font-size:16px;color:var(--ink)}.lkhd b.dn{color:var(--coral)}.lkhd b.up{color:var(--teal)}
+.rcl{display:inline-block;font-size:11px;font-weight:700;padding:0 7px;border-radius:999px;background:var(--ochre-soft);color:var(--ochre);margin-left:4px;vertical-align:1px}
+.rcl.on{background:var(--teal-soft);color:var(--teal)}
+.r2 .dn{color:var(--coral)}
+.lktodo{font-size:13px;color:var(--ink2);line-height:1.45;margin:0 0 8px}
+.lktodo h5{margin:0 0 4px;font-size:12.5px;font-weight:700;color:var(--mute)}
+.lktodo ul{margin:0;padding-left:18px}.lktodo li+li{margin-top:4px}.lktodo b{color:var(--ink)}.lktodo .up{color:var(--teal);font-weight:700}
+.lktodo .hint{margin:6px 0 0}
+.c2wht{font-size:12.5px;color:var(--ink2);line-height:1.4}.c2wht .dn{color:var(--coral);font-weight:700}
+.rclrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.rclrow .chip{cursor:pointer}.rclrow .hint{margin:0;flex:1 1 200px}
 .today button.inc b{color:var(--teal)}
 .nxhero .inc{font-size:13px;color:var(--ink2);font-weight:600}
 .list .empty{display:block}
@@ -743,6 +757,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
   <div class="msec">
     <h4>Portfolio</h4>
     <div class="inc" id="incBox"></div>
+    <div class="inc" id="leakBox"></div>
     <div class="pstrip" id="pStrip"></div>
     <p class="hint" id="depotStatus">No statement imported on this device.</p>
     <div class="row">
@@ -795,8 +810,16 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.6.0';
+const VERSION='3.7.0';
 const CHANGELOG=[
+  {v:'3.7.0',d:'2026-11-09',t:'What withholding tax costs you',items:[
+    'New block under the income view in ⋯ → Portfolio: "about N € a year lost to withholding you can\'t credit" (Italy, Japan …), and separately what you lose on top if you don\'t file the reclaims (Canada, Switzerland …).',
+    'Below it, every holding that loses something, sorted by € a year: country, gross dividend, lost, reclaimable, with a "reclaim" tag where filing would get money back. Tap one for its details.',
+    'A short reclaim to-do at the bottom: per country the amount, where to file and the deadline. Today that\'s Canada for BEPC: form NR7-R with the CRA, within 2 years. Italy\'s 11 % is counted as lost, because that reclaim takes years.',
+    'Foreign stocks, owned or on the Radar, show one line under the dividend box: e.g. "CA withholding 25 % · 15 % credited · 10 % to reclaim", plus what that costs per share. Holdings also show the € a year in Position. The rows are unchanged.',
+    'A holding\'s settings have an "I reclaim this" tag for Canadian and Swiss stocks. Tap it if you file the reclaim: Radar then counts that money as yours, in the income view and in Next €. It syncs like your levels.',
+    'Next €: the top pick says how many € a year of its dividend go to withholding you can\'t credit, and each stock\'s Next € section says how much a reclaim would bring back.',
+    'Scores, tiers and the order of every list are unchanged.']},
   {v:'3.6.0',d:'2026-11-09',t:'Your dividend income',items:[
     'New Income view on top of ⋯ → Portfolio, and an "income" button in the Today line that opens it. It shows what your depot pays a year in €: gross, after the withholding tax you can\'t get credited (Italy, Canada, Japan …), and after German tax. It replaces the old one-line dividend estimate.',
     'The German tax uses your Sparer-Pauschbetrag: 1.000 € single by default, one tap for 2.000 € joint, or type what\'s left of it if part sits with another bank. Equity funds count 70 % (Teilfreistellung). US, Dutch and French withholding counts toward the German tax; below the Pauschbetrag it can\'t be credited, and the number says so.',
@@ -1629,6 +1652,7 @@ function cardEl(i,inSheet){
       <div><span>Review</span><b title="${i.nextReview?fmtDate(i.nextReview):''}">${i.nextReview?new Date(i.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!i.nextReview?'not set':due?'due now':'next look'}</span></div>
     </div>
     ${inSheet?divBoxHtml(symOf(i)):''}
+    ${inSheet&&symOf(i)?whtLine(ccOf(null,symOf(i)),recOf(i),q,c,cur):''}
     ${(b=>b?`<div class="c2biz" title="Business trend, tap the card for details">${bizLine(b)}</div>`:'')(sc?sc.biz:bizOf(symOf(i)))}
     <p class="c2th">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>`;
   if(inSheet){ el.removeAttribute('tabindex'); return el; }
@@ -1847,6 +1871,7 @@ $('#btnClaudeGo').onclick=()=>{
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
     if(!o.id) o.id=uid();
     ['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
+    if('reclaim' in o) o.reclaim=o.reclaim===true||o.reclaim==='true';
     if(!o.loggedDate) o.loggedDate=today();
     if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
     if(typeof o.notes==='string') o.notes=[{date:today(),text:o.notes}];
@@ -2108,6 +2133,7 @@ function holdCard(r){
       <div><span>Review</span><b title="${src.nextReview?fmtDate(src.nextReview):''}">${src.nextReview?new Date(src.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!src.nextReview?'not set':due?'due now':'next look'}</span></div>
     </div>
     ${fund||!hSym(h)?'':divBoxHtml(hSym(h))}
+    ${fund||!hSym(h)?'':whtLine(ccOf(h.isin,hSym(h)),hRec(h),q,c,cur)}
     ${b?`<div class="c2biz" title="Business trend, tap for details">${bizLine(b)}</div>`:''}
     <p class="c2th">${src.thesis?esc(src.thesis):`<i>${fund?'No note yet.':'No thesis yet. Why do you own it?'}</i>`}</p>`;
   el.onclick=()=>openHold(h.id);
@@ -2289,12 +2315,43 @@ function openDecisions(){
 const LS_NEXT='radar.next.v1';
 let nextAmt=1000; try{ const v=Number(localStorage.getItem(LS_NEXT)); if(v>0) nextAmt=v; }catch{}
 const NX={years:5,sectorCap:20,sectorPen:5,fxCap:40,fxPen:10};
-// Withholding tax lost for a German private investor (share of the gross dividend), assuming no
-// manual reclaim. Checked 2026-11-09: IT 26 % (15 credited), CA 25 %, CH 35 %, JP 15.315 %, FR 12.8 %.
-const LEAK={IT:.11,CA:.10,CH:.20,JP:.003,IE:.10,ES:.04,DK:.12,AT:.125,BE:.15,FI:.20,NO:.10,SE:.15,PT:.10};
+// ---------- Withholding tax (v3.7.0): one table, everything else is derived from it ----------
+// Per country (ISIN prefix / symbol suffix, see ccOf), as shares of the gross dividend, for a German private investor:
+//   rate = withheld at source · cred = credited against German tax · back = only comes back if you file a reclaim
+//   lost = rate − cred − back, gone for good.  auth/form/yrs = where and how long to file the reclaim (static text).
+// IT, CA, CH, JP, FR, NL, US checked 2026-11-09; the rest are the statutory rates behind the old LEAK table,
+// no holding there yet, so check the procedure before filing.
+const WHT={
+  US:{rate:.15,cred:.15,back:0},              // 15 % with the W-8BEN Trade Republic files, fully credited
+  NL:{rate:.15,cred:.15,back:0},              // 15 % dividend tax, fully credited
+  FR:{rate:.128,cred:.128,back:0},            // 12,8 % for private investors, fully credited (a bank withholding 25–30 % would need a French reclaim)
+  GB:{rate:0,cred:0,back:0},                  // no withholding on UK dividends
+  DE:{rate:0,cred:0,back:0},                  // domestic: the German tax itself, nothing foreign
+  JP:{rate:.15315,cred:.15,back:0},           // 15,315 % (15 % + reconstruction surtax), 15 credited, 0,3 lost
+  IT:{rate:.26,cred:.15,back:0,theory:.11},   // 26 %, 15 credited; the 11 % reclaim from the Agenzia delle Entrate exists only in theory (years), so lost
+  CA:{rate:.25,cred:.15,back:.10,auth:'the CRA (Canada Revenue Agency)',form:'form NR7-R',yrs:2},     // 25 %, 15 credited, 10 back via NR7-R
+  CH:{rate:.35,cred:.15,back:.20,auth:'the ESTV (Swiss Federal Tax Administration)',form:'form 85',yrs:3}, // 35 %, 15 credited, 20 back via form 85
+  IE:{rate:.25,cred:.15,back:.10,auth:'Irish Revenue'},          // 25 % DWT, 15 credited, 10 by reclaim
+  ES:{rate:.19,cred:.15,back:.04,auth:'the Agencia Tributaria'},  // 19 %, 15 credited, 4 by reclaim
+  DK:{rate:.27,cred:.15,back:.12,auth:'Skattestyrelsen'},        // 27 %, 15 credited, 12 by reclaim
+  AT:{rate:.275,cred:.15,back:.125,auth:'the Austrian tax office'}, // 27,5 %, 15 credited, 12,5 by reclaim
+  BE:{rate:.30,cred:.15,back:.15,auth:'SPF Finances'},           // 30 %, 15 credited, 15 by reclaim
+  FI:{rate:.35,cred:.15,back:.20,auth:'Vero (Finnish Tax Administration)'}, // 35 % on nominee accounts, 15 credited, 20 by reclaim
+  NO:{rate:.25,cred:.15,back:.10,auth:'Skatteetaten'},           // 25 %, 15 credited, 10 by reclaim
+  SE:{rate:.30,cred:.15,back:.15,auth:'Skatteverket'},           // 30 %, 15 credited, 15 by reclaim
+  PT:{rate:.25,cred:.15,back:.10,auth:'the Autoridade Tributária'}, // 25 %, 15 credited, 10 by reclaim
+};
+const r3=v=>Math.round(v*1000)/1000;
+// LEAK = withholding Germany doesn't credit, assuming no reclaim (back + lost); LOST = what stays lost after a reclaim
+const LEAK={}, LOST={}; for(const [cc,w] of Object.entries(WHT)){ const l=r3(w.rate-w.cred), x=r3(w.rate-w.cred-w.back); if(l>0) LEAK[cc]=l; if(x>0) LOST[cc]=x; }
 const SUFFIX_CC={MI:'IT',PA:'FR',AS:'NL',DE:'DE',F:'DE',T:'JP',L:'GB',SW:'CH',TO:'CA',MC:'ES',CO:'DK',VI:'AT',BR:'BE',HE:'FI',OL:'NO',ST:'SE',LS:'PT',IR:'IE'};
 const ccOf=(isin,sym)=>{ if(isin&&/^[A-Z]{2}/.test(isin)) return isin.slice(0,2); const m=String(sym||'').match(/\.([A-Z]+)$/); return m?SUFFIX_CC[m[1]]||'??':'US'; };
-const leakOf=cc=>LEAK[cc]||0;
+// rec = you file the reclaim for this one ("reclaim": true on the holding or its Radar card)
+const leakOf=(cc,rec)=>(rec?LOST[cc]:LEAK[cc])||0;
+const backOf=cc=>(WHT[cc]&&WHT[cc].back)||0;
+const recOf=o=>!!(o&&o.reclaim===true);
+// a holding: its own setting wins, else the linked Radar card's
+const hRec=h=>h.reclaim!=null?h.reclaim===true:recOf(ideaOf(h));
 const sectorOf=(sym,fb)=>((fund.companies||{})[sym]||{}).sector||fb||'Other';
 function nextCands(){
   const T=depotTotal(), out=[], seen=new Set();
@@ -2302,10 +2359,10 @@ function nextCands(){
     const x=px(h), z=valOfH(h), a=addOf(h), w=weightOf(h,T), v=valueOf(h);
     seen.add(hSym(h));
     out.push({kind:'hold',id:h.id,tk:h.short||h.symbol,nm:h.name,sym:hSym(h),x,c:curOf(x),cur:curOfI(x),val:z?z.v:null,lvl:a?a.v:null,
-      y:yldOf(x),cc:ccOf(h.isin,hSym(h)),sector:sectorOf(hSym(h),h.sector),w,eur:v?v.eur:0,cap:capOf(h),inDepot:!depot||!!posOf_(h),broken:brokenOf(textSrc(h)),open:()=>openHold(h.id)}); }
+      y:yldOf(x),cc:ccOf(h.isin,hSym(h)),rc:hRec(h),sector:sectorOf(hSym(h),h.sector),w,eur:v?v.eur:0,cap:capOf(h),inDepot:!depot||!!posOf_(h),broken:brokenOf(textSrc(h)),open:()=>openHold(h.id)}); }
   for(const i of live()){ if(i.status==='out'||seen.has(symOf(i))) continue;
     out.push({kind:'idea',id:i.id,tk:i.ticker,nm:i.name,sym:symOf(i),x:i,c:curOf(i),cur:curOfI(i),val:valNorm(i.val),lvl:i.buyBelow>0?i.buyBelow:null,
-      y:yldOf(i),cc:ccOf(null,symOf(i)),sector:sectorOf(symOf(i),i.sector),w:depot?0:null,eur:0,cap:capDefault(),inDepot:true,broken:brokenOf(i),open:()=>openRead(i.id)}); }
+      y:yldOf(i),cc:ccOf(null,symOf(i)),rc:recOf(i),sector:sectorOf(symOf(i),i.sector),w:depot?0:null,eur:0,cap:capDefault(),inDepot:true,broken:brokenOf(i),open:()=>openRead(i.id)}); }
   return out;
 }
 function nextRank(amt){
@@ -2319,8 +2376,8 @@ function nextRank(amt){
     o.age=v?valAge(v,r.sym):null;
     if(!(c>0)){ o.st='noprice'; return o; }
     if(!v){ o.st='noval'; return o; }
-    const leak=leakOf(r.cc), y=r.y||0;
-    o.yNet=y*(1-leak); o.tax=y*leak;
+    const leak=leakOf(r.cc,r.rc), y=r.y||0;
+    o.yNet=y*(1-leak); o.tax=y*leak; o.leak=leak;
     const vg=numOr(v.g), dg=o.biz&&o.biz.dg!=null?Math.max(0,Math.min(6,o.biz.dg)):null;
     o.g=vg??dg??0; o.gSrc=vg!=null?'val':dg!=null?'div':'none';
     o.rr=(Math.pow(v.base/c,1/NX.years)-1)*100;
@@ -2345,7 +2402,9 @@ function nextRank(amt){
 function bondRef(){ const b=holdings().find(h=>h.kind==='bond'&&hSym(h)); if(!b) return null; const y=yldOf(px(b)); return y!=null?{y,nm:b.short||b.name}:null; }
 const pp=v=>fmtN(v,1);
 // v3.6.0: dividends the next amount would bring in, after the withholding you can't credit (before German tax)
-const nextIncOf=r=>r&&r.y>0?nextAmt*r.y*(1-leakOf(r.cc))/100:null;
+const nextIncOf=r=>r&&r.y>0?nextAmt*r.y*(1-leakOf(r.cc,r.rc))/100:null;
+// v3.7.0: € a year of the next amount's dividend lost to withholding you can't credit
+const nextLeakOf=r=>r&&r.y>0?nextAmt*r.y*leakOf(r.cc,r.rc)/100:0;
 const nextIncTxt=r=>{ const v=nextIncOf(r); return v==null?(r&&r.c>0?'no dividend':''):`+${fmtN(v,0)} € a year in dividends`; };
 function erParts(r){ let t=`yield ${pp(r.yNet)}`;
   if(r.g) t+=` + growth ${pp(r.g)}`;
@@ -2376,7 +2435,7 @@ function renderNext(){
         <b class="tk">${esc(top.tk)} <span>${esc(top.nm)}</span></b>
         <span class="er num">≈ ${pp(top.adj)} % a year</span>
         ${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}
-        <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
+        <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax${(l=>l>=.5?`, after ${fmtEur(l)} a year withholding you can't credit`:'')(nextLeakOf(top))}.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
         ${R.ready[1]?`<span class="ex">Next best at your level: ${R.ready.slice(1,3).map(r=>`${esc(r.tk)} ${pp(r.adj)} %`).join(', ')}.</span>`:''}`
       :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b>${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}<span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
       :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?fmtN(r.above,0)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
@@ -2396,7 +2455,7 @@ function renderNext(){
   const ex=document.createElement('details'); ex.className='cs nxex';
   ex.innerHTML=`<summary><b>How this is worked out</b></summary><div class="vtxt">
     <p>Each stock with a valuation gets an expected return a year over the next ${NX.years} years, in percent:</p>
-    <ul><li><b>Yield</b>: today's dividend yield, minus withholding tax Germany doesn't credit and you'd only get back by filing a reclaim yourself (Italy 11 of 26 %, Canada 10 of 25 %, Switzerland 20 of 35 %, Japan 0.3 %). US, Dutch, French, German and UK dividends lose nothing.</li>
+    <ul><li><b>Yield</b>: today's dividend yield, minus withholding tax Germany doesn't credit and you'd only get back by filing a reclaim yourself (Italy 11 of 26 %, Canada 10 of 25 %, Switzerland 20 of 35 %, Japan 0.3 %). US, Dutch, French, German and UK dividends lose nothing. If you tap "I reclaim this" in a holding's settings, the part you get back counts as yours (Canada, Switzerland); Italy's stays lost.</li>
     <li><b>Growth</b>: the long-run growth from your valuation (the g in the Gordon method). Without one, the dividend growth of the last 5 years, capped at 6 %. Buybacks are part of it, because it's growth per share.</li>
     <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value.</li>
     <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out.</li></ul>
@@ -2418,7 +2477,8 @@ function nextSecHtml(kind,id,sym){
     :r.st==='full'?`Held back: ${fmtEur(nextAmt)} more would make it ${fmtN(r.wAfter,1)} % of the depot, your max is ${fmtN(r.cap,1)} %.`:'';
   const notes=[r.gSrc==='val'?'growth from your valuation':r.gSrc==='div'?'growth = dividend growth of the last 5 years':'no growth assumed (none in the valuation, no dividend history)'];
   if(nextIncOf(r)!=null) notes.push(`${fmtEur(nextAmt)} here = ${nextIncTxt(r)}, after withholding`);
-  if(r.tax>=.05) notes.push(`withholding you can't credit takes ${pp(r.tax)} of the ${pp(r.y||0)} % yield`);
+  if(r.tax>=.05) notes.push(`withholding you can't credit takes ${pp(r.tax)} of the ${pp(r.y||0)} % yield, ${fmtEur(nextLeakOf(r))} a year on ${fmtEur(nextAmt)}${!r.rc&&backOf(r.cc)>0?` (${pp(r.y*backOf(r.cc))} of it comes back if you file the ${esc(r.cc)} reclaim)`:''}`);
+  else if(r.rc&&backOf(r.cc)>0) notes.push(`you file the ${esc(r.cc)} reclaim, so no withholding is lost`);
   if(r.why&&r.why.length) notes.push('mix: '+r.why.join(', '));
   if(b) notes.push(`${esc(b.nm)} bond fund ${pp(b.y)} %`);
   return `<div class="sec nxsec"><h4>Next € · expected return</h4>
@@ -2433,10 +2493,10 @@ function nextSecHtml(kind,id,sym){
 // history (radar.depotHist.v1) and the Pauschbetrag (radar.income.v1). Nothing of it goes into portfolio.json.
 const LS_INC='radar.income.v1', LS_DHIST='radar.depotHist.v1';
 const INC={tax:26.375, single:1000, joint:2000, tfFund:.30, hist:12};
-// Foreign withholding Germany credits against its own tax (the part it doesn't credit is in LEAK). Below the
-// Pauschbetrag there is no German tax to credit it against, so there it is a cost too.
-const CRED={FR:.128,GB:0,DE:0};
-const credOf=cc=>!cc?0:cc in CRED?CRED[cc]:.15;
+// Foreign withholding Germany credits against its own tax (WHT[cc].cred; the part it doesn't credit is in LEAK).
+// Below the Pauschbetrag there is no German tax to credit it against, so there it is a cost too.
+// Countries not in WHT: 15 % treaty rate assumed, nothing lost.
+const credOf=cc=>!cc?0:WHT[cc]?WHT[cc].cred:.15;
 let incSet={pausch:INC.single}; try{ const v=JSON.parse(localStorage.getItem(LS_INC)); if(v&&v.pausch>=0) incSet=v; }catch{}
 let dhist=[]; try{ const v=JSON.parse(localStorage.getItem(LS_DHIST)); if(Array.isArray(v)) dhist=v; }catch{}
 const saveHist=()=>{ try{ localStorage.setItem(LS_DHIST,JSON.stringify(dhist)); }catch{} };
@@ -2453,8 +2513,11 @@ function incRows(){
     let eur=null;
     if(fund) eur=y!=null&&v?v.eur*y/100:d&&d.v===0?0:null;
     else if(dE!=null) eur=p.shares*dE;
-    const leak=fund?0:leakOf(cc), cred=fund?0:credOf(cc), cost=costOf(h);
+    const rec=!fund&&hRec(h), leak=fund?0:leakOf(cc,rec), cred=fund?0:credOf(cc), cost=costOf(h);
+    const back=fund?0:backOf(cc), lost=fund?0:leakOf(cc,true);
     return {h,fund,cc,eur,leak,cred,leakEur:eur!=null?eur*leak:null,credEur:eur!=null?eur*cred:null,y,
+      // v3.7.0: lost for good, reclaimable and not filed, reclaimable and filed by you
+      rec,lostEur:eur!=null?eur*lost:null,backEur:eur!=null&&!rec?eur*back:0,recEur:eur!=null&&rec?eur*back:0,
       yoc:cost&&dE>0?dE/cost*100:null,
       taxable:eur==null?null:fund&&h.kind!=='bond'?eur*(1-INC.tfFund):eur}; });   // equity funds: 30 % Teilfreistellung
 }
@@ -2496,11 +2559,11 @@ function chgLine(c,lbl){ const pct=c.before>0?c.total/c.before*100:null;
   return `<p><b>${sgnEur(c.total)} a year</b>${pct!=null?` (${fmtPct(pct,1)})`:''} ${lbl} ${fmtDate(c.from)}: raises ${sgnEur(c.raise)}, new money ${sgnEur(c.newm)}.</p>`; }
 function renderIncome(){
   const box=$('#incBox'); if(!box) return;
-  histSync();
+  histSync(); renderLeak();
   const I=incomeOf(), list=document.createElement('div');
   if(!I){
     // without a statement: yields only
-    const rows=holdings().filter(h=>hSym(h)).map(h=>{ const x=px(h), y=yldOf(x), cc=isFund(h)?null:ccOf(h.isin,hSym(h)); return {h,x,y,net:y!=null?y*(1-(isFund(h)?0:leakOf(cc))):null}; })
+    const rows=holdings().filter(h=>hSym(h)).map(h=>{ const x=px(h), y=yldOf(x), cc=isFund(h)?null:ccOf(h.isin,hSym(h)); return {h,x,y,net:y!=null?y*(1-(isFund(h)?0:leakOf(cc,hRec(h)))):null}; })
       .filter(r=>r.y>0).sort((a,b)=>b.net-a.net);
     box.innerHTML=`<h4 class="shd">Dividend income</h4><p class="ink">The € figures need your statement on this device (import it below). Until then, the yields: today's trailing yield and what's left after withholding you can't credit.</p>`;
     list.appendChild(groupEl('Yield, after withholding',rows.map(r=>rowEl({tc:'var(--t-none)',tile:fmtN(r.net,1),txt:true,tk:r.h.short||r.h.symbol,nm:r.h.name,
@@ -2540,6 +2603,64 @@ function renderIncome(){
 }
 function setPausch(v){ incSet={...incSet,pausch:v}; try{ localStorage.setItem(LS_INC,JSON.stringify(incSet)); }catch{} renderIncome(); renderToday(); }
 $('#btnMenu').addEventListener('click',()=>renderIncome());
+// ---------- Tax leak (v3.7.0) ----------
+// What withholding costs you a year in €, from the WHT table and the income rows: lost for good (Italy, Japan …)
+// and what only comes back if you file the reclaim (Canada, Switzerland …). "I reclaim this" on a holding
+// (reclaim: true, synced in portfolio.json) counts its reclaimable part as recovered, here and in Next €.
+const CC_NAME={US:'US',NL:'Netherlands',FR:'France',GB:'UK',DE:'Germany',JP:'Japan',IT:'Italy',CA:'Canada',CH:'Switzerland',IE:'Ireland',ES:'Spain',DK:'Denmark',AT:'Austria',BE:'Belgium',FI:'Finland',NO:'Norway',SE:'Sweden',PT:'Portugal'};
+const pcW=v=>{ const p=v*100; return fmtN(p,Math.abs(p-Math.round(p))<.05?0:1)+' %'; };
+const eurW=v=>v>=.5?fmtEur(v):v>0?'< € 1':'€ 0';
+// "withholding 25 % · 15 % credited · 10 % to reclaim" for a country; '' for Germany and unknown countries
+function whtTxt(cc,rec){ const w=WHT[cc]; if(!w||cc==='DE') return '';
+  if(!(w.rate>0)) return `${esc(CC_NAME[cc]||cc)}: no withholding tax`;
+  const t=[`${esc(cc)} withholding ${pcW(w.rate)}`];
+  if(w.cred>=w.rate) t.push('fully credited');
+  else { t.push(`${pcW(w.cred)} credited`);
+    if(w.back>0) t.push(rec?`${pcW(w.back)} reclaimed by you`:`<b class="dn">${pcW(w.back)} to reclaim</b>`);
+    const l=LOST[cc]; if(l>0) t.push(`<b class="dn">${pcW(l)} lost</b>`); }
+  return t.join(' · '); }
+// card line under the dividend box; per share in the listing currency (and €) when something is lost
+function whtLine(cc,rec,q,c,cur){ const t=whtTxt(cc,rec); if(!t) return '';
+  const lk=leakOf(cc,rec), d=q&&q.divTTM>0?q.divTTM:null;
+  const ps=lk>0&&d?(v=>{ const e=cur!=='EUR'?eurOf(v,cur):null; return ` · ≈ ${fmtP(v,cur)}${e!=null?` (${fmtN(e,e<.1?3:2)} €)`:''} a share a year you don't get`; })(d*lk):'';
+  return `<div class="c2wht" title="Withholding at source, what Germany credits against its own tax, what only comes back with a reclaim, and what is lost for good. Last 12 months of dividends per share.">${t}${ps}</div>`; }
+const RECLAIM_HOW=cc=>{ const w=WHT[cc]; if(!w||!(w.back>0)) return '';
+  return `file ${w.form?w.form+' with ':'with '}${w.auth} for the ${pcW(w.back)} above the treaty rate${w.yrs?`, within ${w.yrs} years after the end of the year it was withheld`:', check the deadline first'}. You need the dividend statements showing the tax withheld and a residence certificate from your Finanzamt.`; };
+function renderLeak(){
+  const box=$('#leakBox'); if(!box) return; box.innerHTML='';
+  const I=incomeOf(), list=document.createElement('div');
+  const stk=holdings().filter(h=>!isFund(h)&&hSym(h)&&(!depot||posOf_(h))).map(h=>({h,cc:ccOf(h.isin,hSym(h)),rec:hRec(h)})).filter(o=>LEAK[o.cc]>0);
+  const ccs=[...new Set(stk.map(o=>o.cc))];
+  const credited=[...new Set(holdings().filter(h=>!isFund(h)&&hSym(h)&&(!depot||posOf_(h))).map(h=>ccOf(h.isin,hSym(h))).filter(cc=>WHT[cc]&&WHT[cc].rate>0&&WHT[cc].cred>=WHT[cc].rate))];
+  const credTxt=credited.length?`<p class="hint">Fully credited, nothing lost: ${credited.map(cc=>`${esc(cc)} ${pcW(WHT[cc].rate)}`).join(', ')}. That withholding counts toward your German tax; below the Pauschbetrag it can't, see the income view above.</p>`:'';
+  const todo=rows=>{ const L=ccs.filter(cc=>backOf(cc)>0).map(cc=>{ const R=rows.filter(r=>r.cc===cc), v=R.reduce((a,r)=>a+(r.v||0),0), filed=R.length&&R.every(r=>r.rec);
+      return `<li><b>${esc(CC_NAME[cc]||cc)}</b>${I?` · about ${eurW(v)} a year`:''} (${R.map(r=>esc(r.h.short||r.h.symbol)).join(', ')})${filed?' · <span class="up">you file this</span>':''}: ${RECLAIM_HOW(cc)}</li>`; });
+    const th=ccs.filter(cc=>WHT[cc].theory).map(cc=>`${esc(CC_NAME[cc]||cc)}'s ${pcW(WHT[cc].theory)} can be reclaimed only in theory (it takes years), so it is counted as lost and not on the list.`).join(' ');
+    return L.length||th?`<div class="lktodo"><h5>Reclaim to-do</h5>${L.length?`<ul>${L.join('')}</ul>`:'<p>Nothing to reclaim.</p>'}${th?`<p class="hint">${th}</p>`:''}</div>`:''; };
+  if(!I){
+    box.innerHTML=`<h4 class="shd">Withholding tax you lose</h4><p class="ink">The € figures need your statement on this device. Until then, the rates: what is withheld, what Germany credits, what comes back with a reclaim and what is lost.</p>`;
+    stk.sort((p,q)=>leakOf(q.cc,q.rec)-leakOf(p.cc,p.rec));
+    list.appendChild(groupEl('Foreign withholding Germany doesn\'t credit',stk.map(o=>{ const w=WHT[o.cc];
+      return rowEl({tc:o.rec?'var(--teal)':LOST[o.cc]?'var(--coral)':'var(--ochre)',tile:esc(o.cc),txt:true,tk:o.h.short||o.h.symbol,nm:o.h.name,
+      line2:`${pcW(w.rate)} withheld · ${pcW(w.cred)} credited`,
+      line3:[w.back>0?`${pcW(w.back)} ${o.rec?'back':'to reclaim'} <span class="rcl ${o.rec?'on':''}">${o.rec?'✓ you reclaim':'reclaim'}</span>`:'',LOST[o.cc]?`${pcW(LOST[o.cc])} lost`:''].filter(Boolean).join(' · '),px:{main:'−'+pcW(leakOf(o.cc,o.rec)),sub:''},onOpen:()=>{ closeAll(); openHold(o.h.id); }}); }),'Nothing: all your stocks are fully credited.'));
+    box.appendChild(list);
+    box.insertAdjacentHTML('beforeend',todo(stk.map(o=>({...o,v:null})))+credTxt); return; }
+  const R=I.R.filter(r=>!r.fund&&LEAK[r.cc]>0).map(r=>({...r,v:r.backEur+r.recEur,miss:(r.lostEur||0)+(r.backEur||0)})).sort((a,b)=>b.miss-a.miss||b.recEur-a.recEur);
+  const N=R.reduce((a,r)=>a+(r.lostEur||0),0), M=R.reduce((a,r)=>a+r.backEur,0), K=R.reduce((a,r)=>a+r.recEur,0);
+  box.innerHTML=`<h4 class="shd">Withholding tax you lose</h4>
+    <div class="lkhd"><p><b class="num">about ${eurW(N)} a year</b> lost to withholding you can't credit${(c=>c.length?` (${c.join(', ')})`:'')([...new Set(R.filter(r=>r.lostEur>=.5).map(r=>esc(r.cc)))])}</p>
+    ${M>=.5?`<p><b class="num dn">${eurW(M)} more</b> if you don't file the reclaims</p>`:''}
+    ${K>=.5?`<p><b class="num up">${eurW(K)} a year</b> comes back through the reclaims you file</p>`:''}</div>
+    <p class="ink">Together the ${eurW(N+M)} that "After withholding" above takes off. Gross dividends at today's rates × your shares.</p>`;
+  // line 2: gross and lost for good; line 3 only where a reclaim can bring money back
+  const line2=r=>`gross ${eurW(r.eur)} · lost ${eurW(r.lostEur)}`;
+  const line3=r=>backOf(r.cc)>0?`${eurW(r.backEur+r.recEur)} ${r.rec?'back':'reclaimable'} <span class="rcl ${r.rec?'on':''}">${r.rec?'✓ you reclaim':'reclaim'}</span>`:'';
+  list.appendChild(groupEl('Who loses it · € a year',R.map(r=>rowEl({tc:r.miss<.5?'var(--teal)':r.lostEur>=.5?'var(--coral)':'var(--ochre)',tile:esc(r.cc),txt:true,tk:r.h.short||r.h.symbol,nm:r.h.name,
+    line2:line2(r),line3:line3(r),px:{main:r.miss>=.5?'−'+fmtEur(r.miss):eurW(r.miss),sub:'a year'},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),'Nothing: all your dividends are fully credited.'));
+  box.appendChild(list);
+  box.insertAdjacentHTML('beforeend',todo(R)+credTxt);
+}
 // ---------- Today strip (v3.5.0) ----------
 // One line under the header on every tab with what needs you today, ideas and holdings together.
 // Each part is tappable: it jumps to its group when all of it sits on one tab, otherwise it shows a
@@ -2644,6 +2765,7 @@ function openHold(id){
   holdId=id; const h=port.holdings.find(x=>x.id===id); if(!h) return;
   const T=depotTotal(), s=hScore(h,T), x=px(h), c=curOf(x), d=dayOf(x), y=yldOf(x), hi=histOf(x), q=quoteOf(x), p=posOf_(h), v=valueOf(h), w=weightOf(h,T), a=addOf(h), idea=ideaOf(h), cur=curOfI(x), tb=toBuyOf(x), mm=mismatchOf(h);
   const fund=isFund(h), src=textSrc(h), rt=hRetOf(h), own=!idea;
+  const hcc=fund||!hSym(h)?null:ccOf(h.isin,hSym(h)), ir=hcc&&depot?incRows().find(r=>r.h===h):null;   // v3.7.0 withholding
   const lbl={buy:'to add level',yld:PART.yld.label,rng:PART.rng.label};
   const wide=window.matchMedia('(min-width:701px)').matches;
   const fold=(t,v,cls)=>`<details class="cs ${cls}" ${wide?'open':''}><summary><b>${t}</b><span class="peek">${v?esc(v):'Nothing written yet.'}</span></summary><p>${v?esc(v):'Nothing written yet.'}</p></details>`;
@@ -2669,6 +2791,7 @@ function openHold(id){
       ${rt&&rt.split&&!rt.split.pending?`<div class="kpi"><b class="num ${rt.split.price>=0?'up':'dn'}">${fmtPct(rt.split.price)}</b><span>the stock itself, in ${esc(cur)} (from about ${mN(rt.split.local0,cur)})</span></div>
       <div class="kpi"><b class="num ${rt.split.fx>=0?'up':'dn'}">${fmtPct(rt.split.fx)}</b><span>the ${esc(rt.split.code)} against the € since ${fmtDate(rt.split.date)}</span></div>`:rt&&rt.split?`<div class="kpi"><b class="num">…</b><span>loading the ${esc(rt.split.code)} rate for ${fmtDay(rt.split.date)}</span></div>`:''}
       ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
+      ${ir&&ir.eur>0&&LEAK[hcc]>0?`<div class="kpi"><b class="num ${ir.lostEur>=.5?'dn':''}">${eurW(ir.lostEur)}</b><span>a year lost to ${esc(hcc)} withholding</span></div>${backOf(hcc)>0?`<div class="kpi"><b class="num ${ir.rec?'up':'dn'}">${eurW(ir.backEur+ir.recEur)}</b><span>${ir.rec?'a year back through your reclaim':'a year to reclaim, lost if you don\'t file'}</span></div>`:''}`:''}
     </div></div>
     ${!fund&&hSym(h)&&!flagFirst?bizHtml(hSym(h),h,'hold'):''}
     ${hi?`<div class="sec"><h4>Yield vs. its own history</h4>
@@ -2692,6 +2815,7 @@ function openHold(id){
       <label>Add below (${esc(cur||'price')})<input id="h_addBelow" type="number" step="any" inputmode="decimal" value="${h.addBelow??''}" placeholder="${a&&a.src==='radar'?'Radar: '+a.v:''}"></label>
       <label>2nd add level<input id="h_addBelow2" type="number" step="any" inputmode="decimal" value="${h.addBelow2??''}" placeholder="optional, buy more"></label>
       <label>Conviction<select id="h_conv"><option value="">${idea&&idea.conviction?`from Radar card (${idea.conviction}★)`:'not set (3★)'}</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(h.conviction)===n?'selected':''}>${'★'.repeat(n)} → max ${fmtN(Math.max(1,capDefault()+(n-3)*CONV_STEP),1)} %</option>`).join('')}</select></label>
+      ${hcc&&backOf(hcc)>0?`<div class="w4 rclrow"><button type="button" class="chip ${hRec(h)?'on':''}" id="h_reclaim">${hRec(h)?'✓ ':''}I reclaim this</button><p class="hint">${esc(CC_NAME[hcc]||hcc)} withholds ${pcW(WHT[hcc].rate)}, Germany credits ${pcW(WHT[hcc].cred)}. The other ${pcW(WHT[hcc].back)} only comes back if you file with ${WHT[hcc].auth}. Tap if you do: Radar then stops counting it as lost${h.reclaim==null&&recOf(idea)?' (now taken from the Radar card)':''}.</p></div>`:''}
       <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${fmtN(Math.max(1,capDefault()+((convOf(h)??3)-3)*CONV_STEP),1)} (from stars)"></label>
       ${own?`<label>Next review<input id="h_review" type="date" value="${esc(h.nextReview||'')}"></label>`:''}
       <label>Short name<input id="h_short" value="${esc(h.short)}"></label>
@@ -2739,6 +2863,9 @@ function openHold(id){
       if($('#h_bull')) Object.assign(h,{bull:val('#h_bull'),bear:val('#h_bear'),kill:val('#h_kill')}); }
     persistPort(); openHold(h.id); toast('Saved');
   };
+  if($('#h_reclaim')) $('#h_reclaim').onclick=()=>{ const sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0;
+    h.reclaim=!hRec(h); if(!h.reclaim&&!recOf(idea)) delete h.reclaim; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
+    toast(h.reclaim?'Counted as reclaimed':'Counted as lost again'); };
   $('#hDel').onclick=()=>{ if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
   $('#mHold').classList.add('on');
 }
@@ -2750,6 +2877,7 @@ function importHoldings(arr){
     const o={...raw}; PRIVATE_KEYS.forEach(k=>delete o[k]);
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
     ['addBelow','addBelow2','maxWeight','conviction'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
+    if('reclaim' in o) o.reclaim=o.reclaim===true||o.reclaim==='true';   // v3.7.0: I file the reclaim for this one
     const cur=port.holdings.find(h=>!h.deletedAt&&((o.id&&h.id===o.id)||(o.isin&&h.isin===o.isin)||(o.symbol&&hSym(h)===o.symbol)));
     let t=null;
     if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); t=cur; n++; }
