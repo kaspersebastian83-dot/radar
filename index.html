@@ -1024,8 +1024,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.5';
+const VERSION='4.1.6';
 const CHANGELOG=[
+  {v:'4.1.6',d:'2026-11-09',t:'Edits survive a sync while the sheet is open',items:[
+    'If a newer copy of a stock arrived from GitHub while you had its sheet open (for example after switching back to the app), a note, a review, a stage change, a holding Save, the quality or reclaim chips or "Checked, it\'s fine" could land on the old copy and be lost silently. They now always go to the current one.',
+  ]},
   {v:'4.1.5',d:'2026-11-09',t:'Tidier sheets inside, nothing new to see',items:[
     'Which stock sheet is open (idea, idea editor or holding) is now kept in one place instead of three loose markers. Everything should work exactly as before. This prepares the next fix: a note or a holding edit can still get lost when a sync arrives while the sheet is open.',
   ]},
@@ -1709,13 +1712,13 @@ const qualChips=(id,cur,inh)=>`<div class="qchips" id="${id}"><span>Quality</spa
 function wireBiz(root,rerender){
   const box=root.querySelector('.sec.biz[data-sym]'); if(!box) return;
   const sym=box.dataset.sym, kind=box.dataset.kind, oid=box.dataset.owner;
-  const owner=kind==='hold'?port.holdings.find(h=>h.id===oid):data.ideas.find(i=>i.id===oid);
-  const save=()=>{ owner.updatedAt=now(); kind==='hold'?persistPort():persist(); rerender(); };
+  const ownerOf=()=>kind==='hold'?port.holdings.find(h=>h.id===oid):data.ideas.find(i=>i.id===oid);   // looked up when it saves (v4.1.6)
+  const save=owner=>{ owner.updatedAt=now(); kind==='hold'?persistPort():persist(); rerender(); };
   box.querySelectorAll('[data-ckopen]').forEach(btn=>btn.onclick=e=>{ e.stopPropagation(); const w=btn.parentElement;
     w.innerHTML=`<input placeholder="Why it's fine (optional), e.g. one-off payment in 2024"><button class="btn small primary">Save</button>`;
     const inp=w.querySelector('input'); inp.focus();
-    const go=()=>{ const b=bizOf(sym), f=b&&b.F.find(x=>x.id===w.dataset.ck); if(!f||!owner) return;
-      owner.checks={...(owner.checks||{}),[f.id]:{key:f.key,date:today(),note:inp.value.trim()}}; save(); toast('Marked as checked'); };
+    const go=()=>{ const owner=ownerOf(), b=bizOf(sym), f=b&&b.F.find(x=>x.id===w.dataset.ck); if(!f||!owner) return;
+      owner.checks={...(owner.checks||{}),[f.id]:{key:f.key,date:today(),note:inp.value.trim()}}; save(owner); toast('Marked as checked'); };
     w.querySelector('button').onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter') go(); }; });
   box.querySelectorAll('[data-unck]').forEach(a=>a.onclick=e=>{ e.preventDefault(); const id=a.dataset.unck;
     // the note may sit on the other object (card vs. holding) with the same symbol
@@ -2210,10 +2213,14 @@ const sheetT=(tk,nm)=>`${esc(nm||tk||'?')}${nm&&tk?`<small>${esc(tk)}</small>`:'
 // The three sheets about one stock: 'read' = idea sheet (#mRead), 'edit' = idea editor (#mEdit, id null = new idea),
 // 'hold' = holding sheet (#mHold). SHEET says which one is open and for which id. Only sheetOn() and closeAll() change it.
 // Not yet (follow-ups in the state-machine audit): the buttons inside a sheet still use the object the sheet was
-// opened with, and typed-but-unsaved input isn't tracked.
+// opened with (fixed in v4.1.6, see liveIdea / liveHold), and typed-but-unsaved input isn't tracked.
 const SHEET={kind:null,id:null};
 const SHEET_EL={read:'#mRead',edit:'#mEdit',hold:'#mHold'};
 function sheetOn(kind,id){ SHEET.kind=kind; SHEET.id=id; $(SHEET_EL[kind]).classList.add('on'); }
+// v4.1.6: a sync can replace the idea or holding while its sheet is open (merge/mergeP swap in GitHub's newer copy).
+// Every button that writes looks the object up again through these, so the write lands on the copy that gets saved.
+const liveIdea=i=>data.ideas.find(x=>x.id===i.id)||i;
+const liveHold=h=>port.holdings.find(x=>x.id===h.id)||h;
 // ---------- reading mode ----------
 function openRead(id){
   const i=data.ideas.find(x=>x.id===id); if(!i) return;
@@ -2254,7 +2261,7 @@ function openRead(id){
   $('#readT').innerHTML=sheetT(i.ticker,i.name); segSheet($('#dossier'),'read',i.id,()=>$('#btnEdit').click());
   renderNotes(i);
   renderStagebar(i);
-  const revIdea=due=>reviewForm($('#buyform'),{due,kill:i.kill,months:3,onSave:r=>{
+  const i0=i, revIdea=due=>reviewForm($('#buyform'),{due,kill:i.kill,months:3,onSave:r=>{ const i=liveIdea(i0);
       const c=curOf(i), cur=curOfI(i);
       if(r.verdict==='broken'&&i.status!=='bought'){ // broken idea: passed, with the reason
         logDecision(i,{kind:'pass',reason:'broken',changed:r.changed,checked:r.checked,price:c,cur,sym:symOf(i),text:`Passed (Thesis broken)${c?` at ${fmtP(c,cur)}`:''}. ${revText(r)}`});
@@ -2263,7 +2270,7 @@ function openRead(id){
   if($('#iRev')) $('#iRev').onclick=()=>{ revIdea(false); $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); };
   if(reviewDue(i)&&i.status!=='out') revIdea(true);
   wireBiz($('#dossier'),()=>openRead(i.id));
-  $('#btnNote').onclick=()=>{
+  $('#btnNote').onclick=()=>{ const i=liveIdea(i0);
     const t=$('#f_note').value.trim(); if(!t) return;
     i.notes=i.notes||[]; i.notes.push({date:today(),text:t}); i.updatedAt=now();
     $('#f_note').value=''; renderNotes(i); persist();
@@ -2277,7 +2284,7 @@ function renderStagebar(i){
   const bar=$('#stagebar'), bf=$('#buyform');
   bar.innerHTML=`<span class="lbl">Stage</span>`+STATUSES.map(s=>`<button class="chip ${i.status===s.k?'on':''}" data-s="${s.k}"><i style="background:${s.c}"></i>${s.label}</button>`).join('');
   bf.hidden=true; bf.innerHTML='';
-  $$('#stagebar .chip').forEach(b=>b.onclick=()=>{
+  $$('#stagebar .chip').forEach(b=>b.onclick=()=>{ i=liveIdea(i);
     const k=b.dataset.s; if(k===i.status) return;
     if(k==='bought'){ buyFlow(i); return; }
     if(k==='out'){ passFlow(i); return; }
@@ -2288,14 +2295,14 @@ function buyFlow(i){
   const c=curOf(i), cur=curOfI(i), sym=symOf(i);
   decisionForm($('#buyform'),{kind:'buy',title:'Mark as bought',go:'Mark as bought',c,cur,sym,
     ctx:{c,cur,lvl:i.buyBelow,val:valNorm(i.val),sym,kill:i.kill,word:'buy'},
-    onSave:e=>{ i.boughtPrice=e.price; i.boughtDate=e.date; delete i.broken; logDecision(i,e); setStage(i,'bought'); }});
+    onSave:e=>{ i=liveIdea(i); i.boughtPrice=e.price; i.boughtDate=e.date; delete i.broken; logDecision(i,e); setStage(i,'bought'); }});
   $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); }
 function passFlow(i){
   const c=curOf(i), cur=curOfI(i), sym=symOf(i), sold=i.status==='bought';
-  decisionForm($('#buyform'),sold?{kind:'sell',title:'Sold',go:'Mark as sold',c,cur,sym,onSave:e=>{ i.passed={date:e.date,price:e.price,reason:'sold'}; logDecision(i,e); setStage(i,'out'); }}
-    :{kind:'pass',title:'Pass on it',go:'Pass',c,cur,sym,reasons:PASS_WHY.filter(x=>x[0]!=='broken'),onSave:e=>{ i.passed={date:e.date,price:e.price,reason:e.reason}; logDecision(i,e); setStage(i,'out'); }});
+  decisionForm($('#buyform'),sold?{kind:'sell',title:'Sold',go:'Mark as sold',c,cur,sym,onSave:e=>{ i=liveIdea(i); i.passed={date:e.date,price:e.price,reason:'sold'}; logDecision(i,e); setStage(i,'out'); }}
+    :{kind:'pass',title:'Pass on it',go:'Pass',c,cur,sym,reasons:PASS_WHY.filter(x=>x[0]!=='broken'),onSave:e=>{ i=liveIdea(i); i.passed={date:e.date,price:e.price,reason:e.reason}; logDecision(i,e); setStage(i,'out'); }});
   $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); }
-function setStage(i,k){
+function setStage(i,k){ i=liveIdea(i);
   const from=stageOf(i).label; i.status=k; i.updatedAt=now();
   persist(); openRead(i.id); toast(`${from} → ${stageOf(i).label}`);
 }
@@ -3602,7 +3609,7 @@ $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.
 
 // ---------- holding sheet ----------
 function openHold(id){
-  const h=port.holdings.find(x=>x.id===id); if(!h) return;
+  const h=port.holdings.find(x=>x.id===id); if(!h) return; const h0=h, srcNow=()=>textSrc(liveHold(h0));
   const T=depotTotal(), s=hScore(h,T), x=px(h), c=curOf(x), d=dayOf(x), y=yldOf(x), hi=histOf(x), q=quoteOf(x), p=posOf_(h), v=valueOf(h), w=weightOf(h,T), a=addOf(h), idea=ideaOf(h), cur=curOfI(x), tb=toBuyOf(x), mm=mismatchOf(h);
   const fund=isFund(h), src=textSrc(h), rt=hRetOf(h), own=!idea;
   const hcc=fund||!hSym(h)?null:ccOf(h.isin,hSym(h)), ir=hcc&&depot?incRows().find(r=>r.h===h):null;   // v3.7.0 withholding
@@ -3681,22 +3688,22 @@ function openHold(id){
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
   wireBiz($('#holdBody'),()=>openHold(h.id));
   if(!fund) valWire('hv_','#h_addBelow',cur);
-  const notes=()=>{ $('#hNoteList').innerHTML=noteRows(src.notes); };
+  const notes=()=>{ $('#hNoteList').innerHTML=noteRows(srcNow().notes); };
   notes();
   const saveH=msg=>{ idea?persist():persistPort(); if(idea) persistPort(); openHold(h.id); toast(msg); };
   const box=$('#hDec'), sym=hSym(h), go=()=>box.scrollIntoView({behavior:'smooth',block:'center'});
-  const revH=due=>reviewForm(box,{due,kill:src.kill,months:6,isHold:true,onSave:r=>{ saveReview(src,r,c,cur,sym); saveH(r.verdict==='broken'?'Saved. Next € holds it back until a review says it holds again.':'Review saved'); }});
+  const revH=due=>reviewForm(box,{due,kill:src.kill,months:6,isHold:true,onSave:r=>{ saveReview(srcNow(),r,c,cur,sym); saveH(r.verdict==='broken'?'Saved. Next € holds it back until a review says it holds again.':'Review saved'); }});
   $('#hRev').onclick=()=>{ revH(false); go(); };
   if(!fund){
-    $('#hAdd').onclick=()=>{ decisionForm(box,{kind:'add',title:'I added to it',go:'Log the add',c,cur,sym,ctx:{c,cur,lvl:a?a.v:null,val:valOfH(h)?.v,sym,kill:src.kill,word:'add'},onSave:e=>{ logDecision(src,e); saveH('Logged'); }}); go(); };
-    $('#hTrim').onclick=()=>{ decisionForm(box,{kind:'trim',title:'I trimmed it',go:'Log the trim',c,cur,sym,onSave:e=>{ logDecision(src,e); saveH('Logged'); }}); go(); };
-    $('#hSold').onclick=()=>{ decisionForm(box,{kind:'sell',title:'I sold it all',go:'Log the sale',c,cur,sym,onSave:e=>{ logDecision(src,e); saveH('Logged. Remove the holding once it\'s gone from your statement.'); }}); go(); }; }
+    $('#hAdd').onclick=()=>{ decisionForm(box,{kind:'add',title:'I added to it',go:'Log the add',c,cur,sym,ctx:{c,cur,lvl:a?a.v:null,val:valOfH(h)?.v,sym,kill:src.kill,word:'add'},onSave:e=>{ logDecision(srcNow(),e); saveH('Logged'); }}); go(); };
+    $('#hTrim').onclick=()=>{ decisionForm(box,{kind:'trim',title:'I trimmed it',go:'Log the trim',c,cur,sym,onSave:e=>{ logDecision(srcNow(),e); saveH('Logged'); }}); go(); };
+    $('#hSold').onclick=()=>{ decisionForm(box,{kind:'sell',title:'I sold it all',go:'Log the sale',c,cur,sym,onSave:e=>{ logDecision(srcNow(),e); saveH('Logged. Remove the holding once it\'s gone from your statement.'); }}); go(); }; }
   if(reviewDue(src)) revH(true);
-  $('#hNoteBtn').onclick=()=>{ const t=$('#h_noteIn').value.trim(); if(!t) return;
+  $('#hNoteBtn').onclick=()=>{ const t=$('#h_noteIn').value.trim(); if(!t) return; const src=srcNow();
     src.notes=[...(Array.isArray(src.notes)?src.notes:[]),{date:today(),text:t}]; src.updatedAt=now();
     $('#h_noteIn').value=''; notes(); idea?persist():persistPort(); };
   $('#h_noteIn').onkeydown=e=>{ if(e.key==='Enter') $('#hNoteBtn').click(); };
-  $('#hSave').onclick=()=>{
+  $('#hSave').onclick=()=>{ const h=liveHold(h0);
     const num=v=>v===''?null:Number(v), val=id=>$(id)?$(id).value.trim():undefined;
     setCost(h,Number($('#h_cost').value),$('#h_costDate')?$('#h_costDate').value||null:costDateOf(h));
     Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:curNorm(val('#h_currency'),val('#h_symbol')),
@@ -3707,13 +3714,13 @@ function openHold(id){
       if($('#h_bull')) Object.assign(h,{bull:val('#h_bull'),bear:val('#h_bear'),kill:val('#h_kill')}); }
     persistPort(); openHold(h.id); toast('Saved');
   };
-  if($('#h_reclaim')) $('#h_reclaim').onclick=()=>{ const sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0;
+  if($('#h_reclaim')) $('#h_reclaim').onclick=()=>{ const h=liveHold(h0), sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0;
     h.reclaim=!hRec(h); if(!h.reclaim&&!recOf(idea)) delete h.reclaim; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
     toast(h.reclaim?'Counted as reclaimed':'Counted as lost again'); };
-  $$('#h_qual .chip').forEach(b=>b.onclick=()=>{ const sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0, k=b.dataset.q;
+  $$('#h_qual .chip').forEach(b=>b.onclick=()=>{ const h=liveHold(h0), sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0, k=b.dataset.q;
     if(QUAL_SET.includes(k)) h.quality=k; else delete h.quality; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
     toast(QUAL_SET.includes(k)?`Quality set to ${k}`:'Quality back to auto'); });
-  $('#hDel').onclick=()=>{ if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
+  $('#hDel').onclick=()=>{ const h=liveHold(h0); if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
   sheetOn('hold',h.id);
 }
 
