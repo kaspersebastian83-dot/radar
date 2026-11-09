@@ -379,7 +379,7 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .nxbond{display:flex;flex-direction:column;gap:1px;padding:8px 14px;border-top:2px dashed var(--line);background:var(--panel2);font-size:13px;font-weight:700;color:var(--ink2)}
 .nxbond small{font-weight:500;color:var(--mute);font-size:12px}
 .nxex{margin:4px 0 30px;background:var(--panel)}
-#nextBody .r2{white-space:normal;line-height:1.35}
+#nextBody .r2,#nextBody .r3{white-space:normal;line-height:1.35}
 #nextBody .rsc.nx{font-size:13.5px;letter-spacing:-.03em}
 .nxex .vtxt{font-size:13.5px;line-height:1.5}
 .vbar{margin:4px 0 10px}
@@ -840,8 +840,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.9.0';
+const VERSION='3.10.0';
 const CHANGELOG=[
+  {v:'3.10.0',d:'2026-11-09',t:'Where the money could come from',items:[
+    'New group at the bottom of Next €: "Lowest expected return in your depot", the three holdings that would be the obvious place to take money from.',
+    'Each row shows the gain against your buy price and the tax selling would cost (26,375 % of the gain, with Soli), in € once your statement is on the device.',
+    'The third line says how many points a year the stock you\'d buy instead has to beat it by to make up for that tax over 5 years, and how far your best pick at its level is actually ahead.',
+    'Below your buy price it says so: no tax, and the loss can offset later share gains.',
+    'The holding\'s sheet explains it in full under "Next € · selling this to fund it". It needs your average buy price in the holding\'s settings.',
+    'Only arithmetic, not a sell signal: the Next € ranking, the scores and all tiers are unchanged.']},
   {v:'3.9.0',d:'2026-11-09',t:'Quality tag',items:[
     'Every stock now gets a quality tier next to its trend: wonderful, good or fair. Steady / Watch / Red flag says where a business is heading; quality says how good it is. ASML and E.ON no longer look the same when both are Expensive.',
     'It\'s judged on the last 3–4 years, never one year alone, and against the company\'s own kind: most companies on return on capital, free cash flow margin, debt and how long they\'ve raised the dividend; utilities and REITs on cash per share growth and debt on their own scale; banks and insurers on return on equity and steady earnings.',
@@ -2583,6 +2590,51 @@ function nextRank(amt){
     wait:by(rows.filter(r=>r.st==='wait'||r.st==='nolevel')),
     blocked:by(rows.filter(r=>r.st==='broken'||r.st==='flag'||r.st==='full')),
     noval:rows.filter(r=>r.st==='noval'||r.st==='noprice')}; }
+// ---------- Source of funds (v3.10.0) ----------
+// The holdings with the lowest expected return, and what selling one would cost in German tax. Information only:
+// nextRank and every ranking stay as they are. Selling realises the gain, and 26,375 % of it (Abgeltungsteuer + Soli,
+// no church tax, Pauschbetrag left out) is gone at once, so the new stock has to earn that back.
+// Break-even, assuming you'd otherwise hold the old one for good (the honest case for a buy-and-hold depot):
+//   keep: (1 + r_old)^H  ·  swap: (1 − 26,375 % × gain share) × (1 + r_new)^H  →  r_new − r_old = gap you need.
+// If you'd sell in H years anyway, the tax is only paid earlier and the hurdle is smaller; the explainer says so.
+const SRC={show:3, years:NX.years};   // rows in the group · horizon in years (the same 5 years as the expected return)
+function srcOf(r){
+  const h=r.kind==='hold'?port.holdings.find(x=>x.id===r.id):null; if(!h) return null;
+  const tau=INC.tax/100, cost=costOf(h), unit=r.c>0?eurOf(r.c,r.cur):null, p=posOf_(h);
+  const o={h,cost,unit,shares:p?p.shares:null};
+  if(!(cost>0&&unit>0)){ o.unknown=true; return o; }
+  o.gainPct=(unit/cost-1)*100; o.g=1-cost/unit;                  // gain as a share of what you'd sell
+  o.taxShare=Math.max(0,o.g)*tau*100;                              // % of the proceeds that go to tax
+  o.taxEur=o.shares!=null?o.shares*Math.max(0,unit-cost)*tau:null;
+  o.loss=o.g<0;
+  const ro=(r.er??0)/100;
+  o.be=o.g>0?((1+ro)*Math.pow(1-tau*o.g,-1/SRC.years)-1-ro)*100:0;  // pp a year the new stock must beat it by
+  return o; }
+function srcRows(R){
+  return R.rows.filter(r=>r.kind==='hold'&&r.er!=null&&r.inDepot).sort((a,b)=>a.er-b.er).slice(0,SRC.show); }
+// one line on the row, the full story in the sheet
+function srcCmp(r,R){ const top=R.ready[0]; return top&&top.sym!==r.sym?{top,gap:top.adj-r.er}:null; }
+function srcRow(r,R){
+  const o=srcOf(r), c=srcCmp(r,R), bits=[];
+  if(!o||o.unknown) bits.push('set your buy price to see the tax');
+  else if(o.loss) bits.push(`${fmtPct(o.gainPct,0)} vs your buy price · no tax on selling`);
+  else bits.push(`${fmtPct(o.gainPct,0)} gain · tax if sold ${o.taxEur!=null?'≈ '+fmtEur(o.taxEur):'≈ '+fmtN(o.taxShare,1)+' % of it'}`);
+  const need=o&&!o.unknown?(o.loss?'no tax hurdle':`tax needs ${pp(o.be)} pp`):'';
+  const l3=!need?'':c?`${esc(c.top.tk)} is ${pp(c.gap)} pp ahead · ${need}`:o.loss?'no tax hurdle, nothing at its level to swap into':`a swap needs ${pp(o.be)} pp a year more`;
+  const el=rowEl({tc:'var(--t-none)',tile:fmtN(r.er,1),tk:r.tk,nm:r.nm,extra:qualPill(r.sym,o?o.h:null)+`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`,line2:bits.join(' · '),line3:l3,px:pxCol(r.c,r.cur),onOpen:r.open});
+  el.querySelector('.rsc').classList.add('nx'); el.title=`about ${pp(r.er)} % a year expected`; return el; }
+function srcSecHtml(r,R){
+  if(!srcRows(R).includes(r)) return '';
+  const o=srcOf(r), c=srcCmp(r,R), Y=SRC.years;
+  let t;
+  if(!o||o.unknown) t=`Enter your average buy price in this holding's settings to see what selling would cost in tax.`;
+  else if(o.loss) t=`It's ${fmtPct(o.gainPct,0)} against your buy price, so selling costs no tax. The loss goes into your share-loss pot (Aktienverlusttopf) and can offset later gains on shares.`;
+  else t=`Selling realises a ${fmtPct(o.gainPct,0)} gain: ${fmtN(o.taxShare,1)} % of what you'd sell goes to tax${o.taxEur!=null?` (≈ ${fmtEur(o.taxEur)} on the whole position)`:''}. To make up for that over ${Y} years, the new stock needs about <b>${pp(o.be)} pp a year more</b> than this one's ≈ ${pp(r.er)} %, assuming you'd otherwise keep it for good.`;
+  if(o&&!o.unknown&&c) t+=c.gap>o.be?` Your best pick at its level, ${esc(c.top.tk)} (≈ ${pp(c.top.adj)} %), is ${pp(c.gap)} pp ahead, so on these numbers a swap would pay off, if both valuations hold.`
+    :` Your best pick at its level, ${esc(c.top.tk)} (≈ ${pp(c.top.adj)} %), is only ${pp(c.gap)} pp ahead, ${c.gap>0?'less than the tax needs, so a swap would cost you':'so a swap gains nothing'}.`;
+  else if(o&&!o.unknown) t+=' Nothing is at its level today, so there is nothing to swap into yet.';
+  return `<div class="sec nxsec"><h4>Next € · selling this to fund it</h4><p>One of the ${SRC.show} lowest expected returns in your depot.</p><p>${t}</p>
+    <p class="hint">26,375 % Abgeltungsteuer with Soli on the gain, no church tax, your Pauschbetrag left out. The hurdle shrinks if you'd sell in ${Y} years anyway (then the tax is only paid earlier). Expected returns rest on your fair values.</p></div>`; }
 // the bond fund in the depot is the "do nothing clever" alternative
 function bondRef(){ const b=holdings().find(h=>h.kind==='bond'&&hSym(h)); if(!b) return null; const y=yldOf(px(b)); return y!=null?{y,nm:b.short||b.name}:null; }
 const pp=v=>fmtN(v,1);
@@ -2635,6 +2687,7 @@ function renderNext(){
   g.appendChild(sec);
   list('Not at your level yet',R.wait,null,'next.wait');
   list('Held back',R.blocked,null,'next.held');
+  { const S=srcRows(R); if(S.length) g.appendChild(groupEl('Lowest expected return in your depot',S.map(r=>srcRow(r,R)))); }   // v3.10.0
   if(R.noval.length) g.appendChild(groupEl('Not ranked',R.noval.map(r=>rowEl({tc:'var(--t-none)',tile:'–',tk:r.tk,nm:r.nm,extra:r.kind==='hold'?'<span class="own">own</span>':'',line2:r.st==='noprice'?'no price yet':'no valuation yet, add one to rank it',line3:r.c>0?nextIncTxt(r):'',px:pxCol(r.c,r.cur),onOpen:r.open}))));
   body.appendChild(g);
   const ex=document.createElement('details'); ex.className='cs nxex';
@@ -2645,7 +2698,8 @@ function renderNext(){
     <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value.</li>
     <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out. ⋯ → Portfolio x-ray shows where each sector and currency stands today.</li></ul>
     <p>Only stocks at or below your level count as "at your level". Above your max weight, with an open red flag, or after a review called the thesis broken, a stock is held back, however good the number. German tax (Abgeltungsteuer) is the same for all of them, so it's left out. The ${b?esc(b.nm)+' bond fund':'bond fund'} line is the low-risk alternative: a stock should beat it clearly to be worth the risk.</p>
-    <p>The number is only as good as your fair value: ${NX.years}-year catch-up is an assumption, and a stale valuation makes it wrong.</p></div>`;
+    <p>The number is only as good as your fair value: ${NX.years}-year catch-up is an assumption, and a stale valuation makes it wrong.</p>
+    <p><b>Lowest expected return in your depot</b>: the ${SRC.show} holdings that would be the obvious source of money, with what selling them would cost. Selling a gain costs 26,375 % of the gain right away (Abgeltungsteuer with Soli), so the stock you'd buy instead has to beat the old one by more than that: the row says by how many points a year over ${SRC.years} years, assuming you'd otherwise hold for good. Below your buy price there is no tax, and the loss can offset later share gains. It needs your buy price in the holding's settings. This is only arithmetic, not advice to sell, and it doesn't change any ranking.</p></div>`;
   body.appendChild(ex);
   $('#nxAmt').onchange=e=>{ const v=Number(e.target.value); if(!(v>0)){ e.target.value=nextAmt; return; } nextAmt=v; try{localStorage.setItem(LS_NEXT,String(v));}catch{} renderNext(); };
 }
@@ -3053,6 +3107,7 @@ function openHold(id){
     </div>`:'')(!fund&&usualOk(hi,valOfH(h)?.v))}
     ${fund?'':(z=>valHtml(z?z.v:null,c,cur,a?a.v:null,'add',hSym(h),z?z.src:null))(valOfH(h))}
     ${fund?'':nextSecHtml('hold',h.id,hSym(h))}
+    ${fund?'':(R=>{ const r=R.rows.find(x=>x.kind==='hold'&&x.id===h.id); return r?srcSecHtml(r,R):''; })(nextRank(nextAmt))}
     <div class="sec"><h4>Position</h4><div class="kpis">
       <div class="kpi"><b class="num">${v?fmtEur(v.eur):'—'}</b><span>${v?(v.live?'value at live price':'value on statement'):'not in statement'}</span></div>
       <div class="kpi"><b class="num ${!fund&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${fund?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
