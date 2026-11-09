@@ -757,8 +757,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.4.0';
+const VERSION='3.4.1';
 const CHANGELOG=[
+  {v:'3.4.1',d:'2026-11-09',t:'Stock or currency?',items:[
+    'Foreign holdings have a new "Bought around" date next to the average buy price. With it, the holding shows how much of your € return came from the stock itself and how much from the currency, e.g. JNJ +12 % in USD, dollar −5 % against the €. The date stays on this device, like the buy price.',
+    'ENI and National Grid now have a valuation too, so Next € can rank them.']},
   {v:'3.4.0',d:'2026-11-09',t:'Second level, conviction, and trust',items:[
     'Optional 2nd level ("back up the truck") on ideas (Edit) and holdings (settings). It shows as a second green tick on the 52-week bar, in the card, and the row says "at your 2nd level" once the price gets there, so you know when a bigger tranche is in order.',
     'Conviction on holdings: set 1–5 stars in a holding\'s settings (or it takes the stars of its Radar card). The max weight moves with it: 3★ = your default 7 %, each star ±1.5 points (5★ = 10 %, 1★ = 4 %). Your own max per holding still wins.',
@@ -1821,7 +1824,19 @@ const LS_PORT='radar.portfolio.v1', LS_DEPOT='radar.depot.v1', LS_COST='radar.co
 let costs={}; try{ costs=JSON.parse(localStorage.getItem(LS_COST))||{}; }catch{}
 const costKey=h=>h.isin||h.id;
 const costOf=h=>{ const v=costs[costKey(h)]; return v&&v.eur>0?v.eur:null; };
-function setCost(h,eur){ if(eur>0) costs[costKey(h)]={eur,at:today()}; else delete costs[costKey(h)]; try{ localStorage.setItem(LS_COST,JSON.stringify(costs)); }catch{} }
+function setCost(h,eur,date){ if(eur>0) costs[costKey(h)]={eur,at:today(),...(date?{date}:{})}; else delete costs[costKey(h)]; try{ localStorage.setItem(LS_COST,JSON.stringify(costs)); }catch{} }
+const costDateOf=h=>costs[costKey(h)]?.date||null;
+// Historical EUR rate for the "bought on" date: from prices.json if the Action has it, else the ECB rate via
+// frankfurter.app (free, no key), fetched once and kept on this device.
+const LS_FXH='radar.fxhist.v1'; let fxh={}; try{ fxh=JSON.parse(localStorage.getItem(LS_FXH))||{}; }catch{}
+const fxPending=new Set();
+function fxOn(c,date){ if(!c||c==='EUR') return 1; const k=c+'@'+date; if(fxh[k]) return fxh[k];
+  const at=((prices.fxAt||{})[c]||{})[date]; if(at) return at;
+  if(!fxPending.has(k)){ fxPending.add(k);
+    fetch(`https://api.frankfurter.app/${date}?from=EUR&to=${c}`).then(r=>r.ok?r.json():null).then(j=>{ const v=j&&j.rates&&j.rates[c]; if(!v) return;
+      fxh[k]=v; try{ localStorage.setItem(LS_FXH,JSON.stringify(fxh)); }catch{} render();
+      const a=document.activeElement; if(holdId&&$('#mHold').classList.contains('on')&&!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))) openHold(holdId); }).catch(()=>{}); }
+  return null; }
 // Thesis, kill criteria, review and journal: from the linked Radar card if there is one, otherwise the holding's own.
 const textSrc=h=>ideaOf(h)||h;
 const KINDS=[{k:'stock',label:'Stock'},{k:'fund',label:'Fund / ETF'},{k:'bond',label:'Bond fund'}];
@@ -1893,7 +1908,12 @@ function renderBadge(){ const b=$('#portBadge'); if(!b) return;
 // Price return against your average buy price, in EUR (dividends not included).
 function hRetOf(h){ const x=px(h), c=curOf(x), cost=costOf(h); if(!(c>0&&cost)) return null;
   const e=eurOf(c,curOfI(x)); if(e==null) return null;
-  const p=posOf_(h); return {pct:(e/cost-1)*100, cost, unit:e, gain:p?p.shares*(e-cost):null}; }
+  const p=posOf_(h), out={pct:(e/cost-1)*100, cost, unit:e, gain:p?p.shares*(e-cost):null};
+  // Split into the stock's own move and the currency's, if you entered roughly when you bought.
+  const [code,u]=fxCode(curOfI(x)), d=costDateOf(h), r1=(prices.fx||{})[code];
+  if(d&&code&&code!=='EUR'&&r1){ const r0=fxOn(code,d); if(r0){ const local0=cost*r0*u;
+    out.split={date:d,code,price:(c/local0-1)*100,fx:(r0/r1-1)*100,local0}; } else out.split={date:d,code,pending:true}; }
+  return out; }
 // Holding card (v2.5.0): same layout as the idea card. Weight and value take the place of the stage line.
 function holdCard(r){
   const {h,x,s,v,w,y,mm}=r, c=curOf(x), d=dayOf(x), q=quoteOf(x), hi=histOf(x), idea=ideaOf(h), cur=curOfI(x), src=textSrc(h), a=addOf(h), fund=isFund(h);
@@ -1936,7 +1956,7 @@ function holdCard(r){
     ${mm!=null?`<div class="warnbox">Quote is ${fmtPct(mm*100,0)} off the statement price. Probably the wrong Yahoo symbol.</div>`:''}
     <div class="c2box num">
       <div><span>Yield</span><b>${y!=null?fmtN(y,2)+' %':'—'}</b><span class="${yArr?yArr[1]:''}">${hi?`${yArr[0]} usual ${fmtN(hi.avg,2)} %`:y!=null?'no 5-yr history':fund&&q?'no distributions':'no data'}</span></div>
-      <div title="${rt?`Average buy price ${fmtP(rt.cost,'EUR')}, now ${fmtP(rt.unit,'EUR')}. Price only, dividends not included.`:'Enter your average buy price in the holding to see this'}"><span>Return in €</span><b class="${rc}">${rt?fmtPct(rt.pct):'—'}</b><span>${rt?(rt.gain!=null?`${rt.gain>=0?'+':'−'}${fmtEur(Math.abs(rt.gain))}`:`vs ${fmtP(rt.cost,'EUR')}`):'set buy price'}</span></div>
+      <div title="${rt?`Average buy price ${fmtP(rt.cost,'EUR')}, now ${fmtP(rt.unit,'EUR')}. Price only, dividends not included.${rt.split&&!rt.split.pending?` Stock ${fmtPct(rt.split.price)} in ${rt.split.code}, currency ${fmtPct(rt.split.fx)}.`:''}`:'Enter your average buy price in the holding to see this'}"><span>Return in €</span><b class="${rc}">${rt?fmtPct(rt.pct):'—'}</b><span>${rt?(rt.gain!=null?`${rt.gain>=0?'+':'−'}${fmtEur(Math.abs(rt.gain))}`:`vs ${fmtP(rt.cost,'EUR')}`):'set buy price'}</span></div>
       <div><span>Review</span><b title="${src.nextReview?fmtDate(src.nextReview):''}">${src.nextReview?new Date(src.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!src.nextReview?'not set':due?'due now':'next look'}</span></div>
     </div>
     ${b?`<div class="c2biz" title="Business trend, tap for details">${bizLine(b)}</div>`:''}
@@ -2291,6 +2311,8 @@ function openHold(id){
       <div class="kpi"><b class="num ${!fund&&w>capOf(h)?'dn':''}">${w!=null?fmtN(w,1)+' %':'—'}</b><span>${fund?'of the depot':`of depot, max ${fmtN(capOf(h),1)} %`}</span></div>
       <div class="kpi"><b class="num">${p?fmtN(p.shares,3):'—'}</b><span>shares</span></div>
       ${rt&&rt.gain!=null?`<div class="kpi"><b class="num ${rt.gain>=0?'up':'dn'}">${rt.gain>=0?'+':'−'}${fmtEur(Math.abs(rt.gain))}</b><span>gain in €, price only</span></div>`:''}
+      ${rt&&rt.split&&!rt.split.pending?`<div class="kpi"><b class="num ${rt.split.price>=0?'up':'dn'}">${fmtPct(rt.split.price)}</b><span>the stock itself, in ${esc(cur)} (from about ${mN(rt.split.local0,cur)})</span></div>
+      <div class="kpi"><b class="num ${rt.split.fx>=0?'up':'dn'}">${fmtPct(rt.split.fx)}</b><span>the ${esc(rt.split.code)} against the € since ${fmtDate(rt.split.date)}</span></div>`:rt&&rt.split?`<div class="kpi"><b class="num">…</b><span>loading the ${esc(rt.split.code)} rate for ${fmtDay(rt.split.date)}</span></div>`:''}
       ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
     </div></div>
     ${!fund&&hSym(h)&&!flagFirst?bizHtml(hSym(h),h,'hold'):''}
@@ -2311,6 +2333,7 @@ function openHold(id){
     <div class="sec"><h4>Settings for this holding</h4>
     <div class="form">
       <label>Average buy price (EUR)<input id="h_cost" type="number" step="any" inputmode="decimal" value="${costOf(h)??''}" placeholder="as in Trade Republic"></label>
+      ${!fund&&fxCode(cur)[0]&&fxCode(cur)[0]!=='EUR'?`<label>Bought around<input id="h_costDate" type="date" value="${esc(costDateOf(h)||'')}" max="${today()}"></label>`:''}
       <label>Add below (${esc(cur||'price')})<input id="h_addBelow" type="number" step="any" inputmode="decimal" value="${h.addBelow??''}" placeholder="${a&&a.src==='radar'?'Radar: '+a.v:''}"></label>
       <label>2nd add level<input id="h_addBelow2" type="number" step="any" inputmode="decimal" value="${h.addBelow2??''}" placeholder="optional, buy more"></label>
       <label>Conviction<select id="h_conv"><option value="">${idea&&idea.conviction?`from Radar card (${idea.conviction}★)`:'not set (3★)'}</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(h.conviction)===n?'selected':''}>${'★'.repeat(n)} → max ${fmtN(Math.max(1,capDefault()+(n-3)*CONV_STEP),1)} %</option>`).join('')}</select></label>
@@ -2329,7 +2352,7 @@ function openHold(id){
       <label class="w4">Note<textarea id="h_note">${esc(h.note)}</textarea></label>
       ${fund?'':`<div class="w4">${valForm('hv_',h.val,cur)}${!h.val&&valOfH(h)?'<p class="hint">Empty here means the valuation on the Radar card is used.</p>':''}</div>`}
     </div>
-    <p class="hint">The buy price stays in this browser, like your share counts. Everything else is saved to GitHub.</p>
+    <p class="hint">The buy price and date stay in this browser, like your share counts. For several purchases, take a date roughly in the middle: it only splits your € return into the stock's own move and the currency's. Everything else is saved to GitHub.</p>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
   const toIdea=e=>{ e&&e.preventDefault(); closeAll(); openRead(idea.id); };
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
@@ -2352,7 +2375,7 @@ function openHold(id){
   $('#h_noteIn').onkeydown=e=>{ if(e.key==='Enter') $('#hNoteBtn').click(); };
   $('#hSave').onclick=()=>{
     const num=v=>v===''?null:Number(v), val=id=>$(id)?$(id).value.trim():undefined;
-    setCost(h,Number($('#h_cost').value));
+    setCost(h,Number($('#h_cost').value),$('#h_costDate')?$('#h_costDate').value||null:costDateOf(h));
     Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:val('#h_currency').toUpperCase(),
       kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),addBelow2:num($('#h_addBelow2').value),conviction:num($('#h_conv').value),maxWeight:num($('#h_maxWeight').value),idea:val('#h_idea').toUpperCase()||null,
       sector:val('#h_sector'),note:val('#h_note'),updatedAt:now()});
