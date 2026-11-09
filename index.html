@@ -336,6 +336,20 @@ details.cs.kill{background:var(--coral-soft);border-color:transparent}details.cs
 .c2val{font-size:12.5px;line-height:1.35;color:var(--ink2);margin-top:-4px}
 .c2val b{font-weight:800}.c2val .up,.val .up{color:var(--teal)}.c2val .dn,.val .dn{color:var(--coral)}
 .stl{color:var(--coral);font-weight:700}
+.nxhead{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ink2)}
+.nxin{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.nxin input{width:110px;font-size:16px;font-weight:800;text-align:right}
+.nxhero{display:flex;flex-direction:column;gap:4px;background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--tc);border-radius:var(--r);padding:14px 16px;margin:0 0 18px}
+.nxhero .k{font-size:12.5px;font-weight:700;color:var(--mute)}
+.nxhero .tk{font-size:20px;font-weight:800;letter-spacing:-.01em}.nxhero .tk span{font-size:14px;font-weight:600;color:var(--ink2)}
+.nxhero .er{font-size:26px;font-weight:800;color:color-mix(in srgb,var(--tc) 75%,var(--ink));letter-spacing:-.02em}
+.nxhero .ex{font-size:13px;color:var(--ink2);line-height:1.45}
+.nxbond{display:flex;flex-direction:column;gap:1px;padding:8px 14px;border-top:2px dashed var(--line);background:var(--panel2);font-size:13px;font-weight:700;color:var(--ink2)}
+.nxbond small{font-weight:500;color:var(--mute);font-size:12px}
+.nxex{margin:4px 0 30px;background:var(--panel)}
+#nextBody .r2{white-space:normal;line-height:1.35}
+#nextBody .rsc.nx{font-size:13.5px;letter-spacing:-.03em}
+.nxex .vtxt{font-size:13.5px;line-height:1.5}
 .vbar{margin:4px 0 10px}
 .vbar .rt{position:relative;height:18px}
 .vbar .tr{position:absolute;left:0;right:0;top:6px;height:6px;border-radius:3px;background:var(--line)}
@@ -519,7 +533,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 <header>
   <div class="bar">
     <div class="brand"><i></i><span>Radar</span><button class="ver num" id="verBtn" title="What's new"></button></div>
-    <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button></div>
+    <div class="seg"><button class="on" data-v="board">Ideas</button><button data-v="port" title="Your holdings">Portfolio<span class="badge" id="portBadge" hidden></span></button><button data-v="next" title="Where your next money goes">Next €</button></div>
     <span class="sp"></span>
     <button class="btn small quiet" id="btnMenu" title="Menu" aria-label="Menu">⋯</button>
   </div>
@@ -551,6 +565,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
   <section id="viewPort" hidden>
     <div class="list" id="portBody"></div>
   </section>
+  <section id="viewNext" hidden><div id="nextBody"></div></section>
 </main>
 <button class="fab" id="fab" title="Add" aria-label="Add: import from Claude or write an idea by hand">+</button>
 
@@ -702,8 +717,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.1.0';
+const VERSION='3.2.0';
 const CHANGELOG=[
+  {v:'3.2.0',d:'2026-11-09',t:'Next €: where your next money goes',items:[
+    'New third tab "Next €". It ranks every idea and every stock you own by expected return a year over the next 5 years, and names the best place for your next €1,000 (change the amount on top).',
+    'Expected return = dividend yield after withholding tax you can\'t credit (Italy, Canada, Switzerland cost you, US/NL/FR/DE/UK don\'t) + long-run growth from your valuation + the yearly catch-up to your fair value. The row shows each part, e.g. "yield 2,7 + growth 3 + fair 6,7".',
+    'Only stocks at or below your level are recommended. The rest are ranked below as "Not at your level yet", so you see what\'s closest. If nothing is at your level, it says so: keep the money in cash or your usual ETF.',
+    'With your statement loaded, it holds back stocks the money would push above your max weight, and takes a little off when one sector would go above 20 % of the depot or one foreign currency above 40 %. Stocks with an open red flag are held back too.',
+    'A dashed line marks the yield of your bond fund (EUN5). Anything below it pays less than bonds for more risk.',
+    'Valuations have a new field "Long-run growth %". It\'s filled in for all 24 stocks from the growth in their Gordon method.']},
   {v:'3.1.0',d:'2026-11-09',t:'Valuation behind every level',items:[
     'Every stock with a valuation now shows one more line on its card: how far today\'s price is from your fair value and from the bear case, e.g. "+30 % to fair 117 · −29 % to bear 64".',
     'In the details there is a new Valuation section: a scale with bear case, your level, the fair-value range and today\'s price, then upside and downside from today, upside per 1 of downside, and what you\'d have to fair value and to the bear case if you buy at your level.',
@@ -1143,12 +1165,13 @@ const LS_TABLE='radar.table.v1';
 let tableMode=false; try{ tableMode=localStorage.getItem(LS_TABLE)==='1'; }catch{}
 const mqWide=window.matchMedia('(min-width:720px)');
 const showTable=()=>view==='board'&&tableMode&&mqWide.matches;
-function render(){ view==='port'?renderPort():showTable()?renderScore():renderBoard(); renderSub(); renderPxInfo(); renderBadge(); }
+function render(){ view==='port'?renderPort():view==='next'?renderNext():showTable()?renderScore():renderBoard(); renderSub(); renderPxInfo(); renderBadge(); }
 // line under the tabs: what you're looking at, price age, sort
 function renderSub(){
   let t;
   if(view==='port'){ const H=holdings(), T=depotTotal();
     t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtEur(T)}`:''} · ${depot?'statement '+fmtDay(depot.asOf):'no statement yet'}`; }
+  else if(view==='next') t=`ideas and holdings, ranked by expected return${depot?'':' · no statement, so no mix check'}`;
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
     t=showTable()?'':`${n} idea${n===1?'':'s'}${st?' · '+st.label:''}`; }
   $('#subTxt').textContent=t;
@@ -1240,7 +1263,7 @@ function c2barHtml(i,what){
   return `<div class="c2bar" title="52-week range${b!=null?`, your ${what} level (line)`:''} and today's price (dot)"><span>${mN(q.yearLow,cur)}</span><div class="rt"><span class="tr"></span>${b!=null?`<span class="zn" style="width:${pct(b)}"></span><span class="bt" style="left:${pct(b)}"></span>`:''}<span class="nw" style="left:${pct(p)}"></span></div><span>${mN(q.yearHigh,cur)}</span></div>`;
 }
 // ---------- valuation (v3.1.0) ----------
-// val = {date, price (at the estimate), methods:[{t,v}], base, discount (%), why, bear, bearWhy, reverse}
+// val = {date, price (at the estimate), methods:[{t,v}], base, discount (%), why, bear, bearWhy, reverse, g (long-run growth %, used by Next €)}
 // Base defaults to the average of the methods. Level = base × (1 − discount).
 const numOr=x=>x===''||x==null||isNaN(Number(x))?null:Number(x);
 function valNorm(v){ if(!v||typeof v!=='object') return null;
@@ -1310,16 +1333,17 @@ function valForm(p,v,cur){ v=v||{}; const m=v.methods||[], vv=x=>x==null?'':esc(
     <label class="w2">Why this margin<input id="${p}why" value="${vv(v.why)}" placeholder="wide moat 10–20 · average 25–30 · cyclical 35–50"></label>
     <label>Bear value<input id="${p}bear" type="number" step="any" inputmode="decimal" value="${vv(v.bear)}"></label>
     <label>Estimate date<input id="${p}date" type="date" value="${vv(v.date)}"></label>
+    <label>Long-run growth %<input id="${p}g" type="number" step="any" inputmode="decimal" value="${vv(v.g)}" placeholder="g, e.g. 3"></label>
     <label class="w2">Bear case, how<input id="${p}bearWhy" value="${vv(v.bearWhy)}" placeholder="trough EPS × trough multiple"></label>
     <label class="w4">What today's price implies<input id="${p}rev" value="${vv(v.reverse)}" placeholder="reverse DCF, optional"></label>
     <div class="w4 vcalc"><span id="${p}calc"></span><button class="btn small" type="button" id="${p}use">Use as level</button></div>
   </div></details>`; }
 function valRead(p,prev,price){
   const g=k=>$('#'+p+k)?$('#'+p+k).value.trim():'';
-  const raw={methods:[{t:g('m1t'),v:g('m1v')},{t:g('m2t'),v:g('m2v')}],base:numOr(g('base')),discount:numOr(g('disc')),why:g('why'),bear:numOr(g('bear')),bearWhy:g('bearWhy'),reverse:g('rev')};
+  const raw={methods:[{t:g('m1t'),v:g('m1v')},{t:g('m2t'),v:g('m2v')}],base:numOr(g('base')),discount:numOr(g('disc')),why:g('why'),bear:numOr(g('bear')),bearWhy:g('bearWhy'),reverse:g('rev'),g:numOr(g('g'))};
   const n=valNorm(raw); if(!n) return undefined;
   const date=g('date')||today();
-  const out={date,price:prev&&prev.date===date&&prev.price!=null?prev.price:(price>0?price:null),methods:n.methods,base:numOr(g('base'))??niceRound(n.base),discount:n.discount,why:raw.why,bear:n.bear,bearWhy:raw.bearWhy,reverse:raw.reverse};
+  const out={date,price:prev&&prev.date===date&&prev.price!=null?prev.price:(price>0?price:null),methods:n.methods,base:numOr(g('base'))??niceRound(n.base),discount:n.discount,why:raw.why,bear:n.bear,bearWhy:raw.bearWhy,reverse:raw.reverse,g:raw.g};
   Object.keys(out).forEach(k=>{ if(out[k]===''||out[k]==null) delete out[k]; });
   return out; }
 function valWire(p,levelSel,cur){
@@ -1438,9 +1462,9 @@ function renderScore(){
 $('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['score','toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
-function switchView(v){ view=v==='port'?'port':'board'; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
+function switchView(v){ view=v==='port'||v==='next'?v:'board'; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
   const tbl=showTable();
-  $('#viewBoard').hidden=view!=='board'||tbl; $('#viewScore').hidden=!tbl; $('#viewPort').hidden=view!=='port';
+  $('#viewBoard').hidden=view!=='board'||tbl; $('#viewScore').hidden=!tbl; $('#viewPort').hidden=view!=='port'; $('#viewNext').hidden=view!=='next';
   document.body.classList.toggle('wide',tbl); render(); }
 $$('.seg button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
@@ -1851,6 +1875,125 @@ function holdRow(r,due){
   const grey=!s||s.full||!a;
   return rowEl({tc:grey?'var(--t-none)':s.c,tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
     tk:h.short||h.symbol,nm:h.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
+}
+// ---------- Next €: where the next money goes (v3.2.0) ----------
+// Expected return a year over ~5 years, in € terms before German tax (the same for every stock):
+//   dividend yield × (1 − withholding you can't credit) + long-run growth + catch-up to fair value
+// minus soft penalties for piling into one sector or one foreign currency.
+const LS_NEXT='radar.next.v1';
+let nextAmt=1000; try{ const v=Number(localStorage.getItem(LS_NEXT)); if(v>0) nextAmt=v; }catch{}
+const NX={years:5,sectorCap:20,sectorPen:5,fxCap:40,fxPen:10};
+// Withholding tax lost for a German private investor (share of the gross dividend), assuming no
+// manual reclaim. Checked 2026-11-09: IT 26 % (15 credited), CA 25 %, CH 35 %, JP 15.315 %, FR 12.8 %.
+const LEAK={IT:.11,CA:.10,CH:.20,JP:.003,IE:.10,ES:.04,DK:.12,AT:.125,BE:.15,FI:.20,NO:.10,SE:.15,PT:.10};
+const SUFFIX_CC={MI:'IT',PA:'FR',AS:'NL',DE:'DE',F:'DE',T:'JP',L:'GB',SW:'CH',TO:'CA',MC:'ES',CO:'DK',VI:'AT',BR:'BE',HE:'FI',OL:'NO',ST:'SE',LS:'PT',IR:'IE'};
+const ccOf=(isin,sym)=>{ if(isin&&/^[A-Z]{2}/.test(isin)) return isin.slice(0,2); const m=String(sym||'').match(/\.([A-Z]+)$/); return m?SUFFIX_CC[m[1]]||'??':'US'; };
+const leakOf=cc=>LEAK[cc]||0;
+const sectorOf=(sym,fb)=>((fund.companies||{})[sym]||{}).sector||fb||'Other';
+function nextCands(){
+  const T=depotTotal(), out=[], seen=new Set();
+  for(const h of holdings()){ if(isFund(h)||!hSym(h)) continue;
+    const x=px(h), z=valOfH(h), a=addOf(h), w=weightOf(h,T), v=valueOf(h);
+    seen.add(hSym(h));
+    out.push({kind:'hold',id:h.id,tk:h.short||h.symbol,nm:h.name,sym:hSym(h),x,c:curOf(x),cur:curOfI(x),val:z?z.v:null,lvl:a?a.v:null,
+      y:yldOf(x),cc:ccOf(h.isin,hSym(h)),sector:sectorOf(hSym(h),h.sector),w,eur:v?v.eur:0,cap:capOf(h),inDepot:!depot||!!posOf_(h),open:()=>openHold(h.id)}); }
+  for(const i of live()){ if(i.status==='out'||seen.has(symOf(i))) continue;
+    out.push({kind:'idea',id:i.id,tk:i.ticker,nm:i.name,sym:symOf(i),x:i,c:curOf(i),cur:curOfI(i),val:valNorm(i.val),lvl:i.buyBelow>0?i.buyBelow:null,
+      y:yldOf(i),cc:ccOf(null,symOf(i)),sector:sectorOf(symOf(i),i.sector),w:depot?0:null,eur:0,cap:capDefault(),inDepot:true,open:()=>openRead(i.id)}); }
+  return out;
+}
+function nextRank(amt){
+  const T=depotTotal(), C=nextCands(), haveDepot=T!=null&&T>0;
+  // what the depot holds per sector and per currency (stocks; funds count as diversified)
+  const bySec={}, byFx={};
+  if(haveDepot) for(const r of C) if(r.kind==='hold'&&r.eur){ bySec[r.sector]=(bySec[r.sector]||0)+r.eur; const k=fxCode(r.cur)[0]||r.cur; byFx[k]=(byFx[k]||0)+r.eur; }
+  const rows=C.map(r=>{
+    const o={...r}, v=r.val, c=r.c;
+    o.biz=bizOf(r.sym); o.flag=!!(o.biz&&o.biz.red.length);
+    o.age=v?valAge(v,r.sym):null;
+    if(!(c>0)){ o.st='noprice'; return o; }
+    if(!v){ o.st='noval'; return o; }
+    const leak=leakOf(r.cc), y=r.y||0;
+    o.yNet=y*(1-leak); o.tax=y*leak;
+    const vg=numOr(v.g), dg=o.biz&&o.biz.dg!=null?Math.max(0,Math.min(6,o.biz.dg)):null;
+    o.g=vg??dg??0; o.gSrc=vg!=null?'val':dg!=null?'div':'none';
+    o.rr=(Math.pow(v.base/c,1/NX.years)-1)*100;
+    o.er=o.yNet+o.g+o.rr;
+    o.pen=0; o.why=[];
+    if(haveDepot){ const T2=T+amt;
+      const s=((bySec[r.sector]||0)+amt)/T2*100; if(s>NX.sectorCap){ const p=(s-NX.sectorCap)/NX.sectorPen; o.pen+=p; o.why.push(`${esc(r.sector)} would be ${fmtN(s,0)} % of the depot`); }
+      const k=fxCode(r.cur)[0]||r.cur;
+      if(k!=='EUR'){ const f=((byFx[k]||0)+amt)/T2*100; if(f>NX.fxCap){ const p=(f-NX.fxCap)/NX.fxPen; o.pen+=p; o.why.push(`${esc(k)} would be ${fmtN(f,0)} % of the depot`); } }
+      if(r.kind==='hold'){ o.wAfter=(r.eur+amt)/T2*100; o.full=o.wAfter>r.cap; } }
+    o.adj=o.er-o.pen;
+    o.above=r.lvl>0?(c/r.lvl-1)*100:null;
+    o.st=o.flag?'flag':o.full?'full':!(r.lvl>0)?'nolevel':o.above>0?'wait':'ready';
+    return o; });
+  const by=(a)=>a.sort((p,q)=>(q.adj??-99)-(p.adj??-99));
+  return {rows,haveDepot,
+    ready:by(rows.filter(r=>r.st==='ready')),
+    wait:by(rows.filter(r=>r.st==='wait'||r.st==='nolevel')),
+    blocked:by(rows.filter(r=>r.st==='flag'||r.st==='full')),
+    noval:rows.filter(r=>r.st==='noval'||r.st==='noprice')}; }
+// the bond fund in the depot is the "do nothing clever" alternative
+function bondRef(){ const b=holdings().find(h=>h.kind==='bond'&&hSym(h)); if(!b) return null; const y=yldOf(px(b)); return y!=null?{y,nm:b.short||b.name}:null; }
+const pp=v=>fmtN(v,1);
+function erParts(r){ let t=`yield ${pp(r.yNet)}`;
+  if(r.g) t+=` + growth ${pp(r.g)}`;
+  t+=` ${r.rr>=0?'+':'−'} fair ${pp(Math.abs(r.rr))}`;
+  if(r.pen>=.05) t+=` − mix ${pp(r.pen)}`;
+  return t; }
+function nextRow(r,n){
+  const bits=[]; const tone=r.st==='ready'?'var(--t-buy)':r.st==='wait'||r.st==='nolevel'?'var(--t-wait)':'var(--t-none)';
+  if(r.st==='ready') bits.push(`<b class="up">at your level</b>`);
+  else if(r.st==='wait') bits.push(`${fmtN(r.above,0)} % above ${lvl(r.lvl)}`);
+  else if(r.st==='nolevel') bits.push('no level set');
+  else if(r.st==='flag') bits.push('<b class="dn">red flag</b>');
+  else if(r.st==='full') bits.push(`<b class="dn">would be ${fmtN(r.wAfter,1)} %</b>, max ${fmtN(r.cap,1)}`);
+  if(r.er!=null) bits.push(erParts(r));
+  if(r.age&&r.age.stale) bits.push('<span class="dn">valuation stale</span>');
+  const extra=(r.flag?FLAG:'')+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
+  const el=rowEl({tc:tone,tile:r.adj!=null?fmtN(r.adj,1):'–',tk:r.tk,nm:r.nm,extra,line2:bits.join(' · '),px:pxCol(r.c,r.cur),onOpen:r.open});
+  el.querySelector('.rsc').classList.add('nx'); el.title=`about ${pp(r.adj??0)} % a year expected`; return el; }
+function renderNext(){
+  const body=$('#nextBody'), R=nextRank(nextAmt), b=bondRef(), top=R.ready[0];
+  const amt=fmtEur(nextAmt);
+  const shares=top&&top.c>0?(()=>{ const e=eurOf(top.c,top.cur); return e?nextAmt/e:null; })():null;
+  const beatsBond=top&&(!b||top.adj>b.y);
+  body.innerHTML=`
+    <div class="nxhead"><label for="nxAmt">How much</label><span class="nxin"><input id="nxAmt" type="number" min="100" step="100" inputmode="numeric" value="${nextAmt}"> €</span></div>
+    <div class="nxhero" style="--tc:${top&&beatsBond?'var(--t-buy)':'var(--t-wait)'}">
+      ${top&&beatsBond?`<span class="k">Best place for ${amt} today</span>
+        <b class="tk">${esc(top.tk)} <span>${esc(top.nm)}</span></b>
+        <span class="er num">≈ ${pp(top.adj)} % a year</span>
+        <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}</span>
+        ${R.ready[1]?`<span class="ex">Next best at your level: ${R.ready.slice(1,3).map(r=>`${esc(r.tk)} ${pp(r.adj)} %`).join(', ')}.</span>`:''}`
+      :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b><span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
+      :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?fmtN(r.above,0)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
+    </div>`;
+  const g=document.createElement('div'); g.className='list';
+  const list=(t,a,empty)=>{ if(!a.length&&!empty) return; g.appendChild(groupEl(t,a.map(nextRow),empty)); };
+  const readyEls=R.ready.map(nextRow);
+  if(b){ const at=R.ready.findIndex(r=>r.adj<b.y); const line=document.createElement('div'); line.className='nxbond';
+    line.innerHTML=`<span>${esc(b.nm)} bond fund · ${pp(b.y)} %</span><small>below this line you'd do better in bonds</small>`;
+    if(at>=0) readyEls.splice(at,0,line); else if(readyEls.length) readyEls.push(line); }
+  const sec=groupEl('At your level · expected % a year',[],'Nothing at your level today.'); if(readyEls.length){ const box=sec.querySelector('.rows'); box.innerHTML=''; readyEls.forEach(e=>box.appendChild(e)); sec.querySelector('.ghd span:last-child').textContent=R.ready.length; }
+  g.appendChild(sec);
+  list('Not at your level yet',R.wait);
+  list('Held back',R.blocked);
+  if(R.noval.length) g.appendChild(groupEl('Not ranked',R.noval.map(r=>rowEl({tc:'var(--t-none)',tile:'–',tk:r.tk,nm:r.nm,extra:r.kind==='hold'?'<span class="own">own</span>':'',line2:r.st==='noprice'?'no price yet':'no valuation yet, add one to rank it',px:pxCol(r.c,r.cur),onOpen:r.open}))));
+  body.appendChild(g);
+  const ex=document.createElement('details'); ex.className='cs nxex';
+  ex.innerHTML=`<summary><b>How this is worked out</b></summary><div class="vtxt">
+    <p>Each stock with a valuation gets an expected return a year over the next ${NX.years} years, in percent:</p>
+    <ul><li><b>Yield</b>: today's dividend yield, minus withholding tax Germany doesn't credit and you'd only get back by filing a reclaim yourself (Italy 11 of 26 %, Canada 10 of 25 %, Switzerland 20 of 35 %, Japan 0.3 %). US, Dutch, French, German and UK dividends lose nothing.</li>
+    <li><b>Growth</b>: the long-run growth from your valuation (the g in the Gordon method). Without one, the dividend growth of the last 5 years, capped at 6 %. Buybacks are part of it, because it's growth per share.</li>
+    <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value.</li>
+    <li><b>Mix</b>${R.haveDepot?'':' (needs your statement on this device)'}: a soft penalty when the ${amt} would push one sector above ${NX.sectorCap} % of the depot (1 point per ${NX.sectorPen} points above) or one foreign currency above ${NX.fxCap} % (1 point per ${NX.fxPen} above). Funds count as spread out.</li></ul>
+    <p>Only stocks at or below your level count as "at your level". Above your max weight or with an open red flag a stock is held back, however good the number. German tax (Abgeltungsteuer) is the same for all of them, so it's left out. The ${b?esc(b.nm)+' bond fund':'bond fund'} line is the low-risk alternative: a stock should beat it clearly to be worth the risk.</p>
+    <p>The number is only as good as your fair value: ${NX.years}-year catch-up is an assumption, and a stale valuation makes it wrong.</p></div>`;
+  body.appendChild(ex);
+  $('#nxAmt').onchange=e=>{ const v=Number(e.target.value); if(!(v>0)){ e.target.value=nextAmt; return; } nextAmt=v; try{localStorage.setItem(LS_NEXT,String(v));}catch{} renderNext(); };
 }
 function renderPort(){
   const rows=portRows(), body=$('#portBody'), T=depotTotal();

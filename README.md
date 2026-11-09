@@ -61,6 +61,10 @@ Separate from the idea tracking: what you actually own, and whether any of it is
 - The badge on the Portfolio tab counts holdings in the add zone.
 - Claude can update add levels with an Import from Claude block: `{"holdings":[{"symbol":"ALV.DE","addBelow":420}]}` (matched by id, ISIN or symbol).
 
+## Next € tab (v3.2.0)
+
+"Where does my next €1,000 go?" Every idea and stock holding with a valuation gets an expected return a year over ~5 years: dividend yield × (1 − withholding Germany doesn't credit) + long-run growth (`val.g`, else 5-yr dividend growth capped at 6 %) + annualised catch-up to `val.base`. With a statement on the device, soft penalties apply when the amount would push one sector (Yahoo sector) above 20 % of the depot or one foreign currency above 40 %, and holdings that would go over their max weight are held back. Only stocks at or below their level are recommended; the bond fund's yield is shown as the low-risk line. German tax is the same for all and left out.
+
 ## Import from Claude
 
 At the end of a stock discussion, ask Claude for "a Radar card" and paste the JSON into `Import from Claude`. Format (all fields optional except `ticker` or `name`):
@@ -80,7 +84,7 @@ At the end of a stock discussion, ask Claude for "a Radar card" and paste the JS
   "val": {
     "date": "2026-11-05", "price": 142.30,
     "methods": [{"t": "18× 2027e EPS $8.40", "v": 151}, {"t": "Gordon on FCF/sh $7.20, g 3 %, 8 % hurdle", "v": 148}],
-    "base": 150, "discount": 10, "why": "wide moat",
+    "base": 150, "discount": 10, "why": "wide moat", "g": 3,
     "bear": 110, "bearWhy": "$7 EPS × 16×",
     "reverse": "today's price implies ~4 %/yr growth"
   },
