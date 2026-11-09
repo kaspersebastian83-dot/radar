@@ -781,6 +781,15 @@ input[type=file]{display:none}
 .dfold .dbody>.inc>.shd:first-child,#incBox>.shd:first-child{display:none}
 #incBox .c2box b{font-size:19px}
 [hidden]{display:none!important}
+/* v4.0.1: the company name leads, the ticker is the small label next to it; tags get their own line */
+.r1{flex-wrap:nowrap;gap:7px}
+.r1 .nm{flex:0 1 auto;font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+.r1 .tk{flex:none;font-size:12.5px;font-weight:600;letter-spacing:.02em;color:var(--mute)}
+.rx{display:flex;flex-wrap:wrap;align-items:center;gap:5px 6px;margin-top:4px;min-width:0}
+.rx .w{font-size:12.5px;font-weight:600;color:var(--ink2);font-variant-numeric:tabular-nums}.rx .w::after{content:" of depot"}.rx .w.over{color:var(--coral)}
+.c2nm .nm{order:-1;font-size:18px;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+.c2nm .tk{font-size:12.5px;font-weight:600;letter-spacing:.02em;color:var(--mute)}
+.sheet h3 .sht small{font-size:13px;font-weight:600;color:var(--mute);letter-spacing:.02em}
 .bztbl th:first-child{background:var(--sheet-top)}
 @media (prefers-color-scheme:dark){.psegs button.on{background:#2a4a70}}
 #sync{border:0;background:transparent}
@@ -1002,8 +1011,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.0.0';
+const VERSION='4.0.1';
 const CHANGELOG=[
+  {v:'4.0.1',d:'2026-11-09',t:'Company names first',items:[
+    'Every row now leads with the company name in bold; the ticker is the small label next to it. Same in the details and in the Next € pick.',
+    'The tags (wonderful, fair, results in 3 d, your weight, red flag) moved to their own line under the numbers, so they no longer cut the name short.']},
   {v:'4.0.0',d:'2026-11-09',t:'Made for the iPhone',items:[
     'New look: pastel light blue with frosted-glass cards, buttons and bars, in the iPhone system font. Dark mode follows your phone, in deep blue.',
     'The tabs moved to a floating bar at the bottom, in thumb reach: Ideas, Portfolio, Next € and the new Depot.',
@@ -1818,7 +1830,7 @@ function rowEl({tc,tile,txt,tk,nm,extra='',line2,line3,px,onOpen}){
   const el=document.createElement('button'); el.className='row2'+(tc==='var(--t-close)'?' tclose':''); el.type='button';
   el.style.setProperty('--tc',tc||'var(--t-none)');
   el.innerHTML=`<span class="rsc ${txt?'txt':''} num">${tile}</span>
-    <span class="rmid"><span class="r1"><span class="tk">${esc(tk)||'?'}</span>${extra}<span class="nm">${esc(nm||'')}</span></span><span class="r2">${line2}</span>${line3?`<span class="r3">${line3}</span>`:''}</span>
+    <span class="rmid"><span class="r1"><span class="nm">${esc(nm||tk)||'?'}</span>${nm&&tk?`<span class="tk">${esc(tk)}</span>`:''}</span><span class="r2">${line2}</span>${line3?`<span class="r3">${line3}</span>`:''}${extra?`<span class="rx">${extra}</span>`:''}</span>
     <span class="rpx"><b>${px.main}</b>${px.sub?`<small>${px.sub}</small>`:''}</span>`;
   el.onclick=onOpen; return el;
 }
@@ -2148,7 +2160,7 @@ function segSheet(root,kind,id,onEdit){
   root.append(bar,P.over,P.biz,P.edit); show(paneSel[kind]);
 }
 // open a folded Overview section (the journal buttons scroll to their form)
-const sheetT=(tk,nm)=>`${esc(tk||'?')}<small>${esc(nm||'')}</small>`;
+const sheetT=(tk,nm)=>`${esc(nm||tk||'?')}${nm&&tk?`<small>${esc(tk)}</small>`:''}`;
 // ---------- reading mode ----------
 function openRead(id){
   readingId=id; const i=data.ideas.find(x=>x.id===id); if(!i) return;
@@ -2935,7 +2947,7 @@ function renderNext(){
     <div class="nxhead"><label for="nxAmt">How much</label><span class="nxin"><input id="nxAmt" type="number" min="100" step="100" inputmode="numeric" value="${nextAmt}"> €</span></div>
     <div class="nxhero" style="--tc:${top&&beatsBond?'var(--t-buy)':'var(--t-wait)'}">
       ${top&&beatsBond?`<span class="k">Best place for ${amt} today</span>
-        <b class="tk">${esc(top.tk)} <span>${esc(top.nm)}</span></b>
+        <b class="tk">${esc(top.nm||top.tk)} <span>${esc(top.tk)}</span></b>
         <span class="er num">≈ ${pp(top.adj)} % a year</span>
         ${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}
         <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax${(l=>l>=.5?`, after ${fmtEur(l)} a year withholding you can't credit`:'')(nextLeakOf(top))}.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
