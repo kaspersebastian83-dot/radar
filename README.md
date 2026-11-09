@@ -46,7 +46,7 @@ GitHub pauses scheduled workflows in repos with no activity for 60 days; one cli
 Radar → Researching → Watchlist → Bought → Passed / Sold
 
 - Each card is a *thesis at a point in time*: price and date when logged, thesis, bull, bear, kill criteria, conviction, "buy below", next review date, dated journal notes.
-- **Scorecard** shows every idea with logged price vs. current price (live quote, or typed in by hand as fallback), day change and trailing dividend yield. Passed ideas show what you missed, Bought ideas show how it went.
+- **Table** (Ideas → Table, on a computer) shows every idea with logged price vs. current price, day change and trailing dividend yield. Passed ideas show what you missed, Bought ideas show how it went. On the phone the same facts are in the rows and sheets.
 - Cards with an overdue review date are flagged.
 
 ## Portfolio tab

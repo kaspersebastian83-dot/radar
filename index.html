@@ -842,8 +842,18 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.11.0';
+const VERSION='3.11.1';
 const CHANGELOG=[
+  {v:'3.11.1',d:'2026-11-09',t:'Fixes from the reliability check',items:[
+    'Import from Claude no longer makes a second card for a stock that is already on the Radar. It updates the card you have (level, valuation, texts), adds new journal notes, and keeps its stage and the price it was logged at.',
+    'Saving to GitHub keeps working when your lists grow. Before, saving from the iPhone would have failed once a file passed about 65 KB.',
+    '"Bought around" now saves without a buy price, so the EUNL comparison works with the date alone. Clearing the buy price keeps the date.',
+    'Today\'s move uses the official previous close. Before, it used the after-hours price, so the day after results it could show almost nothing (Zoetis −0,1 % instead of −3,3 %).',
+    'Dividend growth is no longer inflated when a payment slips across New Year: Realty Income showed +5,1 % a year, it is about +3,5 %.',
+    'German tax in the income view is a little lower and now exact: Soli is only charged on what is left after the foreign tax credit.',
+    'Just above your level now reads "0,2 % above" instead of "0 % above".',
+    'After a stock split the price history for the EUNL comparison refreshes right away, not at the end of the month.',
+    'Small things: London stocks keep their pence label (National Grid), E.ON no longer shows a meaningless return on capital, a browser without sync still shows your ideas (read-only), dates follow German time around midnight, and the currency split for foreign holdings loads its rates from the service\'s new address.']},
   {v:'3.11.0',d:'2026-11-09',t:'Your picks vs EUNL',items:[
     'Each holding\'s sheet has a new section "Against your world ETF (EUNL)": how the stock did since you bought it, how EUNL did over exactly the same time, and how many points it is ahead or behind.',
     'In ⋯ → Portfolio, under the x-ray: "Your picks vs EUNL", with how many of your picks are ahead, the average, and (with your statement and buy prices) what the money you put in would be worth in EUNL instead. Below it every holding, best first; tap one for its sheet.',
@@ -1008,7 +1018,7 @@ const CHANGELOG=[
 ];
 const LS_DATA='radar.data.v1', LS_SYNC='radar.sync.v1', LS_PRICES='radar.prices.v1', LS_FILTER='radar.filter.v1', LS_SORT='radar.sort.v1', LS_VIEW='radar.view.v1', LS_SEEN='radar.seenVersion.v1', LS_EUR='radar.eurView.v1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>{ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };   // local date (v3.11.1; was UTC)
 const now=()=>new Date().toISOString();
 const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1049,6 +1059,11 @@ function merge(incoming){
 
 // ---------- live prices / derived numbers ----------
 const symOf=i=>String(i.symbol||i.ticker||'').trim().toUpperCase();
+// Currency codes are upper case, except the two Yahoo quotes in a hundredth of the unit: London in pence (GBp), Johannesburg in cents (ZAc).
+const curNorm=(c,sym)=>{ c=String(c||'').trim(); const s=String(sym||'').toUpperCase();
+  if(/^gb[px]$/i.test(c)&&(c!=='GBP'||/\.L$/.test(s))) return 'GBp';
+  if(/^zac$/i.test(c)&&(c!=='ZAC'||/\.JO$/.test(s))) return 'ZAc';
+  return c.toUpperCase(); };
 const quoteOf=i=>(prices.quotes||{})[symOf(i)]||null;
 const errOf=i=>(prices.errors||{})[symOf(i)]||null;
 function curOf(i){ const q=quoteOf(i); return q&&q.price>0?q.price:(i.currentPrice>0?i.currentPrice:null); }
@@ -1167,13 +1182,17 @@ function bizRaw(sym){
       const lev=m!=='fin'&&y.netDebt!=null&&y.ebitda>0?y.netDebt/y.ebitda:null;
       const tax=Math.min(.5,Math.max(0,y.taxRate??.25));
       const roc=m==='fin'?(y.netIncome!=null&&y.equity>0?y.netIncome/y.equity*100:null)
-        :(y.ebit!=null&&y.investedCapital>0?y.ebit*(1-tax)/y.investedCapital*100:null);
+        :(y.ebit!=null&&y.investedCapital>0&&!(m==='cash'&&y.investedCapital===y.equity)?y.ebit*(1-tax)/y.investedCapital*100:null);   // utilities/REITs: Yahoo sometimes has no debt, then invested capital = equity and the ratio means nothing
       return {end:y.end,fy:fyOf(y.end),ps,pay,div,basis,lev,roc,shares:y.shares};
     });
     // dividends per calendar year; a year with fewer payments than usual is a data gap, not a cut
-    const dv=(c.divYears||[]).map(([y,v,n])=>({y,v,n}));
-    const ns=dv.slice(-6,-1).map(d=>d.n).filter(n=>n!=null).sort((a,b)=>a-b);
+    const dv0=(c.divYears||[]).map(([y,v,n])=>({y,v,n}));
+    const ns=dv0.slice(-6,-1).map(d=>d.n).filter(n=>n!=null).sort((a,b)=>a-b);
     const typ=ns.length?ns[Math.floor(ns.length/2)]:null;
+    // v3.11.1: a year with more payments than usual next to a year with fewer = a payment slipped across New Year
+    // (Realty Income 2024: 11, 2025: 13). The long year is scaled to the usual count, the short one is skipped as before.
+    const shortY=d=>!!d&&typ!=null&&d.n!=null&&d.n<typ&&d.n>0;
+    const dv=dv0.map((d,k)=>typ!=null&&d.n!=null&&d.n>typ&&(shortY(dv0[k-1])||shortY(dv0[k+1]))?{...d,v:d.v*typ/d.n,n:typ,paid:d.n}:d);
     const full=d=>d.n==null||typ==null||d.n>=typ;
     const curY=new Date().getFullYear();
     // streak = years paid without a cut; raises and cuts compare complete years only
@@ -1204,8 +1223,8 @@ function bizRaw(sym){
       W.push({id:'flat',key:'div'+dl.y,t:`No dividend raise since ${lastRaise}`,d:`${dl.y-lastRaise} years flat`});
     if(ys.length>=3&&o.shares>0){ const g=(y0.shares/o.shares-1)*100, grew=ps(0)>0&&o.ps!=null&&ps(0)>o.ps;
       if(g>=5&&!grew) F.push({id:'dil',key,t:`Share count up ${fmtN(g,0)} % without per-share growth`,d:`${o.fy}–${y0.fy}; ${B.short} ${o.ps!=null?f2(o.ps):'—'} → ${ps(0)!=null?f2(ps(0)):'—'}`}); }
-    if(m!=='fin'&&y0&&y0.lev!=null){ const L=m==='cash'?[7,6]:[3.5,3], older=ys.slice(1).map(y=>y.lev).filter(v=>v!=null), first=older[older.length-1];
-      if(y0.lev>L[0]&&first!=null&&y0.lev-first>=1) F.push({id:'lev',key,t:`Debt rising: ${fmtN(y0.lev,1)}× EBITDA`,d:`from ${fmtN(first,1)}× in ${ys[older.length].fy}`});
+    if(m!=='fin'&&y0&&y0.lev!=null){ const L=m==='cash'?[7,6]:[3.5,3], olderY=ys.slice(1).filter(y=>y.lev!=null), firstY=olderY[olderY.length-1], first=firstY?firstY.lev:null;
+      if(y0.lev>L[0]&&first!=null&&y0.lev-first>=1) F.push({id:'lev',key,t:`Debt rising: ${fmtN(y0.lev,1)}× EBITDA`,d:`from ${fmtN(first,1)}× in ${firstY.fy}`});
       else if(y0.lev>L[1]) W.push({id:'lev1',key,t:`High debt: ${fmtN(y0.lev,1)}× EBITDA`,d:`net debt / EBITDA in ${y0.fy}`}); }
     const psG=ys.length>=3&&ps(0)>0&&o.ps>0?cagr(ps(0),o.ps,ys.length-1):null;
     if(psG!=null&&psG<=-10&&!F.some(f=>f.id==='ps')&&!W.some(f=>f.id==='ps1'))
@@ -1256,7 +1275,7 @@ function bizHtml(sym,owner,kind){
     ${row('Shares (m)',y=>fmtN(y.shares/1e6,0))}
   </tbody></table></div>`:'';
   const dvs=b.dv.slice(-10), mx=Math.max(...dvs.map(d=>d.v),0);
-  const bars=dvs.length?`<div class="dvbars" title="Dividends per share by calendar year (faded: fewer payments than usual recorded)">${dvs.map(d=>`<i style="height:${mx?Math.max(4,d.v/mx*100):0}%" class="${d.n!=null&&b.typ!=null&&d.n<b.typ?'gap':''}" title="${d.y}: ${fmtN(d.v,2)}${d.n!=null?`, ${d.n} payments`:''}"><s>${String(d.y).slice(2)}</s></i>`).join('')}</div>`:'';
+  const bars=dvs.length?`<div class="dvbars" title="Dividends per share by calendar year (faded: fewer payments than usual recorded)">${dvs.map(d=>`<i style="height:${mx?Math.max(4,d.v/mx*100):0}%" class="${d.n!=null&&b.typ!=null&&d.n<b.typ?'gap':''}" title="${d.y}: ${fmtN(d.v,2)}${d.paid?`, ${d.paid} payments, counted as ${d.n}`:d.n!=null?`, ${d.n} payments`:''}"><s>${String(d.y).slice(2)}</s></i>`).join('')}</div>`:'';
   const dtext=b.dv.length?[b.streak?`no cut for ${b.streak}${b.streak>=24?'+':''} years`:'',b.lastRaise?`last raised ${b.lastRaise}`:'',b.dg!=null?`${fmtPct(b.dg,1)}/yr over 5 years`:''].filter(Boolean).join(' · '):'Pays no dividend.';
   const flag=(f,red)=>`<div class="bzf ${red?'r':'w'} ${f.ok?'ok':''}"><b>${f.ok?'✓':red?'!':'·'}</b><div><div class="t">${esc(f.t)}</div><div class="d">${esc(f.d||'')}</div>
     ${red?(f.ok?`<div class="d">Checked ${fmtDate(f.ok.date)}${f.ok.note?': '+esc(f.ok.note):''} <a href="#" data-unck="${f.id}">undo</a></div>`
@@ -1489,6 +1508,7 @@ function wireBiz(root,rerender){
 const TIERS=[[75,'Buy zone','var(--t-buy)'],[55,'Getting close','var(--t-close)'],[35,'Wait','var(--t-wait)'],[0,'Expensive','var(--t-exp)']];
 const PART={buy:{label:'to buy price',c:'var(--teal)'},yld:{label:'yield vs 5-yr',c:'var(--research)'},rng:{label:'52w range',c:'var(--ochre)'}};
 const lin=(v,a,b)=>Math.min(1,Math.max(0,(v-a)/(b-a)));
+const abv=v=>v>=1?fmtN(v,0):fmtN(Math.max(v,.1),1);   // % above a level: one decimal under 1 %, so it never reads "0 % above"
 function scoreOf(i){
   const parts=[], c=curOf(i);
   if(i.buyBelow>0&&c>0){ const above=(c/i.buyBelow-1)*100; parts.push({k:'buy',w:60,f:1-lin(above,0,25),above}); }
@@ -1512,7 +1532,7 @@ function whyOf(i,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng');
   if(i.status==='bought') out.push('Holding');
   if(s.cap==='flag') out.push(`held at Wait by a red flag (would be ${s.raw})`);
-  out.push(b?(b.above<=0?'in the buy zone':`${fmtN(b.above,0)} % above buy`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:'')):s.cap==='level'?`no buy price set, so it stops at Getting close (would be ${s.raw})`:'no buy price set');
+  out.push(b?(b.above<=0?'in the buy zone':`${abv(b.above)} % above buy`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:'')):s.cap==='level'?`no buy price set, so it stops at Getting close (would be ${s.raw})`:'no buy price set');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
   return out.join(' · ');
@@ -1650,7 +1670,7 @@ function ideaRow(i,due){
   if(i.status==='out'&&i.passed){ const P=i.passed, since=P.price>0&&c>0?(c/P.price-1)*100:null;
     bits.push(`${P.reason==='sold'?'sold':passLabel(P.reason).toLowerCase()} ${fmtDay(P.date)}${P.price>0?` at ${lvl(P.price)}`:''}${since!=null?` · ${fmtPct(since,0)} since`:''}`); }
   else if(!c) bits.push(!q&&errOf(i)?`no quote for ${esc(symOf(i))}`:'waiting for the first price');
-  else if(bp) bits.push(bp.above<=0?(lvl2Of(i)&&c<=lvl2Of(i)?`<b class="up">at your 2nd level</b> · below ${lvl(lvl2Of(i))}`:`<b class="up">at your price</b> · below ${lvl(i.buyBelow)}`):`${fmtN(bp.above,0)} % above ${lvl(i.buyBelow)}`);
+  else if(bp) bits.push(bp.above<=0?(lvl2Of(i)&&c<=lvl2Of(i)?`<b class="up">at your 2nd level</b> · below ${lvl(lvl2Of(i))}`:`<b class="up">at your price</b> · below ${lvl(i.buyBelow)}`):`${abv(bp.above)} % above ${lvl(i.buyBelow)}`);
   else bits.push(rp&&rp.pos<=.15?'no buy price · near 52w low':rp&&rp.pos>=.85?'no buy price · near 52w high':'no buy price');
   if(y!=null) bits.push(yTxt(y,h));
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
@@ -1804,7 +1824,7 @@ function cardEl(i,inSheet){
   // decision line: tier · distance to the buy level (· near the 52-week high/low)
   const bp=sc?.parts.find(x=>x.k==='buy'), rp=sc?.parts.find(x=>x.k==='rng');
   const tier=sc?sc.tier:!q&&errOf(i)?'No quote':'No score yet';
-  let dist=i.buyBelow>0?(bp?(bp.above<=0?`in the buy zone, buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`:`${fmtN(bp.above,0)} % above buy at ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`):`buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`)+lvl2Txt(i,c,cur)
+  let dist=i.buyBelow>0?(bp?(bp.above<=0?`in the buy zone, buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`:`${abv(bp.above)} % above buy at ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`):`buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`)+lvl2Txt(i,c,cur)
     :'no buy price set';
   if(!sc&&!q&&errOf(i)) dist=`no quote for ${symOf(i)}, set the Yahoo symbol in Edit`;
   else if(!sc&&!c) dist='waiting for the first price';
@@ -1812,7 +1832,7 @@ function cardEl(i,inSheet){
   // in the sheet: the same facts without repeating the tier or the level (both have their own place)
   let dec=dist;
   if(inSheet){ const l2=lvl2Of(i);
-    if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':'at your buy level'):`${fmtN(bp.above,0)} % above your buy level`):'no buy price set';
+    if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':'at your buy level'):`${abv(bp.above)} % above your buy level`):'no buy price set';
       if(sc.cap==='flag') dec=`held at Wait by a red flag (would be ${sc.raw}) · `+dec;
       else if(sc.cap==='above'||sc.cap==='level') dec+=`, so it stops at Getting close (would be ${sc.raw})`;
       dec+=rngTxt(rp); }
@@ -2032,7 +2052,7 @@ $('#btnSave').onclick=()=>{
   const i=editingId?data.ideas.find(x=>x.id===editingId):blank();
   const prevCur=i.currentPrice;
   F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
-  i.conviction=conv;
+  i.conviction=conv; i.currency=curNorm(i.currency,i.symbol||i.ticker);
   { const qb=document.querySelector('#f_qual .chip.on'), qv=qb?qb.dataset.q:'auto'; if(QUAL_SET.includes(qv)) i.quality=qv; else delete i.quality; }
   { const nv=valRead('fv_',i.val,curOf(i)); if(nv) i.val=nv; else delete i.val; }
   if(i.currentPrice!=null && i.currentPrice!==prevCur) i.currentDate=today();
@@ -2064,24 +2084,39 @@ $('#btnClaudeGo').onclick=()=>{
   if(obj&&!Array.isArray(obj)&&Array.isArray(obj.holdings)){ // portfolio update: add levels, symbols, notes
     const n=importHoldings(obj.holdings); closeAll(); persistPort(); toast(`Updated ${n} holding${n===1?'':'s'}`); return; }
   const arr=Array.isArray(obj)?obj:(obj.ideas||[obj]);
-  let n=0;
+  let n=0, upd=0; const KEEP=['id','status','loggedDate','loggedPrice','createdAt','source','boughtDate','boughtPrice','passed','deletedAt'];
   for(const raw of arr){
     if(!raw||typeof raw!=='object') continue;
-    const o={...raw}; o.ticker=(o.ticker||'').toUpperCase(); o.currency=(o.currency||'EUR').toUpperCase();
+    const o={...raw}; o.ticker=String(o.ticker||'').toUpperCase().trim();
     if(o.symbol) o.symbol=String(o.symbol).toUpperCase().trim();
-    if(!o.id) o.id=uid();
     ['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].forEach(k=>{ if(o[k]!=null&&o[k]!=='') o[k]=Number(o[k]); });
     if('reclaim' in o) o.reclaim=o.reclaim===true||o.reclaim==='true';
-    if('quality' in o){ const q=String(o.quality||'').toLowerCase().trim(); if(QUAL_SET.includes(q)) o.quality=q; else delete o.quality; }   // v3.9.0; "auto" = no override
+    let qAuto=false; if('quality' in o){ const q=String(o.quality||'').toLowerCase().trim(); if(QUAL_SET.includes(q)) o.quality=q; else { delete o.quality; qAuto=q==='auto'; } }   // v3.9.0; "auto" = no override
+    if(typeof o.notes==='string') o.notes=o.notes.trim()?[{date:today(),text:o.notes.trim()}]:[];
+    // v3.11.1: a card for a stock that is already on the Radar updates that card (by id, else Yahoo symbol, else ticker).
+    // Only the fields in the import change; stage, logged price and date, purchase and source stay; new notes are added.
+    const sy=o.symbol||o.ticker;
+    const cur=live().find(i=>o.id&&i.id===o.id)||(sy?live().find(i=>symOf(i)===sy):null)||(o.ticker?live().find(i=>String(i.ticker||'').toUpperCase()===o.ticker):null);
+    if(cur){
+      const add=Array.isArray(o.notes)?o.notes.filter(x=>x&&x.text):[]; delete o.notes;
+      KEEP.forEach(k=>delete o[k]); if(!o.ticker) delete o.ticker;
+      if('currency' in o) o.currency=curNorm(o.currency,o.symbol||symOf(cur));
+      if(o.val&&typeof o.val==='object'){ if(!o.val.date) o.val.date=today(); if(o.val.price==null){ const c=curOf(cur); if(c) o.val.price=c; }
+        if(!(raw.buyBelow>0)){ const l=levelFromVal(valNorm(o.val)); if(l) o.buyBelow=niceRound(l); } }
+      Object.assign(cur,o); if(qAuto) delete cur.quality;
+      const have=new Set((cur.notes||[]).map(x=>(x.date||'')+'|'+(x.text||'')));
+      cur.notes=[...(Array.isArray(cur.notes)?cur.notes:[]),...add.map(x=>({date:x.date||today(),...x})).filter(x=>!have.has(x.date+'|'+x.text))];
+      cur.updatedAt=now(); upd++; continue; }
+    o.currency=curNorm(o.currency||'EUR',sy);
+    if(!o.id) o.id=uid();
     if(!o.loggedDate) o.loggedDate=today();
     if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
-    if(typeof o.notes==='string') o.notes=[{date:today(),text:o.notes}];
     if(o.val&&typeof o.val==='object'){ if(o.val.price==null&&o.loggedPrice>0) o.val.price=o.loggedPrice; if(!o.val.date) o.val.date=o.loggedDate;
       if(!(o.buyBelow>0)){ const l=levelFromVal(valNorm(o.val)); if(l) o.buyBelow=niceRound(l); } }
     o.updatedAt=now(); if(!o.createdAt) o.createdAt=o.updatedAt;
     n+=merge([o]);
   }
-  closeAll(); persist(); toast(`Imported ${n} idea${n===1?'':'s'}`);
+  closeAll(); persist(); toast([n?`${n} new idea${n===1?'':'s'}`:'',upd?`${upd} updated (stage and logged price kept)`:''].filter(Boolean).join(', ')||'Nothing to import');
 };
 
 // ---------- export / import file ----------
@@ -2106,7 +2141,8 @@ $('#btnSyncNow').onclick=()=>{ closeAll(); pull(true); pullP(); loadPrices(); };
 const cfg=()=>sync.repo&&sync.token;
 const api=()=>`https://api.github.com/repos/${sync.repo}/contents/${sync.path}`;
 const hdr=()=>({Authorization:`Bearer ${sync.token}`,Accept:'application/vnd.github+json'});
-const b64enc=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+// v3.11.1: in chunks. One call with a byte per argument fails above 65,536 bytes in Safari (≈110,000 in Chrome), so a grown ideas.json or portfolio.json could no longer be saved.
+const b64enc=s=>{ const b=new TextEncoder().encode(s); let o=''; for(let k=0;k<b.length;k+=8192) o+=String.fromCharCode.apply(null,b.subarray(k,k+8192)); return btoa(o); };
 const b64dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,'')),c=>c.charCodeAt(0)));
 let remoteSha=null, pushTimer=null, pushing=false;
 let syncTxt='saved on this device';
@@ -2117,7 +2153,10 @@ function renderStatus(){ const s=$('#sync'); if(!s) return; const n=Object.keys(
   s.title=`${n?'Prices updated '+ago(prices.updated):'No prices loaded yet'} · ${syncTxt}`; s.setAttribute('aria-label',s.title); }
 
 async function pull(thenPush){
-  if(!cfg()) return;
+  if(!cfg()){ // no token: read-only copy from the site, so a new browser isn't empty (v3.11.1)
+    try{ const r=await fetch(`ideas.json?t=${Date.now()}`,{cache:'no-store'});
+      if(r.ok){ const j=await r.json(); if(merge((j&&j.ideas)||[])){ localStorage.setItem(LS_DATA,JSON.stringify(data)); render(); } } }catch(e){ console.warn('ideas.json',e); }
+    return; }
   setSync('busy','syncing');
   try{
     const r=await fetch(`${api()}?ref=${sync.branch}&t=${Date.now()}`,{headers:hdr(),cache:'no-store'});
@@ -2188,7 +2227,8 @@ const LS_PORT='radar.portfolio.v1', LS_DEPOT='radar.depot.v1', LS_COST='radar.co
 let costs={}; try{ costs=JSON.parse(localStorage.getItem(LS_COST))||{}; }catch{}
 const costKey=h=>h.isin||h.id;
 const costOf=h=>{ const v=costs[costKey(h)]; return v&&v.eur>0?v.eur:null; };
-function setCost(h,eur,date){ if(eur>0) costs[costKey(h)]={eur,at:today(),...(date?{date}:{})}; else delete costs[costKey(h)]; try{ localStorage.setItem(LS_COST,JSON.stringify(costs)); }catch{} }
+function setCost(h,eur,date){ const k=costKey(h); if(eur>0) costs[k]={eur,at:today(),...(date?{date}:{})}; else if(date) costs[k]={date}; else delete costs[k];   // v3.11.1: the date alone is kept (it starts the EUNL comparison)
+  try{ localStorage.setItem(LS_COST,JSON.stringify(costs)); }catch{} }
 const costDateOf=h=>costs[costKey(h)]?.date||null;
 // Historical EUR rate for the "bought on" date: from prices.json if the Action has it, else the ECB rate via
 // frankfurter.app (free, no key), fetched once and kept on this device.
@@ -2197,7 +2237,7 @@ const fxPending=new Set();
 function fxOn(c,date){ if(!c||c==='EUR') return 1; const k=c+'@'+date; if(fxh[k]) return fxh[k];
   const at=((prices.fxAt||{})[c]||{})[date]; if(at) return at;
   if(!fxPending.has(k)){ fxPending.add(k);
-    fetch(`https://api.frankfurter.app/${date}?from=EUR&to=${c}`).then(r=>r.ok?r.json():null).then(j=>{ const v=j&&j.rates&&j.rates[c]; if(!v) return;
+    fetch(`https://api.frankfurter.dev/v1/${date}?from=EUR&to=${c}`).then(r=>r.ok?r.json():null).then(j=>{ const v=j&&j.rates&&j.rates[c]; if(!v) return;
       fxh[k]=v; try{ localStorage.setItem(LS_FXH,JSON.stringify(fxh)); }catch{} render();
       const a=document.activeElement; if(holdId&&$('#mHold').classList.contains('on')&&!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))) openHold(holdId); }).catch(()=>{}); }
   return null; }
@@ -2250,7 +2290,7 @@ function hWhy(h,s){
   const out=[], get=k=>s.parts.find(x=>x.k===k), b=get('buy'), y=get('yld'), r=get('rng'), a=addOf(h);
   if(s.full) out.push(`would be ${s.rawTier.toLowerCase()} (${s.score}), but already ${fmtN(s.w,1)} % of the depot`);
   if(s.cap==='flag') out.push(`held at Hold by a red flag (would be ${s.raw})`);
-  out.push(b?(b.above<=0?'at or below your add level':`${fmtN(b.above,0)} % above add level`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:''))+(a&&a.src==='radar'?' (from Radar card)':''):s.capped||s.cap==='level'?'set an add level to reach the add zone':'no add level yet');
+  out.push(b?(b.above<=0?'at or below your add level':`${abv(b.above)} % above add level`+(s.cap==='above'?`, so it stops at Getting close (would be ${s.raw})`:''))+(a&&a.src==='radar'?' (from Radar card)':''):s.capped||s.cap==='level'?'set an add level to reach the add zone':'no add level yet');
   if(y) out.push(y.dev>=10?'yield above its 5-yr average':y.dev<=-10?'yield below its 5-yr average':'yield near its 5-yr average');
   if(r&&r.pos>=.85) out.push('near 52-week high'); else if(r&&r.pos<=.15) out.push('near 52-week low');
   return out.join(' · ');
@@ -2285,7 +2325,7 @@ function holdCard(r){
   let tier, dist;
   if(s){ tier=s.tier;
     dist=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} %`
-      :bp?(bp.above<=0?`at or below your add level ${mN(a.v,cur)}${eurTag(a.v,cur)}`:`${fmtN(bp.above,0)} % above add at ${mN(a.v,cur)}${eurTag(a.v,cur)}`)+(a.src==='radar'?' (Radar)':'')+lvl2Txt(x,c,cur)
+      :bp?(bp.above<=0?`at or below your add level ${mN(a.v,cur)}${eurTag(a.v,cur)}`:`${abv(bp.above)} % above add at ${mN(a.v,cur)}${eurTag(a.v,cur)}`)+(a.src==='radar'?' (Radar)':'')+lvl2Txt(x,c,cur)
       :'no add level set';
     if(s.cap==='flag') dist='held by a red flag · '+dist;
     if(rp&&rp.pos>=.85) dist+=' · near 52w high'; else if(rp&&rp.pos<=.15) dist+=' · near 52w low'; }
@@ -2298,7 +2338,7 @@ function holdCard(r){
   let dec=dist;
   if(s){ const l2=lvl2Of(x);
     dec=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} % (would be ${s.rawTier.toLowerCase()}, ${s.score})`
-      :bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd add level':'at your add level'):`${fmtN(bp.above,0)} % above your add level`)
+      :bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd add level':'at your add level'):`${abv(bp.above)} % above your add level`)
       :s.capped||s.cap==='level'?'no add level yet, so it stops at Getting close':'no add level yet';
     if(!s.full&&s.cap==='flag') dec=`held at Hold by a red flag (would be ${s.raw}) · `+dec;
     else if(!s.full&&s.cap==='above'&&bp) dec+=`, so it stops at Getting close (would be ${s.raw})`;
@@ -2366,7 +2406,7 @@ function holdRow(r,due){
   else if(fund&&!s) bits.push(h.kind==='bond'?'bond fund':'fund');
   else if(s&&s.full) bits.push(`full · max ${fmtN(capOf(h),1)} %`);
   else{
-    if(a&&bp) bits.push(bp.above<=0?(lvl2Of(x)&&c<=lvl2Of(x)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(x))}`:`<b class="up">at your add level</b> ${lvl(a.v)}`):`${fmtN(bp.above,0)} % above ${lvl(a.v)}`);
+    if(a&&bp) bits.push(bp.above<=0?(lvl2Of(x)&&c<=lvl2Of(x)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(x))}`:`<b class="up">at your add level</b> ${lvl(a.v)}`):`${abv(bp.above)} % above ${lvl(a.v)}`);
     else if(p!=null&&(p<=.15||p>=.85)) bits.push(p<=.15?'near 52w low':'near 52w high');
   }
   if(y!=null) bits.push(yTxt(y,hi)+(!a&&!fund&&hi&&!(s&&s.full)?` · usual ${fmtN(hi.avg,1)} %`:''));
@@ -2385,13 +2425,13 @@ const PASS_WHY=[['price','Too expensive'],['toohard','Too hard'],['flag','Red fl
 const passLabel=k=>(PASS_WHY.find(x=>x[0]===k)||[,'Passed'])[1];
 const VERDICT={holds:'Still holds',changed:'Changed',broken:'Broken'};
 const pad2=n=>String(n).padStart(2,'0');
-function addMonths(d,n){ const x=new Date(d+'T00:00:00'); x.setMonth(x.getMonth()+n); return `${x.getFullYear()}-${pad2(x.getMonth()+1)}-${pad2(x.getDate())}`; }
+function addMonths(d,n){ const x=new Date(d+'T00:00:00'), day=x.getDate(); x.setDate(1); x.setMonth(x.getMonth()+n); x.setDate(Math.min(day,new Date(x.getFullYear(),x.getMonth()+1,0).getDate())); return `${x.getFullYear()}-${pad2(x.getMonth()+1)}-${pad2(x.getDate())}`; }
 function logDecision(src,e){ src.notes=[...(Array.isArray(src.notes)?src.notes:[]),{date:today(),...e}]; src.updatedAt=now(); }
 // Buy / add checklist. The first five fill in themselves, the last three are honest-to-yourself ticks.
 function checkItems(x){
   const biz=bizOf(x.sym), age=x.val?valAge(x.val,x.sym):null, e=earnOf(x.sym), w=x.word;
   return [
-    {k:'level',s:'level',auto:1,ok:x.lvl>0&&x.c>0&&x.c<=x.lvl,t:!(x.lvl>0)?`No ${w} level set`:x.c<=x.lvl?`At or below your ${w} level ${mN(x.lvl,x.cur)}`:`${fmtN((x.c/x.lvl-1)*100,0)} % above your ${w} level ${mN(x.lvl,x.cur)}`},
+    {k:'level',s:'level',auto:1,ok:x.lvl>0&&x.c>0&&x.c<=x.lvl,t:!(x.lvl>0)?`No ${w} level set`:x.c<=x.lvl?`At or below your ${w} level ${mN(x.lvl,x.cur)}`:`${abv((x.c/x.lvl-1)*100)} % above your ${w} level ${mN(x.lvl,x.cur)}`},
     {k:'val',s:'valuation current',auto:1,ok:!!x.val&&!(age&&age.stale),t:!x.val?'No valuation written down':age&&age.stale?'Valuation is stale, results came out since':'Valuation is current'},
     {k:'flag',s:'no red flag',auto:1,ok:!(biz&&biz.red.length),t:biz&&biz.red.length?`Open red flag: ${biz.red.map(f=>f.t).join('; ')}`:'No open red flag in the business'},
     {k:'kill',s:'"I\'m wrong if"',auto:1,ok:!!String(x.kill||'').trim(),t:String(x.kill||'').trim()?'"I\'m wrong if" is written down':'No "I\'m wrong if" written yet'},
@@ -2661,7 +2701,7 @@ function erParts(r){ let t=`yield ${pp(r.yNet)}`;
 function nextRow(r,n){
   const bits=[]; const tone=r.st==='ready'?'var(--t-buy)':r.st==='wait'||r.st==='nolevel'?'var(--t-wait)':'var(--t-none)';
   if(r.st==='ready') bits.push(r.x&&lvl2Of(r.x)&&r.c<=lvl2Of(r.x)?`<b class="up">at your 2nd level</b>, a bigger tranche`:`<b class="up">at your level</b>`);
-  else if(r.st==='wait') bits.push(`${fmtN(r.above,0)} % above ${lvl(r.lvl)}`);
+  else if(r.st==='wait') bits.push(`${abv(r.above)} % above ${lvl(r.lvl)}`);
   else if(r.st==='nolevel') bits.push('no level set');
   else if(r.st==='flag') bits.push('<b class="dn">red flag</b>');
   else if(r.st==='broken') bits.push('<b class="dn">thesis broken</b>');
@@ -2685,7 +2725,7 @@ function renderNext(){
         <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax${(l=>l>=.5?`, after ${fmtEur(l)} a year withholding you can't credit`:'')(nextLeakOf(top))}.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
         ${R.ready[1]?`<span class="ex">Next best at your level: ${R.ready.slice(1,3).map(r=>`${esc(r.tk)} ${pp(r.adj)} %`).join(', ')}.</span>`:''}`
       :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b>${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}<span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
-      :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?fmtN(r.above,0)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
+      :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?abv(r.above)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
     </div>`;
   const g=document.createElement('div'); g.className='list';
   const list=(t,a,empty,fk)=>{ if(!a.length&&!empty) return; g.appendChild(groupEl(t,a.map(nextRow),empty,fk)); };
@@ -2719,7 +2759,7 @@ function nextSecHtml(kind,id,sym){
   if(!r||r.er==null) return '';
   const rank=R.ready.indexOf(r), b=bondRef();
   const st=r.st==='ready'?(rank>=0?`At your level: number ${rank+1} of ${R.ready.length} for your next ${fmtEur(nextAmt)}.`:'At your level.')
-    :r.st==='wait'?`${fmtN(r.above,0)} % above your level, so it waits under "Not at your level yet".`
+    :r.st==='wait'?`${abv(r.above)} % above your level, so it waits under "Not at your level yet".`
     :r.st==='nolevel'?'No level set yet, so it can\'t be "at your level".'
     :r.st==='flag'?'Held back by an open red flag.'
     :r.st==='broken'?'Held back: your last review called the thesis broken.'
@@ -2741,7 +2781,7 @@ function nextSecHtml(kind,id,sym){
 // Everything private stays in this browser: statement (radar.depot.v1), buy prices (radar.cost.v1), statement
 // history (radar.depotHist.v1) and the Pauschbetrag (radar.income.v1). Nothing of it goes into portfolio.json.
 const LS_INC='radar.income.v1', LS_DHIST='radar.depotHist.v1';
-const INC={tax:26.375, single:1000, joint:2000, tfFund:.30, hist:12};
+const INC={tax:26.375, soli:5.5, single:1000, joint:2000, tfFund:.30, hist:12};
 // Foreign withholding Germany credits against its own tax (WHT[cc].cred; the part it doesn't credit is in LEAK).
 // Below the Pauschbetrag there is no German tax to credit it against, so there it is a cost too.
 // Countries not in WHT: 15 % treaty rate assumed, nothing lost.
@@ -2776,8 +2816,10 @@ function incomeOf(){
   const S=k=>R.reduce((s,r)=>s+(r[k]||0),0);
   const G=S('eur'), L=S('leakEur'), F=S('credEur'), taxable=S('taxable'), P=Number(incSet.pausch)||0;
   const T0=INC.tax/100*Math.max(0,taxable-P);
-  const tax=Math.max(F,T0);   // credited foreign tax is part of the German 26,375 %; below the allowance it is lost
-  return {R,zero:all.filter(r=>r.eur===0),miss:all.filter(r=>r.eur==null),G,L,F,taxable,P,T0,tax,net1:G-L,net2:G-L-tax,T:depotTotal()};
+  // Credited foreign tax counts toward the German 25 %, and the 5,5 % Soli is only charged on what is left after that credit,
+  // so the total is 26,375 % minus 5,5 % of the credited foreign tax (v3.11.1). Below the allowance the foreign tax is lost.
+  const soliSaved=T0>F?INC.soli/100*F:0, tax=Math.max(F,T0-INC.soli/100*F);
+  return {R,zero:all.filter(r=>r.eur===0),miss:all.filter(r=>r.eur==null),G,L,F,taxable,P,T0,soliSaved,tax,net1:G-L,net2:G-L-tax,T:depotTotal()};
 }
 // statement history: one entry per statement date (asOf), shares per ISIN plus the dividend per share at import,
 // so a later import can split income growth into raises and new money. Last INC.hist imports.
@@ -2828,9 +2870,9 @@ function renderIncome(){
     <div class="c2box num">
       <div title="Trailing dividends × your shares, at today's exchange rates"><span>Gross</span><b>${fmtEur(I.G)}</b><span>${mo(I.G)} a month</span></div>
       <div title="Minus withholding tax Germany doesn't credit (Italy 11 %, Canada 10 %, Japan 0,3 % … of the gross)"><span>After withholding</span><b>${fmtEur(I.net1)}</b><span>${I.L>=.5?`− ${fmtEur(I.L)} lost`:'nothing lost'}</span></div>
-      <div title="26,375 % on everything above your Sparer-Pauschbetrag; equity funds 30 % tax-free (Teilfreistellung). Credited foreign tax is part of it."><span>After German tax</span><b>${fmtEur(I.net2)}</b><span>${mo(I.net2)} a month</span></div>
+      <div title="26,375 % on everything above your Sparer-Pauschbetrag; equity funds 30 % tax-free (Teilfreistellung). Credited foreign tax is part of it, and Soli is only charged on the rest."><span>After German tax</span><b>${fmtEur(I.net2)}</b><span>${mo(I.net2)} a month</span></div>
     </div>
-    <p class="ink">${I.T?`<b>${fmtN(I.G/I.T*100,2)} %</b> of the depot, gross. `:''}${I.L>=.5?`Withholding you can't credit: ${fmtEur(I.L)} (${lost.join(', ')}). `:''}German tax ≈ <b>${fmtEur(I.tax)}</b>: 26,375 % on ${fmtEur(Math.max(0,I.taxable-pb))} above your ${fmtEur(pb)}${I.F>I.T0+.5?`; the ${fmtEur(I.F)} US/NL/FR… withholding is more than that, and below the Pauschbetrag Germany can't credit it, so it counts in full`:''}.</p>
+    <p class="ink">${I.T?`<b>${fmtN(I.G/I.T*100,2)} %</b> of the depot, gross. `:''}${I.L>=.5?`Withholding you can't credit: ${fmtEur(I.L)} (${lost.join(', ')}). `:''}German tax ≈ <b>${fmtEur(I.tax)}</b>: 26,375 % on ${fmtEur(Math.max(0,I.taxable-pb))} above your ${fmtEur(pb)}${I.soliSaved>=.5?`, minus ${fmtEur(I.soliSaved)} Soli that the credited foreign tax saves`:''}${I.F>I.T0+.5?`; the ${fmtEur(I.F)} US/NL/FR… withholding is more than that, and below the Pauschbetrag Germany can't credit it, so it counts in full`:''}.</p>
     <div class="incpb"><span class="lb">Sparer-Pauschbetrag</span>
       <button type="button" class="chip ${pb===INC.single?'on':''}" data-pb="${INC.single}">${fmtEur(INC.single)} single</button>
       <button type="button" class="chip ${pb===INC.joint?'on':''}" data-pb="${INC.joint}">${fmtEur(INC.joint)} joint</button>
@@ -3275,7 +3317,7 @@ function openHold(id){
   $('#hSave').onclick=()=>{
     const num=v=>v===''?null:Number(v), val=id=>$(id)?$(id).value.trim():undefined;
     setCost(h,Number($('#h_cost').value),$('#h_costDate')?$('#h_costDate').value||null:costDateOf(h));
-    Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:val('#h_currency').toUpperCase(),
+    Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:curNorm(val('#h_currency'),val('#h_symbol')),
       kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),addBelow2:num($('#h_addBelow2').value),conviction:num($('#h_conv').value),maxWeight:num($('#h_maxWeight').value),idea:val('#h_idea').toUpperCase()||null,
       sector:val('#h_sector'),note:val('#h_note'),updatedAt:now()});
     if(!fund){ const nv=valRead('hv_',h.val,c); if(nv) h.val=nv; else delete h.val; }

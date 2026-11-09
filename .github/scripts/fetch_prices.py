@@ -36,6 +36,17 @@ def num(v, nd=4):
         return None
 
 
+def prev_close(fi):
+    for k in ("regular_market_previous_close", "previous_close"):
+        try:
+            v = num(getattr(fi, k))
+        except Exception:
+            v = None
+        if v:
+            return v
+    return None
+
+
 def utc(idx):
     return idx.tz_convert("UTC") if idx.tz is not None else idx.tz_localize("UTC")
 
@@ -172,16 +183,33 @@ def pack(d, start, end):
     return out
 
 
-def update_history(symbols, codes):
-    """Refresh history.json when a month has completed since the last write or a symbol / currency is new."""
+def looks_split(prev, quotes):
+    """A live price far from the last stored month-end close means a split (or a reverse split) happened since:
+    the stored closes are on the old share count and the comparison would show a false -50 %."""
+    out = []
+    for s, ser in prev.get("series", {}).items():
+        px = [v for v in ser.get("px", []) if v]
+        q = quotes.get(s) or {}
+        if px and q.get("price") and not q.get("stale") and not 0.6 < q["price"] / px[-1] < 1.67:
+            out.append(s)
+    return out
+
+
+def update_history(symbols, codes, quotes=None):
+    """Refresh history.json when a month has completed since the last write, a symbol / currency is new,
+    or a price looks like a split happened (at most once a day)."""
     try:
         prev = json.loads(HISTORY.read_text(encoding="utf-8"))
     except Exception:
         prev = {}
     n = pd.Timestamp.now()
     last = f"{n.year - (n.month == 1):04d}-{(n.month - 2) % 12 + 1:02d}"   # last complete month
+    today_s = n.strftime("%Y-%m-%d")
+    split = looks_split(prev, quotes or {}) if prev.get("splitCheck") != today_s else []
+    if split:
+        print(f"history: refetch, price far from last month-end for {', '.join(split)}")
     if (prev.get("month") == last and set(symbols) <= set(prev.get("series", {}))
-            and set(codes) <= set(prev.get("fx", {}))):
+            and set(codes) <= set(prev.get("fx", {})) and not split):
         print("history: up to date")
         return
     start_ts = pd.Timestamp.now().normalize() - pd.DateOffset(years=HIST_YEARS)
@@ -216,6 +244,8 @@ def update_history(symbols, codes):
                 fx[c] = prev["fx"][c]
     out = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds"), "month": last,
            "bench": BENCH, "series": series, "fx": fx, "errors": errs}
+    if split or prev.get("splitCheck"):
+        out["splitCheck"] = today_s if split else prev.get("splitCheck")
     HISTORY.write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
     print(f"history: wrote {len(series)} symbols, {len(fx)} currencies, {len(errs)} errors")
 
@@ -273,7 +303,9 @@ def main():
                 raise ValueError("no price returned (check the symbol)")
             q = {
                 "price": price,
-                "prevClose": num(fi.previous_close),
+                # the official previous close; fast_info.previous_close comes from pre/post-market trades and
+                # gave the after-hours price (ZTS 79.45 instead of 82.11 on 2026-11-09)
+                "prevClose": prev_close(fi),
                 "currency": fi.currency,
                 "yearHigh": num(fi.year_high),
                 "yearLow": num(fi.year_low),
@@ -313,7 +345,7 @@ def main():
 
     codes = {fx_code(q.get("currency"))[0] for q in quotes.values()} - {"EUR", ""}
     try:
-        update_history(sorted(set(symbols) | {BENCH}), codes)
+        update_history(sorted(set(symbols) | {BENCH}), codes, quotes)
     except Exception as e:   # the benchmark data must never block the prices
         print(f"history failed: {e}")
     fx, fx_at = fetch_fx(codes, sorted(log_dates))

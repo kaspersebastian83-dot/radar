@@ -164,13 +164,13 @@
       "status": "radar",
       "loggedDate": "2026-11-06",
       "loggedPrice": 1285.5,
-      "currency": "GBP",
+      "currency": "GBp",
       "symbol": "NG.L",
       "currentPrice": null,
       "currentDate": null,
       "buyBelow": 928,
       "conviction": 3,
-      "thesis": "Regulated grid owner whose profits grow with the networks it builds: RIIO-T3 is locked in to 2031, assets grow ~10% a year and EPS 8–10% a year. The dividend grows with UK CPIH and is untouched by withholding tax for a German investor. A buy only when the yield reaches ~4.6%, because at ~3.9% it pays less than gilts.",
+      "thesis": "Regulated grid owner whose profits grow with the networks it builds: RIIO-T3 is locked in to 2031, assets grow ~10% a year and EPS 8–10% a year. The dividend grows with UK CPIH and is untouched by withholding tax for a German investor. A buy only below 928p, where the yield reaches ~5.4%; at ~3.9% it pays less than gilts.",
       "bull": "H1 FY27: capex £6.7bn (+33%), underlying EPS +22% to 36.5p, FY27 EPS guidance raised to +15–16% (~90p). RIIO-T3 accepted (base RoE 5.70% real, management targets >9% incl. incentives). £70bn+ five-year plan. Joulent (35%, US data-centre power, Microsoft 20-yr PPA) adds growth. UK withholding tax 0%, beta ~0.6.",
       "bear": "~3.9% yield sits below the 10y gilt (~5.1%) while the BoE is hiking again. Net debt £48.6bn and rising ~£4bn per half, gearing heading to 65%. The 2024 £7bn rights issue at 645p rebased the dividend, and another raise is possible. DPS grows only with CPIH and is diluted by scrip. UK bill-affordability politics and US rate cases. Mega-project overrun risk. Near 30-year highs. 0.5% UK stamp duty on purchase.",
       "kill": "I'm wrong if: the dividend grows below UK CPIH in any year or is rebased; any new equity raise beyond scrip; regulatory gearing above 70% or any credit-rating downgrade; the 8–10% EPS CAGR framework (to FY31) is cut; UK Electricity Transmission RoE reported below 8% in two consecutive years.",
@@ -185,10 +185,14 @@
         {
           "date": "2026-11-09",
           "text": "Level lowered from 1,100p to 928p: fair value ~1,160p, 20 % margin for a regulated network with negative FCF."
+        },
+        {
+          "date": "2026-11-09",
+          "text": "Thesis text brought in line with the 928p level (it still named the old ~4.6 % yield trigger). Currency label corrected to pence."
         }
       ],
       "createdAt": "2026-11-06T12:49:42.223Z",
-      "updatedAt": "2026-11-09T10:37:42.000Z",
+      "updatedAt": "2026-11-09T13:45:00.000Z",
       "val": {
         "date": "2026-11-09",
         "price": 1257.5,
@@ -406,7 +410,7 @@
       "currentDate": null,
       "buyBelow": 88,
       "conviction": 3,
-      "thesis": "Expert software + content for health (UpToDate), tax & accounting, legal, compliance; 85% recurring, cloud software +15% organic. Shares -45% in 2025 on AI-disruption fear, ~15x earnings vs ~22x usual. The numbers keep compounding: 9M 2026 organic +6%, adj. operating profit +10% cc, FCF/share 4.96 -> 5.62 -> 5.88 (2023-25), net debt 2.0x EBITDA, dividend EUR 2.52 (+8%). Buy below EUR 88 = 25% off a ~EUR 117 base: 20x 2026e adj. EPS ~EUR 5.60 = EUR 112; adj. FCF EUR 1.30-1.35B = ~EUR 5.95/sh growing 3% at an 8% hurdle = EUR 123. At EUR 90 the market implies ~1.3% growth forever. Yield 2.8% vs ~1.9% in 2025.",
+      "thesis": "Expert software + content for health (UpToDate), tax & accounting, legal, compliance; 85% recurring, cloud software +15% organic. Shares -45% in 2025 on AI-disruption fear, ~16x earnings vs ~22x usual. The numbers keep compounding: 9M 2026 organic +6%, adj. operating profit +10% cc, FCF/share 4.96 -> 5.62 -> 5.88 (2023-25), net debt 2.0x EBITDA, dividend EUR 2.52 (+8%). Buy below EUR 88 = 25% off a ~EUR 117 base: 20x 2026e adj. EPS ~EUR 5.60 = EUR 112; adj. FCF EUR 1.30-1.35B = ~EUR 5.95/sh growing 3% at an 8% hurdle = EUR 123. At EUR 90 the market implies ~1.3% growth forever. Yield 2.8% vs ~1.9% in 2025.",
       "bull": "GenAI on proprietary content (~70% of digital revenue already AI-powered) lifts pricing and retention instead of replacing the product; EUR 500M buyback in 2026. Re-rating to 20x = EUR 112+ plus a ~8%-growing dividend.",
       "bear": "LLMs commoditise tax/legal research and clinical answers -> growth slips to 0-2%, 12x on ~EUR 5.3 = ~EUR 64 (2026 low was ~EUR 54). Stock already rallied +33% in a month - don't chase above ~EUR 95. New CEO since Feb 2026, product spend rising to 12-13% of revenue. Tax: NL 15% withheld, fully credited in DE, nothing to reclaim.",
       "kill": "I'm wrong if organic growth drops below 4% in two reports in a row, or recurring cloud software growth falls below 10%.",
@@ -420,7 +424,7 @@
         }
       ],
       "createdAt": "2026-11-06T20:32:30.021Z",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
+      "updatedAt": "2026-11-09T13:45:00.000Z",
       "val": {
         "date": "2026-11-06",
         "price": 90.11,
@@ -458,7 +462,7 @@
       "currentDate": null,
       "buyBelow": 22.5,
       "conviction": 2,
-      "thesis": "Triple-net landlord of Caesars Palace, MGM Grand, the Venetian and ~90 more; 100% occupancy, ~40-yr leases, ~2% escalators, about half CPI-linked. 2026 AFFO $2.47-2.48/sh, dividend $1.84 (7.3%), payout ~75%, 9 straight raises, net debt 4.8x EBITDA, first $2B buyback. Buy below $22.50 = 25% off a ~$30 base: 12x 2027e AFFO ~$2.56 = $31; dividend growing 2.5% at an 8% hurdle = $34; haircut for Caesars. NOT in the buy zone today (was $22.73 two weeks ago); by my estimate the score crosses 75 around $24.70.",
+      "thesis": "Triple-net landlord of Caesars Palace, MGM Grand, the Venetian and ~90 more; 100% occupancy, ~40-yr leases, ~2% escalators, about half CPI-linked. 2026 AFFO $2.47-2.48/sh, dividend $1.84 (7.3%), payout ~75%, 9 straight raises, net debt 4.8x EBITDA, first $2B buyback. Buy below $22.50 = 25% off a ~$30 base: 12x 2027e AFFO ~$2.56 = $31; dividend growing 2.5% at an 8% hurdle = $34; haircut for Caesars. NOT in the buy zone today (was $22.73 two weeks ago): Buy zone only at or below $22.50.",
       "bull": "Rent is contractual and covered; AFFO/sh still +4%; buying back stock at ~10x AFFO is accretive; any clean Caesars outcome re-rates to 13-14x = $33-36.",
       "bear": "Caesars (~38% of rent; regional + Joliet lease ~$740M/yr) is being bought by Fertitta, got downgraded, VICI booked a $313M credit-loss allowance and openly weighs fixing or selling that lease. A 25% cut on it = -$0.17 AFFO/sh -> 9x on $2.30 = ~$21. Refinancing gets dearer (new notes at 5.42%). Tax: US 15% withheld, credited in DE; the whole payout is taxed as dividend income.",
       "kill": "I'm wrong if the Caesars regional rent is cut by more than 30%, or 2027 AFFO per share falls.",
@@ -472,7 +476,7 @@
         }
       ],
       "createdAt": "2026-11-06T20:32:30.021Z",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
+      "updatedAt": "2026-11-09T13:45:00.000Z",
       "val": {
         "date": "2026-11-06",
         "price": 25.21,
