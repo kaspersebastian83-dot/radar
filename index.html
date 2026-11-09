@@ -1024,8 +1024,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.4';
+const VERSION='4.1.5';
 const CHANGELOG=[
+  {v:'4.1.5',d:'2026-11-09',t:'Tidier sheets inside, nothing new to see',items:[
+    'Which stock sheet is open (idea, idea editor or holding) is now kept in one place instead of three loose markers. Everything should work exactly as before. This prepares the next fix: a note or a holding edit can still get lost when a sync arrives while the sheet is open.',
+  ]},
   {v:'4.1.4',d:'2026-11-09',t:'No more lost edits, the dot covers the portfolio',items:[
     'An edit you make while a save to GitHub is still running is now saved right after it, instead of waiting until you next open the app. The dot keeps saying "saving" until it is really done.',
     'The dot now covers portfolio.json too. If your add levels or notes fail to save or load, it turns red and says "save failed (portfolio)", instead of a toast you might miss.',
@@ -1249,7 +1252,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 // ---------- state ----------
 let data = load();
 let sync = JSON.parse(localStorage.getItem(LS_SYNC)||'null') || {repo:'',branch:'main',path:'ideas.json',token:''};
-let editingId=null, readingId=null, view='board', sortKey='score', sortDir=-1;
+let view='board', sortKey='score', sortDir=-1;
 let filter='all'; try{ filter=localStorage.getItem(LS_FILTER)||'all'; }catch{}
 let focus=null, todayCache=null;   // v3.5.0 Today strip: filtered list instead of a tab
 let boardSort='score'; try{ boardSort=localStorage.getItem(LS_SORT)||'score'; }catch{}
@@ -2203,9 +2206,17 @@ function segSheet(root,kind,id,onEdit){
 }
 // open a folded Overview section (the journal buttons scroll to their form)
 const sheetT=(tk,nm)=>`${esc(nm||tk||'?')}${nm&&tk?`<small>${esc(tk)}</small>`:''}`;
+// ---------- which sheet is open (v4.1.5) ----------
+// The three sheets about one stock: 'read' = idea sheet (#mRead), 'edit' = idea editor (#mEdit, id null = new idea),
+// 'hold' = holding sheet (#mHold). SHEET says which one is open and for which id. Only sheetOn() and closeAll() change it.
+// Not yet (follow-ups in the state-machine audit): the buttons inside a sheet still use the object the sheet was
+// opened with, and typed-but-unsaved input isn't tracked.
+const SHEET={kind:null,id:null};
+const SHEET_EL={read:'#mRead',edit:'#mEdit',hold:'#mHold'};
+function sheetOn(kind,id){ SHEET.kind=kind; SHEET.id=id; $(SHEET_EL[kind]).classList.add('on'); }
 // ---------- reading mode ----------
 function openRead(id){
-  readingId=id; const i=data.ideas.find(x=>x.id===id); if(!i) return;
+  const i=data.ideas.find(x=>x.id===id); if(!i) return;
   const s=stageOf(i), q=quoteOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), tb=toBuyOf(i), chg=chgOf(i);
   const sec=(t,v,cls='')=>`<div class="sec ${cls}"><h4>${t}</h4><p class="${v?'':'none'}">${v?esc(v):'Nothing written yet.'}</p></div>`;
   const wide=window.matchMedia('(min-width:701px)').matches;
@@ -2258,7 +2269,7 @@ function openRead(id){
     $('#f_note').value=''; renderNotes(i); persist();
   };
   $('#f_note').onkeydown=e=>{ if(e.key==='Enter') $('#btnNote').click(); };
-  $('#mRead').classList.add('on');
+  sheetOn('read',i.id);
 }
 // Stage switcher inside the dossier. Moving to Bought asks for the purchase price and date,
 // which then become the base for the return figures.
@@ -2289,7 +2300,7 @@ function setStage(i,k){
   persist(); openRead(i.id); toast(`${from} → ${stageOf(i).label}`);
 }
 function renderNotes(i){ $('#noteList').innerHTML=noteRows(i.notes); }
-$('#btnEdit').onclick=()=>{ const id=readingId; closeAll(); openEdit(id); };
+$('#btnEdit').onclick=()=>{ const id=SHEET.id; closeAll(); openEdit(id); };
 
 // ---------- edit sheet ----------
 $('#f_status').innerHTML=STATUSES.map(s=>`<option value="${s.k}">${s.label}</option>`).join('');
@@ -2298,7 +2309,6 @@ $$('#f_conviction span').forEach((s,i)=>s.onclick=()=>setConv(i+1));
 function setConv(n){ conv=n; $$('#f_conviction span').forEach((s,i)=>s.classList.toggle('on',i<n)); }
 const F=['ticker','name','sector','status','loggedDate','loggedPrice','currency','symbol','currentPrice','buyBelow','buyBelow2','nextReview','boughtDate','boughtPrice','source','thesis','bull','bear','kill'];
 function openEdit(id){
-  editingId=id;
   const i=id?data.ideas.find(x=>x.id===id):blank();
   $('#eTitle').textContent=id?`Edit ${i.ticker||'idea'}`:'New idea';
   F.forEach(k=>$('#f_'+k).value=i[k]??'');
@@ -2309,9 +2319,10 @@ function openEdit(id){
   $('#f_valBox').innerHTML=valForm('fv_',i.val,i.currency||'');
   valWire('fv_','#f_buyBelow',i.currency||'');
   $('#btnDelete').style.visibility=id?'visible':'hidden';
-  $('#mEdit').classList.add('on');
+  sheetOn('edit',id);
 }
 $('#btnSave').onclick=()=>{
+  const editingId=SHEET.kind==='edit'?SHEET.id:null;
   const i=editingId?data.ideas.find(x=>x.id===editingId):blank();
   const prevCur=i.currentPrice;
   F.forEach(k=>{ let v=$('#f_'+k).value; if(['loggedPrice','currentPrice','buyBelow','buyBelow2','boughtPrice'].includes(k)) v=v===''?null:Number(v); if(k==='ticker'||k==='currency'||k==='symbol') v=v.toUpperCase().trim(); i[k]=v; });
@@ -2325,6 +2336,7 @@ $('#btnSave').onclick=()=>{
   closeAll(); persist(); toast('Saved');
 };
 $('#btnDelete').onclick=()=>{
+  const editingId=SHEET.kind==='edit'?SHEET.id:null;
   if(!editingId||!confirm('Delete this idea?')) return;
   const i=data.ideas.find(x=>x.id===editingId); i.deletedAt=now(); i.updatedAt=now();
   closeAll(); persist(); toast('Deleted');
@@ -2333,7 +2345,7 @@ $('#fab').onclick=()=>$('#mAdd').classList.add('on');
 $$('[data-close]').forEach(b=>b.onclick=closeAll);
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeAll(); }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeAll(); });
-function closeAll(){ $$('.modal').forEach(m=>m.classList.remove('on')); }
+function closeAll(){ $$('.modal').forEach(m=>m.classList.remove('on')); SHEET.kind=null; SHEET.id=null; }
 // v4.0.0: a handle on every sheet; drag it down to close (only the handle, so a scroll or a form never closes it by accident)
 $$('.sheet').forEach(sh=>{ const g=document.createElement('div'); g.className='grab'; g.setAttribute('aria-hidden','true'); sh.prepend(g);
   let y0=null, dy=0;
@@ -2563,14 +2575,14 @@ function fxOn(c,date){ if(!c||c==='EUR') return 1; const k=c+'@'+date; if(fxh[k]
   if(!fxPending.has(k)){ fxPending.add(k);
     fetch(`https://api.frankfurter.dev/v1/${date}?from=EUR&to=${c}`).then(r=>r.ok?r.json():null).then(j=>{ const v=j&&j.rates&&j.rates[c]; if(!v) return;
       fxh[k]=v; try{ localStorage.setItem(LS_FXH,JSON.stringify(fxh)); }catch{} render();
-      const a=document.activeElement; if(holdId&&$('#mHold').classList.contains('on')&&!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))) openHold(holdId); }).catch(()=>{}); }
+      const a=document.activeElement; if(SHEET.kind==='hold'&&!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))) openHold(SHEET.id); }).catch(()=>{}); }
   return null; }
 // Thesis, kill criteria, review and journal: from the linked Radar card if there is one, otherwise the holding's own.
 const textSrc=h=>ideaOf(h)||h;
 const KINDS=[{k:'stock',label:'Stock'},{k:'fund',label:'Fund / ETF'},{k:'bond',label:'Bond fund'}];
 const HTIERS=[[75,'Add zone','var(--t-buy)'],[55,'Getting close','var(--t-close)'],[35,'Hold','var(--t-wait)'],[0,'Pricey','var(--t-exp)']];
 const PRIVATE_KEYS=['shares','value','valueEur','priceEur','qty','amount','buyPriceEur','avgPrice','cost','costEur'];
-let port=loadPort(), depot=null, holdId=null;
+let port=loadPort(), depot=null;
 try{ const d=JSON.parse(localStorage.getItem(LS_DEPOT)); if(d&&d.pos) depot=d; }catch{}
 function loadPort(){ try{ const d=JSON.parse(localStorage.getItem(LS_PORT)); if(d&&Array.isArray(d.holdings)) return d; }catch{} return {version:1,settings:{maxWeight:7},holdings:[]}; }
 function savePortLocal(){ try{ localStorage.setItem(LS_PORT,JSON.stringify(port)); }catch{} }
@@ -3590,7 +3602,7 @@ $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.
 
 // ---------- holding sheet ----------
 function openHold(id){
-  holdId=id; const h=port.holdings.find(x=>x.id===id); if(!h) return;
+  const h=port.holdings.find(x=>x.id===id); if(!h) return;
   const T=depotTotal(), s=hScore(h,T), x=px(h), c=curOf(x), d=dayOf(x), y=yldOf(x), hi=histOf(x), q=quoteOf(x), p=posOf_(h), v=valueOf(h), w=weightOf(h,T), a=addOf(h), idea=ideaOf(h), cur=curOfI(x), tb=toBuyOf(x), mm=mismatchOf(h);
   const fund=isFund(h), src=textSrc(h), rt=hRetOf(h), own=!idea;
   const hcc=fund||!hSym(h)?null:ccOf(h.isin,hSym(h)), ir=hcc&&depot?incRows().find(r=>r.h===h):null;   // v3.7.0 withholding
@@ -3702,7 +3714,7 @@ function openHold(id){
     if(QUAL_SET.includes(k)) h.quality=k; else delete h.quality; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
     toast(QUAL_SET.includes(k)?`Quality set to ${k}`:'Quality back to auto'); });
   $('#hDel').onclick=()=>{ if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
-  $('#mHold').classList.add('on');
+  sheetOn('hold',h.id);
 }
 
 // Portfolio updates pasted from Claude: {"holdings":[{"symbol":"ALV.DE","addBelow":420,…}]}. Matched by id, ISIN or symbol.
