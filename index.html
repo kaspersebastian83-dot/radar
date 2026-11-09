@@ -536,7 +536,25 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .rpx{flex:none;text-align:right;display:flex;flex-direction:column;gap:1px;font-variant-numeric:tabular-nums}
 .rpx b{font-weight:800;font-size:15px;white-space:nowrap}
 .rpx small{font-size:12px;color:var(--mute);white-space:nowrap}
+.r3{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .rempty{padding:13px 16px;font-size:13px;color:var(--mute)}
+/* v3.6.0 dividend box and income view */
+.c2box.divbox b small{font-size:11.5px;font-weight:600;color:var(--ink2)}
+.c2box .up{color:var(--teal);font-weight:700}.c2box .dn{color:var(--coral);font-weight:700}
+#incBox{margin:0 0 16px}
+#incBox .c2box{margin:0 0 10px}#incBox .c2box b{font-size:17px}
+#incBox .ink{font-size:12.5px;color:var(--ink2);margin:0 0 10px;line-height:1.45}
+#incBox .ink b{color:var(--ink)}
+.incpb{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0 0 12px;font-size:13.5px}
+.incpb .lb{font-weight:600;flex:1 0 100%}
+.incpb .chip{cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink2)}
+.incpb .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.incpb input{width:84px;text-align:right;padding:6px 9px}
+.incgr{background:var(--panel2);border-radius:var(--r2);padding:10px 12px;margin:0 0 12px;font-size:13px;color:var(--ink2);line-height:1.45}
+.incgr b{color:var(--ink)}.incgr p{margin:0}.incgr p+p{margin-top:6px}
+#incBox .grp{margin:0 0 10px}
+.today button.inc b{color:var(--teal)}
+.nxhero .inc{font-size:13px;color:var(--ink2);font-weight:600}
 .list .empty{display:block}
 /* sort and filter sheet */
 .shd{margin:0 0 6px;font-size:12.5px;font-weight:700;color:var(--mute)}
@@ -724,6 +742,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
   <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnDec">Decision journal</button><button class="btn small" id="btnLog">What's new</button></div>
   <div class="msec">
     <h4>Portfolio</h4>
+    <div class="inc" id="incBox"></div>
     <div class="pstrip" id="pStrip"></div>
     <p class="hint" id="depotStatus">No statement imported on this device.</p>
     <div class="row">
@@ -776,8 +795,16 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.5.0';
+const VERSION='3.6.0';
 const CHANGELOG=[
+  {v:'3.6.0',d:'2026-11-09',t:'Your dividend income',items:[
+    'New Income view on top of ⋯ → Portfolio, and an "income" button in the Today line that opens it. It shows what your depot pays a year in €: gross, after the withholding tax you can\'t get credited (Italy, Canada, Japan …), and after German tax. It replaces the old one-line dividend estimate.',
+    'The German tax uses your Sparer-Pauschbetrag: 1.000 € single by default, one tap for 2.000 € joint, or type what\'s left of it if part sits with another bank. Equity funds count 70 % (Teilfreistellung). US, Dutch and French withholding counts toward the German tax; below the Pauschbetrag it can\'t be credited, and the number says so.',
+    'Below it, who pays your income: every holding with € a year, its share of the total and, where you entered a buy price, the yield on your cost. Tap one for its details. Stocks that pay nothing or reinvest are named underneath.',
+    'Growth: from your next statement import on, Radar compares with the previous statement and splits the change into dividend raises and new money (at today\'s exchange rates, so the currency doesn\'t blur it), plus the change since the oldest stored statement. It keeps your last 12 statements, on this device only.',
+    'Next €: every row and the top pick show what the amount would pay you, e.g. "+27 € a year in dividends", after withholding.',
+    'Every stock\'s details have a new dividend box under Yield | Return | Review: dividend growth over 5 years, how many years in a row it was raised, and the payout of the last fiscal year against free cash flow (operating cash flow for utilities and REITs, earnings for insurers). Each with one word underneath, like "strong", "slow", "covered" or "tight". A missing figure shows "–".',
+    'Scores, tiers and the rows on Ideas and Portfolio are unchanged.']},
   {v:'3.5.0',d:'2026-11-09',t:'Today, at a glance',items:[
     'New "Today" line under the top bar on every tab: how many stocks are at your level, reviews due, results this week, stale valuations and how old the prices are. Ideas and holdings count together, and parts with nothing in them disappear (except "at level"). Tap a part to see exactly those stocks; tap it again or ✕ to go back. "0 at level" opens Next €.',
     'Portfolio tiles: Hold, Pricey and Full are now grey, because a low add score on something you own just means "expensive, keep". Red only shows up for an open red flag or a thesis you called broken, so red always means "look at this". Add zone stays green, Getting close blue. The Ideas tab keeps its colours.',
@@ -1158,6 +1185,63 @@ function bizHtml(sym,owner,kind){
     <p class="hint">${esc(b.B.why)} Fiscal years from Yahoo Finance${b.c.finCurrency?`, in ${esc(b.c.finCurrency)}`:''}; updated ${b.time?fmtDate(b.time.slice(0,10)):'—'}${b.stale?' (last update failed)':''}.</p>
   </div>`;
 }
+// ---------- dividend box (v3.6.0) ----------
+// Three tiles under Yield | Return | Review on every stock card in the sheet: 5-yr dividend growth, years raised
+// in a row, payout vs the company's basis (modelOf). Verdict thresholds live here so they can be tuned.
+const DIV={
+  growth:[[7,'strong','up'],[4,'solid','up'],[1,'slow',''],[-1,'flat',''],[-Infinity,'falling','dn']],  // %/yr, value ≥ threshold
+  raised:[[10,'proven','up'],[5,'steady','up'],[1,'young','']],                                       // years, value ≥ threshold; 0 → flat or cut
+  raiseMin:1,                                                                                         // a year counts as a raise from +1 %
+  cutMin:5,                                                                                           // a drop of 5 %+ is a cut (as the red flag), less is flat
+  pay:{std:[[60,'covered','up'],[80,'ok',''],[100,'tight','dn']],                                    // % of FCF, value ≤ threshold
+       cash:[[75,'covered','up'],[90,'ok',''],[100,'tight','dn']],                                   // % of operating cash flow (utilities, REITs)
+       fin:[[60,'covered','up'],[80,'ok',''],[100,'tight','dn']]},                                   // % of earnings (banks, insurers, BDCs)
+  payOver:['not covered','dn'],
+};
+const DIV_BASIS={std:'FCF',cash:'OCF',fin:'earnings'};
+// Per calendar year from fundamentals.json; complete years only (the current year is still running), and years with
+// fewer payments than usual are skipped, as the red-flag rules do.
+function divStats(sym){
+  const b=sym?bizRaw(sym):null; if(!b) return null;
+  const curY=new Date().getFullYear();
+  const fd=b.dv.filter(d=>d.y<curY&&d.v>0&&(d.n==null||b.typ==null||d.n>=b.typ));
+  const dl=fd[fd.length-1], d5=dl?fd.find(d=>d.y===dl.y-5):null;
+  const g=dl&&d5&&dl.y>=curY-2?cagr(dl.v,d5.v,5):null;
+  let n=null, all=false, stop=null;
+  if(fd.length>=2&&dl.y>=curY-2){ n=0;
+    for(let k=fd.length-1;k>0;k--){ const a=fd[k], p=fd[k-1];
+      if(a.y-p.y>2){ all=false; break; }
+      if(a.v>=p.v*(1+DIV.raiseMin/100)){ n++; if(k===1) all=true; }
+      else { stop=a.v<p.v*(1-DIV.cutMin/100)?'cut':'flat'; break; } } }
+  const y0=b.ys[0];
+  return {b,g,dl,d5,n,all,stop,pay:y0?y0.pay:null,fy:y0?y0.fy:null,m:b.m,none:!b.dv.length};
+}
+const divWord=(v,T)=>{ for(const [t,w,c] of T) if(v>=t) return [w,c]; return ['','']; };
+function divBoxHtml(sym){
+  const s=divStats(sym), dash='–', none=s&&s.none;
+  const vd=(w,c)=>`<span class="${c||''}">${w||''}</span>`;
+  // 1. growth
+  let g1=dash, g2=vd(none?'no dividend':'no data'), gt='';
+  if(s&&s.g!=null){ const [w,c]=divWord(s.g,DIV.growth); g1=`${fmtPct(s.g,1)}<small>/yr</small>`; g2=vd(w,c);
+    gt=`Dividend per share ${s.d5.y} → ${s.dl.y}: ${fmtN(s.d5.v,2)} → ${fmtN(s.dl.v,2)}`; }
+  // 2. raised in a row
+  let r1=dash, r2=vd(none?'no dividend':'no data'), rt='';
+  if(s&&s.n!=null){ r1=`${s.n}${s.all?'+':''}<small> yr${s.n===1&&!s.all?'':'s'}</small>`;
+    r2=s.n===0?vd(s.stop||'flat',s.stop==='cut'?'dn':''):vd(...divWord(s.n,DIV.raised));
+    rt=`Complete calendar years up to ${s.dl.y} in which the dividend per share rose at least ${DIV.raiseMin} %${s.all?'; the data starts there, so it may be longer':''}`; }
+  // 3. payout
+  let p1=dash, p2=vd(none?'no dividend':'no data'), pt='';
+  if(s&&s.pay!=null){ const bs=DIV_BASIS[s.m];
+    if(isFinite(s.pay)){ p1=`${fmtN(s.pay,0)} %<small> of ${bs}</small>`;
+      const T=DIV.pay[s.m], hit=T.find(([t])=>s.pay<=t); p2=hit?vd(hit[1],hit[2]):vd(...DIV.payOver); }
+    else { p1=`neg.<small> ${bs}</small>`; p2=vd(...DIV.payOver); }
+    pt=`Dividends paid vs ${bs==='FCF'?'free cash flow':bs==='OCF'?'operating cash flow':'earnings'}, fiscal ${s.fy}`; }
+  return `<div class="c2box divbox num">
+    <div title="${esc(gt)}"><span>Div. growth 5 yr</span><b>${g1}</b>${g2}</div>
+    <div title="${esc(rt)}"><span>Raised in a row</span><b>${r1}</b>${r2}</div>
+    <div title="${esc(pt)}"><span>Payout${s&&s.fy?' '+esc(s.fy):''}</span><b>${p1}</b>${p2}</div>
+  </div>`;
+}
 function wireBiz(root,rerender){
   const box=root.querySelector('.sec.biz[data-sym]'); if(!box) return;
   const sym=box.dataset.sym, kind=box.dataset.kind, oid=box.dataset.owner;
@@ -1311,11 +1395,11 @@ function pxCol(c,cur){
   const e=eurOf(c,cur), loc=`${fmtN(c,c>=1000?0:2)} ${esc(cur)}`;
   return e!=null?{main:fmtP(e)+' €',sub:loc}:{main:loc,sub:''};
 }
-function rowEl({tc,tile,txt,tk,nm,extra='',line2,px,onOpen}){
+function rowEl({tc,tile,txt,tk,nm,extra='',line2,line3,px,onOpen}){
   const el=document.createElement('button'); el.className='row2'; el.type='button';
   el.style.setProperty('--tc',tc||'var(--t-none)');
   el.innerHTML=`<span class="rsc ${txt?'txt':''} num">${tile}</span>
-    <span class="rmid"><span class="r1"><span class="tk">${esc(tk)||'?'}</span>${extra}<span class="nm">${esc(nm||'')}</span></span><span class="r2">${line2}</span></span>
+    <span class="rmid"><span class="r1"><span class="tk">${esc(tk)||'?'}</span>${extra}<span class="nm">${esc(nm||'')}</span></span><span class="r2">${line2}</span>${line3?`<span class="r3">${line3}</span>`:''}</span>
     <span class="rpx"><b>${px.main}</b>${px.sub?`<small>${px.sub}</small>`:''}</span>`;
   el.onclick=onOpen; return el;
 }
@@ -1544,6 +1628,7 @@ function cardEl(i,inSheet){
       <div title="${t?`Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${t.inEur?fmtPct(t.fx):'n/a'}`:''}`:''}"><span>${t&&t.foreign&&!t.inEur?'Return (local)':'Return in €'}</span><b class="${retCls}">${fmtPct(chg)}</b><span>${t?`${t.base.what==='bought'?'bought':'since'} ${fmtDay(t.base.date)}`:'no price yet'}</span></div>
       <div><span>Review</span><b title="${i.nextReview?fmtDate(i.nextReview):''}">${i.nextReview?new Date(i.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!i.nextReview?'not set':due?'due now':'next look'}</span></div>
     </div>
+    ${inSheet?divBoxHtml(symOf(i)):''}
     ${(b=>b?`<div class="c2biz" title="Business trend, tap the card for details">${bizLine(b)}</div>`:'')(sc?sc.biz:bizOf(symOf(i)))}
     <p class="c2th">${esc(i.thesis)||'<i>No thesis written yet.</i>'}</p>`;
   if(inSheet){ el.removeAttribute('tabindex'); return el; }
@@ -2022,6 +2107,7 @@ function holdCard(r){
       <div title="${rt?`Average buy price ${fmtP(rt.cost,'EUR')}, now ${fmtP(rt.unit,'EUR')}. Price only, dividends not included.${rt.split&&!rt.split.pending?` Stock ${fmtPct(rt.split.price)} in ${rt.split.code}, currency ${fmtPct(rt.split.fx)}.`:''}`:'Enter your average buy price in the holding to see this'}"><span>Return in €</span><b class="${rc}">${rt?fmtPct(rt.pct):'—'}</b><span>${rt?(rt.gain!=null?`${rt.gain>=0?'+':'−'}${fmtEur(Math.abs(rt.gain))}`:`vs ${fmtP(rt.cost,'EUR')}`):'set buy price'}</span></div>
       <div><span>Review</span><b title="${src.nextReview?fmtDate(src.nextReview):''}">${src.nextReview?new Date(src.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!src.nextReview?'not set':due?'due now':'next look'}</span></div>
     </div>
+    ${fund||!hSym(h)?'':divBoxHtml(hSym(h))}
     ${b?`<div class="c2biz" title="Business trend, tap for details">${bizLine(b)}</div>`:''}
     <p class="c2th">${src.thesis?esc(src.thesis):`<i>${fund?'No note yet.':'No thesis yet. Why do you own it?'}</i>`}</p>`;
   el.onclick=()=>openHold(h.id);
@@ -2258,6 +2344,9 @@ function nextRank(amt){
 // the bond fund in the depot is the "do nothing clever" alternative
 function bondRef(){ const b=holdings().find(h=>h.kind==='bond'&&hSym(h)); if(!b) return null; const y=yldOf(px(b)); return y!=null?{y,nm:b.short||b.name}:null; }
 const pp=v=>fmtN(v,1);
+// v3.6.0: dividends the next amount would bring in, after the withholding you can't credit (before German tax)
+const nextIncOf=r=>r&&r.y>0?nextAmt*r.y*(1-leakOf(r.cc))/100:null;
+const nextIncTxt=r=>{ const v=nextIncOf(r); return v==null?(r&&r.c>0?'no dividend':''):`+${fmtN(v,0)} € a year in dividends`; };
 function erParts(r){ let t=`yield ${pp(r.yNet)}`;
   if(r.g) t+=` + growth ${pp(r.g)}`;
   t+=` ${r.rr>=0?'+':'−'} fair ${pp(Math.abs(r.rr))}`;
@@ -2273,7 +2362,7 @@ function nextRow(r,n){
   else if(r.st==='full') bits.push(`<b class="dn">would be ${fmtN(r.wAfter,1)} %</b>, max ${fmtN(r.cap,1)}`);
   if(r.age&&r.age.stale) bits.push('<span class="dn">valuation stale</span>');
   const extra=(r.flag?FLAG:'')+earnPill(r.sym)+(r.kind==='hold'?`<span class="own">own${r.w!=null?' '+fmtN(r.w,1)+' %':''}</span>`:'');
-  const el=rowEl({tc:tone,tile:r.adj!=null?fmtN(r.adj,1):'–',tk:r.tk,nm:r.nm,extra,line2:bits.join(' · '),px:pxCol(r.c,r.cur),onOpen:r.open});
+  const el=rowEl({tc:tone,tile:r.adj!=null?fmtN(r.adj,1):'–',tk:r.tk,nm:r.nm,extra,line2:bits.join(' · '),line3:nextIncTxt(r),px:pxCol(r.c,r.cur),onOpen:r.open});
   el.querySelector('.rsc').classList.add('nx'); el.title=`about ${pp(r.adj??0)} % a year expected`; return el; }
 function renderNext(){
   const body=$('#nextBody'), R=nextRank(nextAmt), b=bondRef(), top=R.ready[0];
@@ -2286,9 +2375,10 @@ function renderNext(){
       ${top&&beatsBond?`<span class="k">Best place for ${amt} today</span>
         <b class="tk">${esc(top.tk)} <span>${esc(top.nm)}</span></b>
         <span class="er num">≈ ${pp(top.adj)} % a year</span>
+        ${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}
         <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
         ${R.ready[1]?`<span class="ex">Next best at your level: ${R.ready.slice(1,3).map(r=>`${esc(r.tk)} ${pp(r.adj)} %`).join(', ')}.</span>`:''}`
-      :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b><span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
+      :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b>${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}<span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
       :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?fmtN(r.above,0)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
     </div>`;
   const g=document.createElement('div'); g.className='list';
@@ -2301,7 +2391,7 @@ function renderNext(){
   g.appendChild(sec);
   list('Not at your level yet',R.wait,null,'next.wait');
   list('Held back',R.blocked,null,'next.held');
-  if(R.noval.length) g.appendChild(groupEl('Not ranked',R.noval.map(r=>rowEl({tc:'var(--t-none)',tile:'–',tk:r.tk,nm:r.nm,extra:r.kind==='hold'?'<span class="own">own</span>':'',line2:r.st==='noprice'?'no price yet':'no valuation yet, add one to rank it',px:pxCol(r.c,r.cur),onOpen:r.open}))));
+  if(R.noval.length) g.appendChild(groupEl('Not ranked',R.noval.map(r=>rowEl({tc:'var(--t-none)',tile:'–',tk:r.tk,nm:r.nm,extra:r.kind==='hold'?'<span class="own">own</span>':'',line2:r.st==='noprice'?'no price yet':'no valuation yet, add one to rank it',line3:r.c>0?nextIncTxt(r):'',px:pxCol(r.c,r.cur),onOpen:r.open}))));
   body.appendChild(g);
   const ex=document.createElement('details'); ex.className='cs nxex';
   ex.innerHTML=`<summary><b>How this is worked out</b></summary><div class="vtxt">
@@ -2327,6 +2417,7 @@ function nextSecHtml(kind,id,sym){
     :r.st==='broken'?'Held back: your last review called the thesis broken.'
     :r.st==='full'?`Held back: ${fmtEur(nextAmt)} more would make it ${fmtN(r.wAfter,1)} % of the depot, your max is ${fmtN(r.cap,1)} %.`:'';
   const notes=[r.gSrc==='val'?'growth from your valuation':r.gSrc==='div'?'growth = dividend growth of the last 5 years':'no growth assumed (none in the valuation, no dividend history)'];
+  if(nextIncOf(r)!=null) notes.push(`${fmtEur(nextAmt)} here = ${nextIncTxt(r)}, after withholding`);
   if(r.tax>=.05) notes.push(`withholding you can't credit takes ${pp(r.tax)} of the ${pp(r.y||0)} % yield`);
   if(r.why&&r.why.length) notes.push('mix: '+r.why.join(', '));
   if(b) notes.push(`${esc(b.nm)} bond fund ${pp(b.y)} %`);
@@ -2334,6 +2425,121 @@ function nextSecHtml(kind,id,sym){
     <p><b class="num">≈ ${pp(r.adj)} % a year</b>: ${erParts(r)} %, over ${NX.years} years, before German tax.</p>
     <p>${st}</p><p class="hint">${notes.join(' · ')}.</p></div>`;
 }
+// ---------- Income view (v3.6.0) ----------
+// Forward dividend income of the depot in € a year. Stocks: trailing dividend per share (divTTM in prices.json, the
+// same last-N-payments sum the yield uses) × shares on the statement × today's rate. Funds and bonds: trailing yield ×
+// value. Then minus the withholding you can't credit (LEAK), then German tax above the Sparer-Pauschbetrag.
+// Everything private stays in this browser: statement (radar.depot.v1), buy prices (radar.cost.v1), statement
+// history (radar.depotHist.v1) and the Pauschbetrag (radar.income.v1). Nothing of it goes into portfolio.json.
+const LS_INC='radar.income.v1', LS_DHIST='radar.depotHist.v1';
+const INC={tax:26.375, single:1000, joint:2000, tfFund:.30, hist:12};
+// Foreign withholding Germany credits against its own tax (the part it doesn't credit is in LEAK). Below the
+// Pauschbetrag there is no German tax to credit it against, so there it is a cost too.
+const CRED={FR:.128,GB:0,DE:0};
+const credOf=cc=>!cc?0:cc in CRED?CRED[cc]:.15;
+let incSet={pausch:INC.single}; try{ const v=JSON.parse(localStorage.getItem(LS_INC)); if(v&&v.pausch>=0) incSet=v; }catch{}
+let dhist=[]; try{ const v=JSON.parse(localStorage.getItem(LS_DHIST)); if(Array.isArray(v)) dhist=v; }catch{}
+const saveHist=()=>{ try{ localStorage.setItem(LS_DHIST,JSON.stringify(dhist)); }catch{} };
+// trailing dividend per share in the listing currency; 0 = pays nothing (or accumulates); null = no quote
+function dpsOf(h){ const x=px(h), q=quoteOf(x), c=curOf(x); if(!q) return null; const cur=curOfI(x);
+  if(q.divTTM>0) return {v:q.divTTM,cur};
+  if(q.yieldTTM>0&&c>0) return {v:c*q.yieldTTM/100,cur};
+  return {v:0,cur}; }
+// per holding in the statement: € a year gross, withholding lost and credited, yield on cost
+function incRows(){
+  return holdings().filter(h=>posOf_(h)).map(h=>{
+    const p=posOf_(h), fund=isFund(h), x=px(h), d=dpsOf(h), v=valueOf(h), y=yldOf(x);
+    const cc=fund?null:ccOf(h.isin,hSym(h)), dE=d?eurOf(d.v,d.cur):null;
+    let eur=null;
+    if(fund) eur=y!=null&&v?v.eur*y/100:d&&d.v===0?0:null;
+    else if(dE!=null) eur=p.shares*dE;
+    const leak=fund?0:leakOf(cc), cred=fund?0:credOf(cc), cost=costOf(h);
+    return {h,fund,cc,eur,leak,cred,leakEur:eur!=null?eur*leak:null,credEur:eur!=null?eur*cred:null,y,
+      yoc:cost&&dE>0?dE/cost*100:null,
+      taxable:eur==null?null:fund&&h.kind!=='bond'?eur*(1-INC.tfFund):eur}; });   // equity funds: 30 % Teilfreistellung
+}
+function incomeOf(){
+  if(!depot) return null;
+  const all=incRows(), R=all.filter(r=>r.eur>0).sort((a,b)=>b.eur-a.eur);
+  const S=k=>R.reduce((s,r)=>s+(r[k]||0),0);
+  const G=S('eur'), L=S('leakEur'), F=S('credEur'), taxable=S('taxable'), P=Number(incSet.pausch)||0;
+  const T0=INC.tax/100*Math.max(0,taxable-P);
+  const tax=Math.max(F,T0);   // credited foreign tax is part of the German 26,375 %; below the allowance it is lost
+  return {R,zero:all.filter(r=>r.eur===0),miss:all.filter(r=>r.eur==null),G,L,F,taxable,P,T0,tax,net1:G-L,net2:G-L-tax,T:depotTotal()};
+}
+// statement history: one entry per statement date (asOf), shares per ISIN plus the dividend per share at import,
+// so a later import can split income growth into raises and new money. Last INC.hist imports.
+function histAdd(dep){ if(!dep||!dep.pos) return;
+  const pos={}; for(const [isin,p] of Object.entries(dep.pos)){ const h=holdings().find(x=>x.isin===isin), d=h?dpsOf(h):null;
+    pos[isin]={shares:p.shares,...(d?{dps:d.v,cur:d.cur}:{})}; }
+  dhist=dhist.filter(e=>e.asOf!==dep.asOf); dhist.push({asOf:dep.asOf,at:now(),pos});
+  dhist.sort((a,b)=>a.asOf.localeCompare(b.asOf)); dhist=dhist.slice(-INC.hist); saveHist(); }
+// the current statement's entry: add it if missing (statements imported before v3.6.0), fill in dividends once prices are there
+function histSync(){ if(!depot) return; const e=dhist.find(x=>x.asOf===depot.asOf);
+  if(!e){ histAdd(depot); return; }
+  let ch=0; for(const [isin,o] of Object.entries(e.pos)) if(o.dps==null){ const h=holdings().find(x=>x.isin===isin), d=h?dpsOf(h):null; if(d){ o.dps=d.v; o.cur=d.cur; ch++; } }
+  if(ch) saveHist(); }
+// income change from an older statement to now, at today's exchange rates (so currency moves don't count):
+// raises = old shares × change in dividend per share; new money = change in shares × today's dividend per share
+function incChange(a){
+  let before=0, raise=0, newm=0; const H=holdings();
+  for(const isin of new Set([...Object.keys(a.pos),...Object.keys(depot.pos)])){
+    const h=H.find(x=>x.isin===isin); if(!h) continue;
+    const d=dpsOf(h); if(!d) continue; const e1=eurOf(d.v,d.cur); if(e1==null) continue;
+    const o=a.pos[isin], s0=o?o.shares:0, s1=depot.pos[isin]?depot.pos[isin].shares:0;
+    const e0=o&&o.dps!=null&&o.cur===d.cur?eurOf(o.dps,d.cur):e1;
+    before+=s0*e0; raise+=s0*(e1-e0); newm+=(s1-s0)*e1; }
+  return {from:a.asOf,before,raise,newm,total:raise+newm};
+}
+const sgnEur=v=>`${v>=0.5?'+':v<=-0.5?'−':'±'}${fmtEur(Math.abs(v))}`;
+function chgLine(c,lbl){ const pct=c.before>0?c.total/c.before*100:null;
+  return `<p><b>${sgnEur(c.total)} a year</b>${pct!=null?` (${fmtPct(pct,1)})`:''} ${lbl} ${fmtDate(c.from)}: raises ${sgnEur(c.raise)}, new money ${sgnEur(c.newm)}.</p>`; }
+function renderIncome(){
+  const box=$('#incBox'); if(!box) return;
+  histSync();
+  const I=incomeOf(), list=document.createElement('div');
+  if(!I){
+    // without a statement: yields only
+    const rows=holdings().filter(h=>hSym(h)).map(h=>{ const x=px(h), y=yldOf(x), cc=isFund(h)?null:ccOf(h.isin,hSym(h)); return {h,x,y,net:y!=null?y*(1-(isFund(h)?0:leakOf(cc))):null}; })
+      .filter(r=>r.y>0).sort((a,b)=>b.net-a.net);
+    box.innerHTML=`<h4 class="shd">Dividend income</h4><p class="ink">The € figures need your statement on this device (import it below). Until then, the yields: today's trailing yield and what's left after withholding you can't credit.</p>`;
+    list.appendChild(groupEl('Yield, after withholding',rows.map(r=>rowEl({tc:'var(--t-none)',tile:fmtN(r.net,1),txt:true,tk:r.h.short||r.h.symbol,nm:r.h.name,
+      line2:r.net<r.y-.005?`${fmtN(r.net,2)} % after withholding`:'no withholding lost',px:{main:fmtN(r.y,2)+' %',sub:'yield'},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),'No yields yet.','inc.list'));
+    box.appendChild(list); return; }
+  const pb=I.P, mo=v=>fmtEur(v/12);
+  const lost=I.R.filter(r=>r.leakEur>=.5).map(r=>r.cc).filter((c,k,a)=>a.indexOf(c)===k);
+  const cur=dhist.find(e=>e.asOf===depot.asOf), older=dhist.filter(e=>e.asOf<depot.asOf);
+  const prev=older[older.length-1], first=older[0];
+  const gr=!prev?`<p>Import your next statement to see growth: how much came from dividend raises and how much from new money.</p>`
+    :chgLine(incChange(prev),'since your statement of')+(first&&first!==prev?chgLine(incChange(first),'since your first stored statement,'):'');
+  box.innerHTML=`<h4 class="shd">Dividend income a year</h4>
+    <div class="c2box num">
+      <div title="Trailing dividends × your shares, at today's exchange rates"><span>Gross</span><b>${fmtEur(I.G)}</b><span>${mo(I.G)} a month</span></div>
+      <div title="Minus withholding tax Germany doesn't credit (Italy 11 %, Canada 10 %, Japan 0,3 % … of the gross)"><span>After withholding</span><b>${fmtEur(I.net1)}</b><span>${I.L>=.5?`− ${fmtEur(I.L)} lost`:'nothing lost'}</span></div>
+      <div title="26,375 % on everything above your Sparer-Pauschbetrag; equity funds 30 % tax-free (Teilfreistellung). Credited foreign tax is part of it."><span>After German tax</span><b>${fmtEur(I.net2)}</b><span>${mo(I.net2)} a month</span></div>
+    </div>
+    <p class="ink">${I.T?`<b>${fmtN(I.G/I.T*100,2)} %</b> of the depot, gross. `:''}${I.L>=.5?`Withholding you can't credit: ${fmtEur(I.L)} (${lost.join(', ')}). `:''}German tax ≈ <b>${fmtEur(I.tax)}</b>: 26,375 % on ${fmtEur(Math.max(0,I.taxable-pb))} above your ${fmtEur(pb)}${I.F>I.T0+.5?`; the ${fmtEur(I.F)} US/NL/FR… withholding is more than that, and below the Pauschbetrag Germany can't credit it, so it counts in full`:''}.</p>
+    <div class="incpb"><span class="lb">Sparer-Pauschbetrag</span>
+      <button type="button" class="chip ${pb===INC.single?'on':''}" data-pb="${INC.single}">${fmtEur(INC.single)} single</button>
+      <button type="button" class="chip ${pb===INC.joint?'on':''}" data-pb="${INC.joint}">${fmtEur(INC.joint)} joint</button>
+      <span class="sp"></span><input id="incPb" type="number" min="0" step="1" inputmode="numeric" value="${pb}" title="What's left of it for Trade Republic, if part of it sits with another bank"> €</div>
+    <div class="incgr">${gr}</div>`;
+  const tile=r=>I.G>0?fmtN(r.eur/I.G*100,0)+' %':'–';
+  const line2=r=>{ const b=[]; if(r.yoc!=null) b.push(`${fmtN(r.yoc,1)} % on your cost`); if(r.y!=null) b.push(`yield ${fmtN(r.y,1)} %`); if(r.leakEur>=.5) b.push(`<span class="dn">−${fmtEur(r.leakEur)} ${esc(r.cc)} tax lost</span>`); return b.join(' · ')||(r.fund?(r.h.kind==='bond'?'bond fund':'fund'):''); };
+  list.appendChild(groupEl('Who pays it · share of your income',I.R.map(r=>rowEl({tc:'var(--teal)',tile:tile(r),txt:true,tk:r.h.short||r.h.symbol,nm:r.h.name,line2:line2(r),
+    px:{main:fmtEur(r.eur),sub:'a year'},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),'No dividends found.','inc.list'));
+  box.appendChild(list);
+  const nm=a=>a.map(r=>esc(r.h.short||r.h.symbol||r.h.name)).join(', ');
+  const tail=[I.zero.length?`Pays nothing (or reinvests): ${nm(I.zero)}.`:'',I.miss.length?`No dividend data yet: ${nm(I.miss)}.`:''].filter(Boolean).join(' ');
+  if(tail){ const p=document.createElement('p'); p.className='hint'; p.innerHTML=tail; box.appendChild(p); }
+  const p2=document.createElement('p'); p2.className='hint';
+  p2.textContent='Forward = the last 12 months of dividends per share (the same payments as the yield) × your shares × today\'s rates. Before church tax; the Vorabpauschale on accumulating funds is not included. Tap a stock for its details.';
+  box.appendChild(p2);
+  box.querySelectorAll('[data-pb]').forEach(b=>b.onclick=()=>setPausch(Number(b.dataset.pb)));
+  $('#incPb').onchange=e=>{ const v=Number(e.target.value); if(!(v>=0&&v<1e6)){ e.target.value=pb; return; } setPausch(Math.round(v)); };
+}
+function setPausch(v){ incSet={...incSet,pausch:v}; try{ localStorage.setItem(LS_INC,JSON.stringify(incSet)); }catch{} renderIncome(); renderToday(); }
+$('#btnMenu').addEventListener('click',()=>renderIncome());
 // ---------- Today strip (v3.5.0) ----------
 // One line under the header on every tab with what needs you today, ideas and holdings together.
 // Each part is tappable: it jumps to its group when all of it sits on one tab, otherwise it shows a
@@ -2369,12 +2575,14 @@ function renderToday(){
   const parts=TODAY.filter(p=>p.k==='level'||D[p.k].length).map(p=>{ const n=D[p.k].length;
     const cls=[p.k==='level'?'lvl':'',p.k==='level'&&!n?'zero':'',p.k==='due'||p.k==='stale'?'warn':'',focus===p.k?'on':''].join(' ');
     return `<button type="button" data-k="${p.k}" class="${cls}" title="${p.title}"><b>${n}</b> ${n===1?p.one:p.many}</button>`; });
+  { const I=incomeOf(); parts.push(`<button type="button" class="inc" data-k="inc" title="Dividend income a year from your depot. Tap for the details.">${I?`<b>${fmtEur(I.G)}</b> income`:'income'}</button>`); }
   if(prices.updated){ const old=pxStaleH(); parts.push(`<button type="button" class="px ${old?'old':''}" data-k="px" title="Age of the last price change. Tap for details.">prices ${agoShort(prices.updated)}</button>`); }
   el.innerHTML=parts.join('');
   el.querySelectorAll('button').forEach(b=>b.onclick=()=>todayTap(b.dataset.k));
 }
 function todayTap(k){
   if(k==='px'){ $('#btnMenu').click(); return; }
+  if(k==='inc'){ $('#btnMenu').click(); requestAnimationFrame(()=>$('#incBox').scrollIntoView({block:'start'})); return; }
   if(focus===k){ focus=null; render(); return; }
   const L=(todayCache||todayData())[k]||[];
   if(k==='level'&&!L.length){ switchView('next'); return; }
@@ -2401,14 +2609,14 @@ function renderPort(){
   $('#pAsOf').textContent=depot?`Statement of ${fmtDate(depot.asOf)}; share counts and buy prices stay on this device.`:'Share counts and buy prices stay on this device.';
   const S=rows.filter(r=>r.inDepot);
   const addZ=S.filter(r=>r.s&&r.s.zone), close=S.filter(r=>r.s&&!r.s.full&&!r.s.zone&&r.s.score>=55&&addOf(r.h)), full=S.filter(r=>r.s&&r.s.full);
-  const withV=S.filter(r=>r.v), divEur=withV.reduce((a,r)=>a+(r.y!=null?r.v.eur*r.y/100:0),0);
+  const withV=S.filter(r=>r.v);
   const anyLive=withV.some(r=>r.v.live);
+  // v3.6.0: the dividend estimate that sat here is now the Income view on top of this section
   $('#pStrip').innerHTML=`
     <div><b class="num">${T!=null?fmtEur(T):'—'}</b>${T!=null?(anyLive?'depot, at live prices':'depot, statement values'):'no statement yet'}</div>
     <div class="t" style="--tc:var(--t-buy)"><b class="num">${addZ.length}</b>in the add zone</div>
     <div class="t" style="--tc:var(--t-close)"><b class="num">${close.length}</b>getting close</div>
-    <div><b class="num">${full.length}</b>full (above ${fmtN(capDefault(),1)} %)</div>
-    ${T?`<div><b class="num">${fmtEur(divEur)}</b>dividends a year (${fmtN(divEur/T*100,2)} %), before tax</div>`:''}`;
+    <div><b class="num">${full.length}</b>full (above ${fmtN(capDefault(),1)} %)</div>`;
   body.innerHTML='';
   if(!rows.length){ body.innerHTML=`<div class="empty"><b>No holdings yet</b>Open ⋯ and tap "Update from Trade Republic PDF". Share counts stay on this device.</div>`; return; }
   const by=a=>a.sort((p,q)=>((q.s?.score??-1)-(p.s?.score??-1))||((q.s?.raw??-1)-(p.s?.raw??-1))||((q.w??0)-(p.w??0)));
@@ -2587,6 +2795,7 @@ $('#pdfIn').onchange=async e=>{
   if(!isins.length){ toast('No positions found. Is it the Vermögensübersicht?'); return; }
   depot={asOf:r.asOf||today(),importedAt:now(),cash:r.cash,brokerage:r.brokerage,pos:r.pos};
   try{ localStorage.setItem(LS_DEPOT,JSON.stringify(depot)); }catch{}
+  histAdd(depot);   // v3.6.0: keep the last 12 statements for income growth
   let added=0;
   for(const isin of isins) if(!holdings().some(h=>h.isin===isin)){
     const nm=r.pos[isin].name, b=nm.match(/Bond|Anleihe|Corp Bond|Treasury/i);
@@ -2600,8 +2809,8 @@ $('#pdfIn').onchange=async e=>{
   switchView('port');
   toast(`${isins.length} positions as of ${fmtDate(depot.asOf)}${added?`, ${added} new (set their symbol)`:''}${ok?'':' – totals do not add up, check'}`);
 };
-$('#btnDepotForget').onclick=()=>{ if(!confirm('Remove the imported share counts from this browser?')) return;
-  depot=null; try{ localStorage.removeItem(LS_DEPOT); }catch{} renderDepotStatus(); render(); toast('Statement removed from this device'); };
+$('#btnDepotForget').onclick=()=>{ if(!confirm('Remove the imported share counts, and the statement history behind the income growth, from this browser?')) return;
+  depot=null; dhist=[]; try{ localStorage.removeItem(LS_DEPOT); localStorage.removeItem(LS_DHIST); }catch{} renderDepotStatus(); renderIncome(); render(); toast('Statement removed from this device'); };
 function renderDepotStatus(){ $('#depotStatus').textContent=depot?`Statement of ${fmtDate(depot.asOf)}, ${Object.keys(depot.pos).length} positions, imported ${ago(depot.importedAt)}. Stored only in this browser, never synced.`:'No statement on this device yet. Import the Vermögensübersicht PDF; share counts stay in this browser.'; }
 $('#btnMenu').addEventListener('click',renderDepotStatus);
 
