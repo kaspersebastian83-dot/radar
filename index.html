@@ -574,6 +574,7 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .xrb u{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px}
 .xw{font-size:11.5px;color:var(--mute);line-height:1.35}
 #xrayBox{margin:0 0 16px}#xrayBox .ink{font-size:12.5px;color:var(--ink2);margin:0 0 10px;line-height:1.45}#xrayBox .ink b{color:var(--ink)}
+.bnsum{background:var(--panel2);border-radius:var(--r2);padding:10px 12px;margin:0 0 10px;font-size:13.5px;color:var(--ink2)}.bnsum b{color:var(--ink)}
 .xrsec{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;margin:0 0 10px}
 .xrsec h5{margin:0 0 2px;font-size:13.5px;font-weight:700}.xrsec .xv{margin:0 0 10px;font-size:12.5px;color:var(--ink2);line-height:1.45}.xrsec .xv b{color:var(--ink)}
 .xrsec .hint{margin:6px 0 0}.xrsec .rmore{display:block;width:100%;margin:2px 0 0;padding:8px 0 2px}
@@ -788,6 +789,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
     <div class="inc" id="incBox"></div>
     <div class="inc" id="leakBox"></div>
     <div class="inc" id="xrayBox"></div>
+    <div class="inc" id="benchBox"></div>
     <div class="pstrip" id="pStrip"></div>
     <p class="hint" id="depotStatus">No statement imported on this device.</p>
     <div class="row">
@@ -840,8 +842,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='3.10.0';
+const VERSION='3.11.0';
 const CHANGELOG=[
+  {v:'3.11.0',d:'2026-11-09',t:'Your picks vs EUNL',items:[
+    'Each holding\'s sheet has a new section "Against your world ETF (EUNL)": how the stock did since you bought it, how EUNL did over exactly the same time, and how many points it is ahead or behind.',
+    'In ⋯ → Portfolio, under the x-ray: "Your picks vs EUNL", with how many of your picks are ahead, the average, and (with your statement and buy prices) what the money you put in would be worth in EUNL instead. Below it every holding, best first; tap one for its sheet.',
+    'Both sides are in €, with dividends reinvested, from the same date to today, so it compares the stock, not your timing.',
+    'It needs a "Bought around" date. That field now shows for every holding, not only foreign ones, and stays on this device like your buy price. For several purchases take a date roughly in the middle.',
+    'The prices update now also keeps 15 years of month-end prices for every stock (history.json), refreshed once a month.',
+    'Information only: scores, tiers and Next € are unchanged.']},
   {v:'3.10.0',d:'2026-11-09',t:'Where the money could come from',items:[
     'New group at the bottom of Next €: "Lowest expected return in your depot", the three holdings that would be the obvious place to take money from.',
     'Each row shows the gain against your buy price and the tax selling would cost (26,375 % of the gain, with Soli), in € once your statement is on the device.',
@@ -2152,10 +2161,11 @@ async function repoJson(name){
   return j;
 }
 async function loadPrices(){
-  const [j,f]=await Promise.all([repoJson('prices.json'),repoJson('fundamentals.json')]);
+  const [j,f,hj]=await Promise.all([repoJson('prices.json'),repoJson('fundamentals.json'),repoJson('history.json')]);
   let ch=false;
   if(j&&j.quotes){ prices=j; ch=true; try{ localStorage.setItem(LS_PRICES,JSON.stringify(j)); }catch{} }
   if(f&&f.companies&&f.updated!==fund.updated){ fund=f; bizCache.clear(); ch=true; try{ localStorage.setItem(LS_FUND,JSON.stringify(f)); }catch{} }
+  if(hj&&hj.series&&(!hist||hj.updated!==hist.updated)){ hist=hj; ch=true; try{ localStorage.setItem(LS_HIST,JSON.stringify(hj)); }catch{} }
   if(ch) render();
 }
 $('#btnPxRefresh').onclick=async()=>{
@@ -2798,7 +2808,7 @@ function chgLine(c,lbl){ const pct=c.before>0?c.total/c.before*100:null;
   return `<p><b>${sgnEur(c.total)} a year</b>${pct!=null?` (${fmtPct(pct,1)})`:''} ${lbl} ${fmtDate(c.from)}: raises ${sgnEur(c.raise)}, new money ${sgnEur(c.newm)}.</p>`; }
 function renderIncome(){
   const box=$('#incBox'); if(!box) return;
-  histSync(); renderLeak(); renderXray();
+  histSync(); renderLeak(); renderXray(); renderBench();
   const I=incomeOf(), list=document.createElement('div');
   if(!I){
     // without a statement: yields only
@@ -2985,6 +2995,89 @@ function renderXray(){
     ${xrSec('top','Biggest stocks',tV,top,g=>g.cap??null,'The tick on each bar is that stock\'s max weight (from its stars, or your own).',true)}`;
   box.querySelectorAll('[data-xf]').forEach(b=>b.onclick=()=>{ const k='xr.'+b.dataset.xf; folds={...folds,[k]:!folds[k]}; try{ localStorage.setItem(LS_FOLD,JSON.stringify(folds)); }catch{} renderXray(); });
 }
+// ---------- Benchmark vs EUNL (v3.11.0) ----------
+// history.json (prices Action): month-end close (px) and adjusted close (tr = dividends reinvested, gross) per symbol,
+// and month-end EUR rates. Each holding with a "Bought around" date is compared with EUNL over the same dates, in €:
+//   stock: tr(today) / tr(bought) × fx(bought) / fx(today)   ·   EUNL: the same with its own series (in €, accumulating)
+// Values between month-ends are interpolated by day; today's value = last month-end × live price / that month's close.
+// Same dates and same money for both legs, so it tests the pick, not your timing. Your real return from your buy
+// price stays in Position. Information only: nothing here feeds a score or a ranking.
+const LS_HIST='radar.hist.v1';
+let hist=null; try{ const v=JSON.parse(localStorage.getItem(LS_HIST)); if(v&&v.series) hist=v; }catch{}
+const BENCH={sym:'EUNL.DE', short:'EUNL', name:'iShares Core MSCI World', show:5};
+const ymEnd=(ym,k)=>{ const y=+ym.slice(0,4), m=+ym.slice(5)-1+k; return new Date(Date.UTC(y+Math.floor(m/12),((m%12)+12)%12+1,0)); };   // last day of month (from + k)
+const dayMs=864e5;
+// value of a monthly series at a date, interpolated; nowV = today's value (or null)
+function serVal(from,arr,date,nowV){
+  if(!from||!arr||!arr.length) return null;
+  const t=Date.parse(date+'T12:00:00Z'), pts=[];
+  arr.forEach((v,k)=>{ if(v!=null) pts.push([ymEnd(from,k).getTime(),v]); });
+  if(nowV!=null) pts.push([Date.now(),nowV]);
+  if(!pts.length||t<pts[0][0]-31*dayMs) return null;      // before the history starts
+  if(t<=pts[0][0]) return pts[0][1];
+  for(let k=1;k<pts.length;k++) if(t<=pts[k][0]){ const [a,va]=pts[k-1],[b,vb]=pts[k]; return va+(vb-va)*(t-a)/(b-a); }
+  return pts[pts.length-1][1]; }
+// a symbol's total-return value in € at a date (null if missing)
+function trNow(sym){ const S=hist&&hist.series[sym], q=prices.quotes&&prices.quotes[sym]; if(!S) return null;
+  const i=S.px.length-1; return q&&q.price>0&&S.px[i]>0&&S.tr[i]>0?S.tr[i]*q.price/S.px[i]:S.tr[i]; }
+function fxSer(cur,date){ const [c]=fxCode(cur); if(!c||c==='EUR') return 1; const F=hist&&hist.fx[c]; const now=(prices.fx||{})[c]||null;
+  return date?serVal(F&&F.from,F&&F.v,date,now):now; }
+function trEur(sym,date){ const S=hist&&hist.series[sym]; if(!S) return null;
+  const v=date?serVal(S.from,S.tr,date,trNow(sym)):trNow(sym), f=fxSer(S.cur,date);
+  return v!=null&&f?v/f:null; }
+// buy date: "Bought around" on this device, else the linked Radar card's bought date
+const benchDate=h=>costDateOf(h)||ideaOf(h)?.boughtDate||null;
+function benchOf(h){
+  const sym=hSym(h), d=benchDate(h); if(!sym||sym===BENCH.sym||h.kind==='bond') return null;
+  if(!d) return {nodate:true};
+  if(!hist) return {nodata:true,d};
+  if(!hist.series[sym]) return {nosym:true,d};
+  const s0=trEur(sym,d), s1=trEur(sym,null), b0=trEur(BENCH.sym,d), b1=trEur(BENCH.sym,null);
+  if(!(s0>0&&s1>0&&b0>0&&b1>0)) return {before:true,d,from:hist.series[sym].from};
+  const days=(Date.now()-Date.parse(d+'T12:00:00Z'))/dayMs, yrs=days/365.25;
+  const rs=s1/s0, rb=b1/b0, ann=r=>yrs>=1?(Math.pow(r,1/yrs)-1)*100:null;
+  return {d,yrs,s:(rs-1)*100,b:(rb-1)*100,gap:(rs-rb)*100,sA:ann(rs),bA:ann(rb),rs,rb}; }
+const sinceTxt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',{month:'short',year:'numeric'});
+const heldTxt=y=>y<1?`${Math.max(1,Math.round(y*12))} mo`:y<2?`${Math.round(y*12)} mo`:`${fmtN(y,1)} yrs`;
+const BENCH_NOTE=`In €, dividends reinvested before tax (Yahoo's adjusted prices), both from the same date to today, so it tests the pick, not your timing. EUNL reinvests inside the fund. Your actual return from your buy price is in Position.`;
+// holding sheet section
+function benchSecHtml(h){
+  const o=benchOf(h); if(!o) return '';
+  const tk=esc(h.short||h.symbol);
+  let body;
+  if(o.nodate) body=`<p class="none">Set "Bought around" in the settings below to see how ${tk} did against ${BENCH.short}, your world ETF, since you bought it.</p>`;
+  else if(o.nodata) body=`<p class="none">The price history isn't loaded yet. It comes with the next price update.</p>`;
+  else if(o.nosym) body=`<p class="none">No price history for ${esc(hSym(h))} yet; the next price update adds it.</p>`;
+  else if(o.before) body=`<p class="none">${fmtDate(o.d)} is before the price history starts (${esc(o.from||'')}).</p>`;
+  else body=`<div class="kpis">
+      <div class="kpi"><b class="num ${o.s>=0?'up':'dn'}">${fmtPct(o.s,0)}</b><span>${tk} since ${sinceTxt(o.d)}${o.sA!=null?`, ${fmtPct(o.sA,1)} a year`:''}</span></div>
+      <div class="kpi"><b class="num ${o.b>=0?'up':'dn'}">${fmtPct(o.b,0)}</b><span>${BENCH.short} over the same ${heldTxt(o.yrs)}${o.bA!=null?`, ${fmtPct(o.bA,1)} a year`:''}</span></div>
+      <div class="kpi"><b class="num ${o.gap>=0?'up':'dn'}">${o.gap>=0?'+':'−'}${fmtN(Math.abs(o.gap),0)} pp</b><span>${o.gap>=0?'ahead of':'behind'} the world ETF</span></div></div>
+    <p class="hint">${BENCH_NOTE}${costDateOf(h)?'':` Start date from the Radar card's bought date.`}</p>`;
+  return `<div class="sec bench"><h4>Against your world ETF (${BENCH.short})</h4>${body}</div>`; }
+// ⋯ → Portfolio block
+function renderBench(){
+  const box=$('#benchBox'); if(!box) return; box.innerHTML='';
+  const H=holdings().filter(h=>hSym(h)&&hSym(h)!==BENCH.sym&&h.kind!=='bond'&&(!depot||posOf_(h)));
+  const rows=H.map(h=>({h,o:benchOf(h)})).filter(r=>r.o);
+  const ok=rows.filter(r=>r.o.gap!=null).sort((a,b)=>b.o.gap-a.o.gap), nod=rows.filter(r=>r.o.nodate);
+  if(!hist){ box.innerHTML=`<h4 class="shd">Your picks vs ${BENCH.short}</h4><p class="ink">The price history isn't loaded yet. It comes with the next price update.</p>`; return; }
+  let sum='';
+  if(ok.length){
+    const beat=ok.filter(r=>r.o.gap>0).length, avgS=ok.reduce((a,r)=>a+r.o.s,0)/ok.length, avgB=ok.reduce((a,r)=>a+r.o.b,0)/ok.length;
+    // on the money you put in: needs shares (statement) and buy price for every compared holding
+    const mw=ok.every(r=>posOf_(r.h)&&costOf(r.h))?ok.reduce((a,r)=>{ const inv=posOf_(r.h).shares*costOf(r.h); return {inv:a.inv+inv,s:a.s+inv*r.o.rs,b:a.b+inv*r.o.rb}; },{inv:0,s:0,b:0}):null;
+    sum=`<div class="bnsum"><b>${beat} of ${ok.length}</b> ${ok.length===1?'holding is':'holdings are'} ahead of ${BENCH.short} since you bought ${ok.length===1?'it':'them'}. On average <b>${fmtPct(avgS,0)}</b> vs <b>${fmtPct(avgB,0)}</b> for ${BENCH.short} over the same dates${mw?`. On the money you put in (about ${fmtEur(mw.inv)}): your picks ≈ <b>${fmtEur(mw.s)}</b> today, ${BENCH.short} would be ≈ <b>${fmtEur(mw.b)}</b>, ${mw.s>=mw.b?`<span class="up">${fmtEur(mw.s-mw.b)} ahead</span>`:`<span class="dn">${fmtEur(mw.b-mw.s)} behind</span>`}`:''}.</div>`; }
+  box.innerHTML=`<h4 class="shd">Your picks vs ${BENCH.short}</h4>
+    <p class="ink">Each holding against your world ETF since you bought it: the honest test of picking single stocks.</p>${sum}`;
+  if(ok.length){ const tk=r=>esc(r.h.short||r.h.symbol);
+    box.appendChild(groupEl(`Since you bought · vs ${BENCH.short}`,ok.map(r=>rowEl({tc:r.o.gap>=0?'var(--t-buy)':'var(--t-exp)',tile:`${r.o.gap>=0?'+':'−'}${fmtN(Math.abs(r.o.gap),0)}`,tk:r.h.short||r.h.symbol,nm:r.h.name,
+      line2:`<span class="${r.o.s>=0?'up':'dn'}">${fmtPct(r.o.s,0)}</span> vs ${BENCH.short} <span class="${r.o.b>=0?'up':'dn'}">${fmtPct(r.o.b,0)}</span>`,
+      line3:r.o.sA!=null?`${fmtPct(r.o.sA,1)} vs ${fmtPct(r.o.bA,1)} a year`:'',px:{main:heldTxt(r.o.yrs),sub:'since '+sinceTxt(r.o.d)},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),null,'bench.list')); }
+  const tail=document.createElement('div');
+  tail.innerHTML=`${nod.length?`<p class="hint">No buy date yet: ${nod.map(r=>esc(r.h.short||r.h.symbol)).join(', ')}. Set "Bought around" in a holding's settings to add it; for several purchases take a date roughly in the middle.</p>`:''}
+    <p class="hint">Tile = points ahead (green) or behind (red). ${BENCH_NOTE} Withholding and German tax on the stocks' dividends are not taken off, so dividend payers look a little better here than they are.</p>`;
+  box.appendChild(tail); }
 // ---------- Today strip (v3.5.0) ----------
 // One line under the header on every tab with what needs you today, ideas and holdings together.
 // Each part is tappable: it jumps to its group when all of it sits on one tab, otherwise it shows a
@@ -3118,6 +3211,7 @@ function openHold(id){
       ${v&&y!=null?`<div class="kpi"><b class="num">${fmtEur(v.eur*y/100)}</b><span>dividends a year, gross</span></div>`:''}
       ${ir&&ir.eur>0&&LEAK[hcc]>0?`<div class="kpi"><b class="num ${ir.lostEur>=.5?'dn':''}">${eurW(ir.lostEur)}</b><span>a year lost to ${esc(hcc)} withholding</span></div>${backOf(hcc)>0?`<div class="kpi"><b class="num ${ir.rec?'up':'dn'}">${eurW(ir.backEur+ir.recEur)}</b><span>${ir.rec?'a year back through your reclaim':'a year to reclaim, lost if you don\'t file'}</span></div>`:''}`:''}
     </div></div>
+    ${benchSecHtml(h)}
     ${!fund&&hSym(h)&&!flagFirst?bizHtml(hSym(h),h,'hold'):''}
     ${hi?`<div class="sec"><h4>Yield vs. its own history</h4>
       <p><span class="vtag ${hi.v}">${hi.label}</span>&nbsp; Today's yield is ${fmtN(Math.abs(hi.dev),0)} % ${hi.dev>=0?'above':'below'} its ${fmtN(hi.yrs,1)}-year average of ${fmtN(hi.avg,2)} %. ${hi.v==='cheap'?'The stock yields more than usual, so it is priced lower than usual relative to its dividend.':hi.v==='expensive'?'The stock yields less than usual, so you pay more than usual for each euro of dividend.':'The stock is priced about where it usually is relative to its dividend.'}</p>
@@ -3136,7 +3230,7 @@ function openHold(id){
     <div class="sec"><h4>Settings for this holding</h4>
     <div class="form">
       <label>Average buy price (EUR)<input id="h_cost" type="number" step="any" inputmode="decimal" value="${costOf(h)??''}" placeholder="as in Trade Republic"></label>
-      ${!fund&&fxCode(cur)[0]&&fxCode(cur)[0]!=='EUR'?`<label>Bought around<input id="h_costDate" type="date" value="${esc(costDateOf(h)||'')}" max="${today()}"></label>`:''}
+      ${h.kind!=='bond'?`<label>Bought around<input id="h_costDate" type="date" value="${esc(costDateOf(h)||'')}" max="${today()}"></label>`:''}
       <label>Add below (${esc(cur||'price')})<input id="h_addBelow" type="number" step="any" inputmode="decimal" value="${h.addBelow??''}" placeholder="${a&&a.src==='radar'?'Radar: '+a.v:''}"></label>
       <label>2nd add level<input id="h_addBelow2" type="number" step="any" inputmode="decimal" value="${h.addBelow2??''}" placeholder="optional, buy more"></label>
       <label>Conviction<select id="h_conv"><option value="">${idea&&idea.conviction?`from Radar card (${idea.conviction}★)`:'not set (3★)'}</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(h.conviction)===n?'selected':''}>${'★'.repeat(n)} → max ${fmtN(Math.max(1,capDefault()+(n-3)*CONV_STEP),1)} %</option>`).join('')}</select></label>
@@ -3157,7 +3251,7 @@ function openHold(id){
       <label class="w4">Note<textarea id="h_note">${esc(h.note)}</textarea></label>
       ${fund?'':`<div class="w4">${valForm('hv_',h.val,cur)}${!h.val&&valOfH(h)?'<p class="hint">Empty here means the valuation on the Radar card is used.</p>':''}</div>`}
     </div>
-    <p class="hint">The buy price and date stay in this browser, like your share counts. For several purchases, take a date roughly in the middle: it only splits your € return into the stock's own move and the currency's. Everything else is saved to GitHub.</p>
+    <p class="hint">The buy price and date stay in this browser, like your share counts. For several purchases, take a date roughly in the middle: it starts the comparison with EUNL and, for foreign stocks, splits your € return into the stock's own move and the currency's. Everything else is saved to GitHub.</p>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
   const toIdea=e=>{ e&&e.preventDefault(); closeAll(); openRead(idea.id); };
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
