@@ -505,7 +505,7 @@ details.vform .form{margin-top:10px}
 body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .subbar{display:flex;align-items:center;gap:8px;padding:0 20px 10px;max-width:760px;margin:0 auto;font-size:13px;color:var(--ink2)}
 .subbar .sp{flex:1}
-#subTxt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#subTxt{min-width:0;line-height:1.3}
 #btnSort,#btnTable{padding:5px 12px;font-size:13px}
 #btnTable.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 @media(max-width:719px){#btnTable{display:none!important}}
@@ -637,6 +637,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 .grp.flash .rows{box-shadow:0 0 0 2px var(--research);transition:box-shadow .3s}
 .c2blk{display:flex;flex-direction:column;gap:8px;background:var(--panel2);border-radius:var(--r2);padding:11px 12px}
 .c2blk .bars{display:flex;flex-direction:column;gap:6px}
+.c2nolvl{font-size:13px;color:var(--ink2);line-height:1.4}.c2blk .golvl{align-self:flex-start}
 .c2lvl{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}.c2lvl b{color:var(--ink);font-weight:800}
 .c2seen{margin-top:4px;font-size:12.5px;line-height:1.4}.c2seen.far{color:var(--ochre)}.c2seen.far b{color:var(--ochre)}
 .nxsec p{margin:0 0 6px}
@@ -780,7 +781,7 @@ input[type=file]{display:none}
 .dfold>summary::-webkit-details-marker{display:none}
 .dfold>summary>span,.drow>span{flex:1;min-width:0;display:flex;flex-direction:column}
 .dfold>summary b,.drow b{font-size:17px;font-weight:600}
-.dfold>summary small,.drow small{font-size:14px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dfold>summary small,.drow small{font-size:14px;color:var(--ink2);line-height:1.3}
 .dfold>summary::after,.drow::after{content:"";flex:none;width:9px;height:9px;border-right:2.4px solid var(--mute);border-bottom:2.4px solid var(--mute);transform:rotate(-45deg);transition:transform .15s}
 .dfold[open]>summary::after{transform:rotate(45deg)}
 .drow{border-top:1px solid var(--line)}
@@ -1031,8 +1032,15 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.4.0';
+const VERSION='4.5.0';
 const CHANGELOG=[
+  {v:'4.5.0',d:'2026-11-10',t:'Clearer overview',items:[
+    'Ideas without a buy price get their own group, "Needs a buy price", at the bottom of Ideas, with a dash instead of a score. Before, they were ranked on yield and the 52-week range alone, so Symrise sat at the top of Getting close with no valuation behind it.',
+    'When nothing is at your level, the Today chip names the closest one and how far above its level it is: "0 at level · WKL +0,3 %" on Ideas, the closest holding on Portfolio.',
+    'A stock without a level now shows a "Set a buy price" (or "Set an add level") button in its sheet instead of the score maths. It takes you to the field.',
+    'An idea logged in the last month shows "new" instead of a return, unless it has already moved 5 % (same rule as the lists).',
+    'Results dates Yahoo only knows from years ago are no longer shown ("1561 days ago"). The short lines under the page titles and in the Depot tab wrap instead of being cut off.',
+  ]},
   {v:'4.4.0',d:'2026-11-10',t:'Price vs your fair value',items:[
     'At the bottom of Portfolio, a new list puts every stock you hold that has a valuation in order of how far today\'s price is from your own fair value, cheapest first. The tile shows the gap in %: green below fair value, ochre up to 20 % above, red further above.',
     'The groups above still go by your add level; this list goes by fair value, so it shows where the two disagree (a stock well below fair value but above a strict add level, or one far above fair value you may want to stop adding to). Each row also says when the valuation was made, whether it is stale, and whether its two methods are far apart. Tap a row for the holding.',
@@ -1858,8 +1866,8 @@ function render(){ applyVis(); if(focus) renderFocus(); else view==='port'?rende
 function renderSub(){
   let t;
   if(view==='port'){ const H=holdings(), T=depotTotal();
-    t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtK(T)}`:''} · ${depot?'as of '+fmtDay(depot.asOf):'no statement yet'}`; }
-  else if(view==='next') t=`ranked by discount to your fair value${depot?'':' · no statement, so no mix check'}`;
+    t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtK(T)}`:''} · ${depot?('as of '+fmtDay(depot.asOf)).replace(/ /g,'\u00a0'):'no statement yet'}`; }
+  else if(view==='next') t=`ranked by discount to fair value${depot?'':' · no statement, so no mix check'}`;
   else if(view==='depot'){ const T=depotTotal(); t=depot?`${T!=null?fmtK(T)+' · ':''}as of ${fmtDay(depot.asOf)}`:'no statement on this device yet'; }
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
     t=showTable()?'':`${n} idea${n===1?'':'s'}${st?' · '+st.label:''}`; }
@@ -1949,7 +1957,8 @@ function ideaRow(i,due){
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
   if(t&&(daysSince(t.base.date)>30||Math.abs(t.best)>=5)) bits.push(`<span class="${t.best>=0?'up':'dn'}">${fmtPct(t.best,0)}</span>`);
   const extra=(biz&&biz.red.length?FLAG:'')+qualPill(symOf(i),i)+earnPill(symOf(i))+(i.status==='bought'?'<span class="own">own</span>':i.status==='out'?`<span class="own out">${i.passed?.reason==='toohard'?'too hard':i.passed?.reason==='sold'?'sold':'passed'}</span>`:'');
-  return rowEl({tc:sc?sc.c:'var(--t-none)',tile:sc?sc.score:'–',tk:i.ticker,nm:i.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openRead(i.id)});
+  const nl=sc&&i.status!=='out'&&!(i.buyBelow>0);   // v4.5.0: no buy price → no score tile, it would rank on yield and range alone
+  return rowEl({tc:sc&&!nl?sc.c:'var(--t-none)',tile:sc&&!nl?sc.score:'–',tk:i.ticker,nm:i.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openRead(i.id)});
 }
 function renderBoard(){
   const g=$('#grid'); g.innerHTML='';
@@ -1957,7 +1966,7 @@ function renderBoard(){
   if(!ideas.length){ g.innerHTML=`<div class="empty"><b>${live().length?'Nothing in this stage':'No ideas yet'}</b>${live().length?'Pick another stage under ↕.':'Discuss a stock with Claude, then paste the card with "Import from Claude", or add one with +.'}</div>`; return; }
   if(boardSort!=='score'){ g.appendChild(groupEl(sortOf().label,ideas.map(i=>ideaRow(i,ideaState(i).due)))); return; }
   const gi=k=>ideas.filter(i=>ideaState(i).group===k);   // groups: see ideaState
-  for(const k of ['due','Buy zone','Getting close','Wait','Expensive','noprice','out']){ const l=gi(k);
+  for(const k of ['due','Buy zone','Getting close','Wait','Expensive','nolevel','noprice','out']){ const l=gi(k);
     if(l.length||k==='Buy zone') g.appendChild(groupEl(I_GROUP[k],l.map(i=>ideaRow(i,k==='due'||k==='Buy zone'&&ideaState(i).due)),k==='Buy zone'?'Nothing at your price yet.':undefined)); }
 }
 // Idea card (v2.3.0). Every fact of the old card is here once: score + tier + distance to buy in one
@@ -1980,6 +1989,7 @@ function earnPill(sym){ const e=earnOf(sym); if(!e||e.dn==null||e.dn>14) return 
   return `<span class="epill" title="Results on ${fmtDate(e.next)}">${e.dn===0?'results today':e.dn===1?'results tmrw':`results ${e.dn} d`}</span>`; }
 // line on the card: always when a date is known
 function earnLine(sym){ const e=earnOf(sym); if(!e||(!e.next&&!e.last)) return '';
+  if(!e.next&&e.dl>200) return '';   // v4.5.0: Yahoo sometimes only knows a date years back (Symrise: 2022); say nothing rather than "1561 days ago"
   const soon=e.dn!=null&&e.dn<=14, n=e.next?`Next results ${fmtDay(e.next)}${e.dn===0?', today':e.dn===1?', tomorrow':`, in ${e.dn} days`}`:'';
   const l=e.last&&(!e.next||e.dl<=30)?`${n?' · last results ':'Last results '}${fmtDay(e.last)}${n?'':e.dl===0?', today':e.dl===1?', yesterday':`, ${e.dl} days ago`}`:'';
   return `<div class="c2ern ${soon?'soon':''}">${n}${l}</div>`; }
@@ -2094,7 +2104,8 @@ const PART_W={buy:60,yld:30,rng:10};   // the normal weights (scoreOf); a missin
 const sbarsHtml=(s,lbl)=>{ const miss=['buy','yld','rng'].filter(k=>!s.parts.find(p=>p.k===k));
   return `<div class="bars">${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'no data'}</b></div>`;}).join('')}</div>`
    +(miss.length&&s.parts.length?`<p class="sbnote">No data for ${miss.map(k=>lbl[k]).join(' and ')}, so ${miss.length>1?'their':'its'} ${miss.reduce((t,k)=>t+PART_W[k],0)} points are shared out: the others count for ${s.parts.map(x=>Math.round(x.max)).join(' and ')} instead of ${s.parts.map(x=>PART_W[x.k]).join(' and ')}.</p>`:''); };
-const decBlk=(tier,dec,s,lbl,lvlLine)=>`<div class="c2blk"><div class="c2dec"><b>${tier}</b> · ${dec}</div>${s?sbarsHtml(s,lbl):''}${lvlLine?`<div class="c2lvl">${lvlLine}</div>`:''}</div>`;
+// v4.5.0: without a level (nl = {what, field}) the bars only explain yield and range maths; offer to set the level instead
+const decBlk=(tier,dec,s,lbl,lvlLine,nl)=>`<div class="c2blk"><div class="c2dec"><b>${tier}</b> · ${dec}</div>${s&&!nl?sbarsHtml(s,lbl):''}${nl?`<div class="c2nolvl">Without your own ${nl.what} the score only sees the yield and the 52-week range. ${nl.val?`Set ${nl.what==='add level'?'an':'a'} ${nl.what} to rank it.`:`Add a valuation or ${nl.what==='add level'?'an':'a'} ${nl.what} to rank it.`}</div><button type="button" class="btn small golvl" data-p="edit" data-golvl="${nl.field}">Set ${nl.what==='add level'?'an':'a'} ${nl.what}</button>`:''}${lvlLine?`<div class="c2lvl">${lvlLine}</div>`:''}</div>`;
 const lvlLineHtml=(word,v,cur,l2,extra='')=>v>0?`${word} below <b>${mN(v,cur)}</b>${eurTag(v,cur)}${extra}${l2?` · 2nd level <b>${mN(l2,cur)}</b>${eurTag(l2,cur)}`:''}`:'';
 // ---------- "Last seen at this level" (v4.3.0) ----------
 // How often the month-end close was at or below a level, from history.json (same listing currency as the level).
@@ -2122,10 +2133,11 @@ const usualOk=(hi,v)=>!!(hi&&hi.fair&&v&&v.base>0&&hi.fair<=v.base*1.25);
 function cardEl(i,inSheet){
   const st=stageOf(i), c=curOf(i), d=dayOf(i), y=yldOf(i), q=quoteOf(i), h=histOf(i), sc=scoreOf(i), cur=curOfI(i), t=totalOf(i);
   const due=i.nextReview&&i.nextReview<=today();
-  const tc=sc?sc.c:'var(--t-none)';
+  const nl=!!sc&&i.status!=='out'&&!(i.buyBelow>0);   // v4.5.0: no buy price → listed under "Needs a buy price", no score shown
+  const tc=sc&&!nl?sc.c:'var(--t-none)';
   // decision line: tier · distance to the buy level (· near the 52-week high/low)
   const bp=sc?.parts.find(x=>x.k==='buy'), rp=sc?.parts.find(x=>x.k==='rng');
-  const tier=sc?sc.tier:!q&&errOf(i)?'No quote':'No score yet';
+  const tier=nl?'Needs a buy price':sc?sc.tier:!q&&errOf(i)?'No quote':'No score yet';
   let dist=i.buyBelow>0?(bp?(bp.above<=0?`in the buy zone, buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`:`${abv(bp.above)} % above buy at ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`):`buy below ${mN(i.buyBelow,cur)}${eurTag(i.buyBelow,cur)}`)+lvl2Txt(i,c,cur)
     :'no buy price set';
   if(!sc&&!q&&errOf(i)) dist=`no quote for ${symOf(i)}, set the Yahoo symbol in Edit`;
@@ -2134,10 +2146,10 @@ function cardEl(i,inSheet){
   // in the sheet: the same facts without repeating the tier or the level (both have their own place)
   let dec=dist;
   if(inSheet){ const l2=lvl2Of(i);
-    if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':'at your buy level'):`${abv(bp.above)} % above your buy level`):'no buy price set';
+    if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':'at your buy level'):`${abv(bp.above)} % above your buy level`):nl?'not ranked yet':'no buy price set';
       if(sc.cap==='flag') dec=`held at Wait by a red flag (would be ${sc.raw}) · `+dec;
       else if(sc.cap==='broken') dec=`held at Wait by a broken thesis (would be ${sc.raw}) · `+dec;
-      else if(sc.cap==='above'||sc.cap==='level') dec+=`, so it stops at Getting close (would be ${sc.raw})`;
+      else if(sc.cap==='above') dec+=`, so it stops at Getting close (would be ${sc.raw})`;
       dec+=rngTxt(rp); }
     else if(!(!q&&errOf(i))&&c) dec='not enough data for a score';
     if(brokenOf(i)) dec='thesis broken · '+dec; }
@@ -2147,11 +2159,12 @@ function cardEl(i,inSheet){
   // yield vs its usual
   const yArr=h?(h.v==='cheap'?['▲','up']:h.v==='expensive'?['▼','dn']:['≈','']):null;
   const chg=t?t.best:null, retCls=chg==null||Math.abs(chg)<.05?'':chg>0?'up':'dn';
+  const young=t&&t.base.what!=='bought'&&daysSince(t.base.date)<=30&&Math.abs(chg)<5;   // v4.5.0: same rule as the row, a few days of noise isn't a return yet
   const el=document.createElement('article'); el.className='card2'; el.tabIndex=0;
   el.style.setProperty('--stage',st.c); el.style.setProperty('--tc',tc);
   el.innerHTML=`
     <div class="c2top">
-      <div class="c2sc" title="Buy score${sc?`: ${sc.score} of 100`:''}">${sc?sc.score:'–'}</div>
+      <div class="c2sc" title="Buy score${sc&&!nl?`: ${sc.score} of 100`:''}">${sc&&!nl?sc.score:'–'}</div>
       <div class="c2id">
         <div class="c2nm"><span class="tk">${esc(i.ticker)||'?'}</span><span class="nm">${esc(i.name)}</span></div>
         <div class="c2st"><i></i><b>${st.label}</b>${stars(i.conviction)}</div>
@@ -2161,13 +2174,13 @@ function cardEl(i,inSheet){
         <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
       </div>
     </div>
-    ${inSheet?decBlk(tier,esc(dec),sc,{buy:PART.buy.label,yld:PART.yld.label,rng:PART.rng.label},lvlLineHtml('Buy',i.buyBelow,cur,lvl2Of(i))+seenHtml(symOf(i),i.buyBelow,cur,c)):`<div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>`}
+    ${inSheet?decBlk(tier,esc(dec),sc,{buy:PART.buy.label,yld:PART.yld.label,rng:PART.rng.label},lvlLineHtml('Buy',i.buyBelow,cur,lvl2Of(i))+seenHtml(symOf(i),i.buyBelow,cur,c),nl?{what:'buy price',field:'f_buyBelow',val:!!valNorm(i.val)}:null):`<div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>`}
     ${valLine(valNorm(i.val),c,cur,symOf(i))}
     ${earnLine(symOf(i))}
     ${bar}
     <div class="c2box num">
       <div><span>Yield</span><b>${y!=null?fmtN(y,2)+' %':'—'}</b><span class="${yArr?yArr[1]:''}">${h?`${yArr[0]} usual ${fmtN(h.avg,2)} %`:y!=null?'no 5-yr history':'no data'}</span></div>
-      <div title="${t?`Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${t.inEur?fmtPct(t.fx):'n/a'}`:''}`:''}"><span>${t&&t.foreign&&!t.inEur?'Return (local)':'Return in €'}</span><b class="${retCls}">${fmtPct(chg)}</b><span>${t?`${t.base.what==='bought'?'bought':'since'} ${fmtDay(t.base.date)}`:'no price yet'}</span></div>
+      <div title="${t?`Price ${fmtPct(t.price)}, dividends ${fmtPct(t.div)}${t.foreign?`, currency ${t.inEur?fmtPct(t.fx):'n/a'}`:''}`:''}"><span>${t&&t.foreign&&!t.inEur?'Return (local)':'Return in €'}</span><b class="${young?'':retCls}">${young?'new':fmtPct(chg)}</b><span>${young?`logged ${fmtDay(t.base.date)}`:t?`${t.base.what==='bought'?'bought':'since'} ${fmtDay(t.base.date)}`:'no price yet'}</span></div>
       <div><span>Review</span><b title="${i.nextReview?fmtDate(i.nextReview):''}">${i.nextReview?new Date(i.nextReview+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'2-digit'}):'—'}</b><span class="${due?'due':''}">${!i.nextReview?'not set':due?'due now':'next look'}</span></div>
     </div>
     ${inSheet?divBoxHtml(symOf(i)):''}
@@ -2267,7 +2280,8 @@ function segSheet(root,kind,id,onEdit){
   bar.innerHTML=segs.map(([k,l])=>`<button type="button" role="tab" data-p="${k}">${l}</button>`).join('');
   const show=k=>{ if(k==='edit'&&onEdit){ onEdit(); return; } if(!P[k].children.length) k='over'; paneSel[kind]=k;
     for(const x in P) P[x].hidden=x!==k; bar.querySelectorAll('button').forEach(b=>{ b.classList.toggle('on',b.dataset.p===k); b.setAttribute('aria-selected',b.dataset.p===k); }); };
-  root.addEventListener('click',e=>{ const b=e.target.closest('[data-p]'); if(!b||!root.contains(b)) return; show(b.dataset.p); const sh=root.closest('.sheet'); if(sh) sh.scrollTop=0; });
+  root.addEventListener('click',e=>{ const b=e.target.closest('[data-p]'); if(!b||!root.contains(b)) return; show(b.dataset.p); const sh=root.closest('.sheet'); if(sh) sh.scrollTop=0;
+    if(b.dataset.golvl) setTimeout(()=>{ const f=document.getElementById(b.dataset.golvl); if(f) (f.closest('label')||f).scrollIntoView({block:'center'}); },60); });   // v4.5.0: "Set a buy price" lands on the field
   root.append(bar,P.over,P.biz,P.edit); show(paneSel[kind]);
 }
 // open a folded Overview section (the journal buttons scroll to their form)
@@ -2792,7 +2806,7 @@ function holdCard(r){
         <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
       </div>
     </div>
-    ${decBlk(tier,esc(dec),s,{buy:'to add level',yld:PART.yld.label,rng:PART.rng.label},lvlLine)}
+    ${decBlk(tier,esc(dec),s,{buy:'to add level',yld:PART.yld.label,rng:PART.rng.label},lvlLine,s&&!fund&&!s.full&&!a?{what:'add level',field:'h_addBelow',val:!!valOfH(h)}:null)}
     ${fund?'':(z=>z?valLine(z.v,c,cur,hSym(h)):'')(valOfH(h))}
     ${fund?'':earnLine(hSym(h))}
     ${c2barHtml(x,'add')}
@@ -2834,11 +2848,12 @@ function holdState(r){   // r: {h, s = hScore(h), inDepot}, as portRows() builds
   return st;
 }
 const hTone=(h,s)=>holdState({h,s,inDepot:true}).tone;
-const I_GROUP={due:'Review due','Buy zone':'Buy zone','Getting close':'Getting close',Wait:'Wait',Expensive:'Expensive',noprice:'No price yet',out:'Passed or sold'};
+const I_GROUP={due:'Review due','Buy zone':'Buy zone','Getting close':'Getting close',Wait:'Wait',Expensive:'Expensive',nolevel:'Needs a buy price',noprice:'No price yet',out:'Passed or sold'};
 function ideaState(i,sc=scoreOf(i)){
   const out=i.status==='out', tier=sc?sc.tier:null;
   const st={kind:'idea',out,due:!out&&reviewDue(i),tier,zone:!out&&tier==='Buy zone',broken:brokenOf(i)};
-  st.group=out?'out':st.zone?'Buy zone':st.due?'due':tier||'noprice';
+  st.nolevel=!out&&!!tier&&!(i.buyBelow>0);   // v4.5.0: scored on yield and range only, so it gets its own group instead of a tier
+  st.group=out?'out':st.zone?'Buy zone':st.due?'due':st.nolevel?'nolevel':tier||'noprice';
   return st;
 }
 // One row per holding (v3.0.0). Line 2 answers "can I add?": distance to the add level, or what's
@@ -3607,7 +3622,15 @@ function todayData(){
     .sort((a,b)=>earnOf(a.key).dn-earnOf(b.key).dn);
   const stale=pick([...stk.filter(r=>{ const z=valOfH(r.h); return z&&valAge(z.v,hSym(r.h))?.stale; }).map(H),
     ...ideas.filter(i=>{ const v=valNorm(i.val); return v&&valAge(v,symOf(i))?.stale; }).map(I)]);
-  return {level,due,earn,stale};
+  // v4.5.0: with nothing at its level, the closest one (ideas with a buy price, holdings with an add level, not held back or full).
+  // Ideas tab: ideas only; Portfolio: holdings only; elsewhere both.
+  let near=null;
+  if(!level.length){ const wI=view!=='port', wH=view!=='board';
+    const C=[...ideas.filter(i=>wI&&i.buyBelow>0).map(i=>{ const s=scoreOf(i); return s&&s.cap!=='flag'&&s.cap!=='broken'?{tk:i.ticker,b:s.parts.find(x=>x.k==='buy')}:null; }),
+      ...P.filter(r=>wH&&r.st.level&&!r.st.full&&!r.st.flag&&!r.st.broken&&r.s).map(r=>({tk:r.h.short||r.h.symbol,b:r.s.parts.find(x=>x.k==='buy')}))]
+      .filter(o=>o&&o.b&&o.b.above>0).sort((a,b)=>a.b.above-b.b.above);
+    if(C[0]) near={tk:C[0].tk,above:C[0].b.above}; }
+  return {level,due,earn,stale,near};
 }
 function agoShort(iso){ const m=Math.max(0,Math.round((Date.now()-new Date(iso))/6e4));
   return m<60?`${m} min`:m<48*60?`${Math.round(m/60)} h`:`${Math.round(m/1440)} d`; }
@@ -3617,7 +3640,8 @@ function renderToday(){
     const cls=[p.k==='level'?'lvl':'',p.k==='level'&&!n?'zero':'',p.k==='due'||p.k==='stale'?'warn':'',focus===p.k?'on':''].join(' ');
     const ki=p.k==='level'&&n?new Set(D.level.map(o=>o.kind)):null;   // v4.2.0: "1 idea at level" on the Portfolio tab, not a bare "1 at level"
     const word=ki&&ki.size===1?(ki.has('idea')?(n===1?'idea':'ideas'):(n===1?'holding':'holdings'))+' at level':n===1?p.one:p.many;
-    return `<button type="button" data-k="${p.k}" class="${cls}" title="${p.title}"><b>${n}</b> ${word}</button>`; });
+    const nr=p.k==='level'&&!n&&D.near?` · ${esc(D.near.tk)} +${abv(D.near.above)} %`:'';   // v4.5.0: the closest one
+    return `<button type="button" data-k="${p.k}" class="${cls}" title="${p.title}${nr?`. Closest: ${esc(D.near.tk)}, ${abv(D.near.above)} % above its level`:''}"><b>${n}</b> ${word}${nr}</button>`; });
   el.innerHTML=parts.join('');
   el.querySelectorAll('button').forEach(b=>b.onclick=()=>todayTap(b.dataset.k));
 }
