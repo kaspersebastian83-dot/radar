@@ -708,6 +708,9 @@ main{padding:6px 16px calc(128px + env(safe-area-inset-bottom))}
 .rpx b{font-size:16px}.rpx small{font-size:12.5px}
 .rempty{padding:16px;font-size:15px;color:var(--ink2)}
 .rmore{min-height:48px;padding:12px 16px;font-size:15px;color:var(--acc);border-top:1px solid var(--line)}
+.rmore.peek{border-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmode{position:static;box-shadow:inset 0 0 0 1px var(--acc-soft);margin:0 0 14px;background:var(--glass)}
+.grp .ghint{margin:-4px 4px 10px;font-size:13px;color:var(--ink2);line-height:1.4}
 .grp.flash .rows{box-shadow:0 0 0 2px var(--acc),var(--sh)}
 .nxhero{border-left:0;padding:18px;box-shadow:inset 5px 0 0 var(--tc),var(--edge),var(--sh);overflow:hidden}
 .nxbond{background:var(--acc-soft);border-top:1px dashed var(--line)}
@@ -1032,8 +1035,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.5.0';
+const VERSION='4.6.0';
 const CHANGELOG=[
+  {v:'4.6.0',d:'2026-11-10',t:'Shorter Portfolio and Next €',items:[
+    'Portfolio has two views at the top: "By add level" (the groups as before) and "By fair value" (cheapest against your own fair value first). The fair-value list no longer sits under the groups, so each stock is listed once per view. The app remembers which view you used.',
+    'Next €: when nothing is at your level, only the box at the top says so (no empty group under it). "Held back", "Lowest expected return in your depot" and "Not ranked" fold to one line with their tickers; tap to open.',
+  ]},
   {v:'4.5.0',d:'2026-11-10',t:'Clearer overview',items:[
     'Ideas without a buy price get their own group, "Needs a buy price", at the bottom of Ideas, with a dash instead of a score. Before, they were ranked on yield and the 52-week range alone, so Symrise sat at the top of Getting close with no valuation behind it.',
     'When nothing is at your level, the Today chip names the closest one and how far above its level it is: "0 at level · WKL +0,3 %" on Ideas, the closest holding on Portfolio.',
@@ -1927,15 +1934,17 @@ function rowEl({tc,tile,txt,tk,nm,extra='',line2,line3,px,onOpen}){
 // Open/closed is remembered per group in radar.fold.v1.
 const LS_FOLD='radar.fold.v1'; let folds={}; try{ folds=JSON.parse(localStorage.getItem(LS_FOLD))||{}; }catch{}
 const FOLD_MAX=6, FOLD_SHOW=5;
-function groupEl(title,list,empty,foldKey){
+// show (v4.6.0): rows shown while folded (default FOLD_SHOW once the list is longer than FOLD_MAX); 0 = header only, with peek text
+function groupEl(title,list,empty,foldKey,show,peek){
   const sec=document.createElement('section'); sec.className='grp'; sec.dataset.g=title;
   sec.innerHTML=`<div class="ghd"><span>${title}</span><span>${list.length}</span></div>`;
   const box=document.createElement('div'); box.className='rows';
   const fill=()=>{ box.innerHTML='';
-    const foldable=foldKey&&list.length>FOLD_MAX, open=!foldable||!!folds[foldKey];
-    (open?list:list.slice(0,FOLD_SHOW)).forEach(el=>box.appendChild(el));
+    const foldable=foldKey&&list.length>(show==null?FOLD_MAX:show), open=!foldable||!!folds[foldKey];
+    (open?list:list.slice(0,show==null?FOLD_SHOW:show)).forEach(el=>box.appendChild(el));
     if(foldable){ const m=document.createElement('button'); m.type='button'; m.className='rmore';
-      m.textContent=open?'Show fewer':`Show all ${list.length}`;
+      m.textContent=open?(show===0?'Hide':'Show fewer'):show===0?`Show ${list.length}${peek?': '+peek:''}`:`Show all ${list.length}`;
+      if(!open&&show===0) m.classList.add('peek');
       m.onclick=()=>{ if(open) delete folds[foldKey]; else folds[foldKey]=1; try{localStorage.setItem(LS_FOLD,JSON.stringify(folds));}catch{} fill(); };
       box.appendChild(m); } };
   if(list.length) fill(); else box.innerHTML=`<div class="rempty">${empty||''}</div>`;
@@ -3201,11 +3210,12 @@ function renderNext(){
     line.innerHTML=`<span>${esc(b.nm)} bond fund · ${pp(b.y)} %</span><small>below this line you'd do better in bonds</small>`;
     if(at>=0) readyEls.splice(at,0,line); else if(readyEls.length) readyEls.push(line); }
   const sec=groupEl('At your level · expected % a year',[],'Nothing at your level today.'); if(readyEls.length){ const box=sec.querySelector('.rows'); box.innerHTML=''; readyEls.forEach(e=>box.appendChild(e)); sec.querySelector('.ghd span:last-child').textContent=R.ready.length; }
-  g.appendChild(sec);
+  if(R.ready.length) g.appendChild(sec);   // v4.6.0: when nothing is at its level the hero already says so
   list('Not at your level yet',R.wait,null,'next.wait');
-  list('Held back',R.blocked,null,'next.held');
-  { const S=srcRows(R); if(S.length) g.appendChild(groupEl('Lowest expected return in your depot',S.map(r=>srcRow(r,R)))); }   // v3.10.0
-  if(R.noval.length) g.appendChild(groupEl('Not ranked',R.noval.map(r=>rowEl({tc:'var(--t-none)',tile:'–',tk:r.tk,nm:r.nm,extra:r.kind==='hold'?'<span class="own">own</span>':'',line2:r.st==='noprice'?'no price yet':'no valuation yet, add one to rank it',line3:r.c>0?nextIncTxt(r):'',px:pxCol(r.c,r.cur),onOpen:r.open}))));
+  const tks=a=>a.map(r=>r.tk).join(', ');   // v4.6.0: the groups below fold to their header
+  if(R.blocked.length) g.appendChild(groupEl('Held back',R.blocked.map(nextRow),null,'next.held',0,tks(R.blocked)));
+  { const S=srcRows(R); if(S.length) g.appendChild(groupEl('Lowest expected return in your depot',S.map(r=>srcRow(r,R)),null,'next.src',0,tks(S))); }   // v3.10.0
+  if(R.noval.length) g.appendChild(groupEl('Not ranked',R.noval.map(r=>rowEl({tc:'var(--t-none)',tile:'–',tk:r.tk,nm:r.nm,extra:r.kind==='hold'?'<span class="own">own</span>':'',line2:r.st==='noprice'?'no price yet':'no valuation yet, add one to rank it',line3:r.c>0?nextIncTxt(r):'',px:pxCol(r.c,r.cur),onOpen:r.open})),null,'next.noval',0,tks(R.noval)));
   body.appendChild(g);
   const ex=document.createElement('details'); ex.className='cs nxex';
   ex.innerHTML=`<summary><b>How this is worked out</b></summary><div class="vtxt">
@@ -3656,7 +3666,7 @@ function todayTap(k){
     const tab=kinds.has('idea')?'board':'port';
     const ok=(tab==='port'||(boardSort==='score'&&filter==='all'&&!(tableMode&&mqWide.matches)))
       &&(k!=='due'||L.every(o=>(o.kind==='idea'?ideaState(o.i):o.r.st).group==='due'));   // a due stock at its level sits in the zone group: then show the list instead
-    if(ok){ switchView(tab);
+    if(ok){ if(tab==='port'&&portMode!=='level'){ portMode='level'; try{localStorage.setItem(LS_PMODE,portMode);}catch{} } switchView(tab);
       const sec=$(`#${tab==='board'?'viewBoard':'viewPort'} .grp[data-g="${k==='due'?'Review due':tab==='board'?'Buy zone':'Add zone'}"]`);
       if(sec){ sec.scrollIntoView({block:'start',behavior:'smooth'}); sec.classList.add('flash'); setTimeout(()=>sec.classList.remove('flash'),1200); return; } } }
   focus=k; render(); window.scrollTo({top:0});
@@ -3710,10 +3720,24 @@ function renderPort(){
     [H_GROUP.nosym,g('nosym')],
     [H_GROUP.gone,g('gone')],
   ];
+  // v4.6.0: two views of the same holdings instead of two lists one under the other
+  const fv=fairRows(rows), seg=document.createElement('div'); seg.className='psegs pmode'; seg.setAttribute('role','tablist');
+  seg.innerHTML=[['level','By add level'],['fair','By fair value']].map(([k,l])=>`<button type="button" role="tab" data-m="${k}" class="${portMode===k?'on':''}" aria-selected="${portMode===k}">${l}</button>`).join('');
+  seg.onclick=e=>{ const b=e.target.closest('[data-m]'); if(!b||b.dataset.m===portMode) return; portMode=b.dataset.m; try{localStorage.setItem(LS_PMODE,portMode);}catch{} renderPort(); };
+  body.appendChild(seg);
+  if(portMode==='fair'){
+    const sec=groupEl(FAIR.title,fv.map(fairRow),'No holding has a valuation yet.');
+    const hn=document.createElement('p'); hn.className='ghint';
+    hn.textContent='Cheapest first: how far today\'s price is from your own fair value. Your add levels sit below fair value by a safety margin, so a stock can be well below fair and still above its add level.';
+    sec.insertBefore(hn,sec.querySelector('.rows'));
+    body.appendChild(sec);
+    const nv=S.filter(r=>!r.st.fund&&!fv.some(o=>o.r===r));
+    if(nv.length) body.appendChild(groupEl('No valuation yet',by(nv).map(r=>holdRow(r)),null,'port.nofair',0,nv.map(r=>r.h.short||r.h.symbol).join(', ')));
+    return; }
   for(const [t,list,empty,isDue,fk] of groups){ if(!list.length&&!empty) continue;
     body.appendChild(groupEl(t,list.map(r=>holdRow(r,isDue||r.st.due&&r.st.group==='zone')),empty,fk)); }
-  const fv=fairRows(rows); if(fv.length) body.appendChild(groupEl(FAIR.title,fv.map(fairRow),null,'port.fair'));
 }
+const LS_PMODE='radar.portMode.v1'; let portMode='level'; try{ if(localStorage.getItem(LS_PMODE)==='fair') portMode='fair'; }catch{}
 // ---------- Price vs your fair value (v4.4.0) ----------
 // Every stock in the depot with a valuation, cheapest first: how far today's price is from your own fair value (val.base).
 // A second view next to the groups above, which go by your add level. Information only: no score or group reads it.
