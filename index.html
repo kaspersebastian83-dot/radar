@@ -1024,8 +1024,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.7';
+const VERSION='4.1.8';
 const CHANGELOG=[
+  {v:'4.1.8',d:'2026-11-10',t:'"Raised in a row" counts small raises',items:[
+    'A year now counts as a raise as soon as the dividend went up at all (from +0.1 %). Before, it had to rise at least 1 %, so slow raisers looked young: Chevron showed 8 years and Realty Income 10. An unchanged dividend still ends the run, and only a drop of 5 % or more counts as a cut. This also feeds the quality tag\'s dividend test.',
+  ]},
   {v:'4.1.7',d:'2026-11-10',t:'What you type stays until you decide',items:[
     'Tapping a quality tier or "I reclaim this" on a holding no longer wipes what you typed but have not saved yet (an add level, a note). The same goes for "Checked, it\'s fine", a logged review or buy, and the currency rate arriving.',
     'If you typed something in a sheet and then tap outside, swipe it down, press ✕ or Cancel, Radar asks "Discard what you typed?" first. Nothing typed: it closes as before.',
@@ -1528,7 +1531,7 @@ function bizHtml(sym,owner,kind){
 const DIV={
   growth:[[7,'strong','up'],[4,'solid','up'],[1,'slow',''],[-1,'flat',''],[-Infinity,'falling','dn']],  // %/yr, value ≥ threshold
   raised:[[10,'proven','up'],[5,'steady','up'],[1,'young','']],                                       // years, value ≥ threshold; 0 → flat or cut
-  raiseMin:1,                                                                                         // a year counts as a raise from +1 %
+  raiseMin:0.1,                                                                                       // any real rise counts (v4.1.8; was 1 %, which ended Chevron's and Realty Income's runs at a +0.6 % year); an unchanged dividend still ends it
   cutMin:5,                                                                                           // a drop of 5 %+ is a cut (as the red flag), less is flat
   pay:{std:[[60,'covered','up'],[80,'ok',''],[100,'tight','dn']],                                    // % of FCF, value ≤ threshold
        cash:[[75,'covered','up'],[90,'ok',''],[100,'tight','dn']],                                   // % of operating cash flow (utilities, REITs)
