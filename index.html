@@ -526,7 +526,11 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .r1 .w{font-size:13px;color:var(--ink2);flex:none;font-variant-numeric:tabular-nums}
 .r1 .w.over{color:var(--coral);font-weight:700}
 .r2{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.row2 .r2{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.35}   /* v4.2.0: wraps to a 2nd line instead of cutting off the yield */
 .r2 b{font-weight:700}
+.nw{white-space:nowrap}
+#buyform,#hDec{scroll-margin-top:12px}
+.sbnote{margin:4px 0 0;font-size:12px;color:var(--ink2);line-height:1.4}
 .r2 .ar{font-size:10px;vertical-align:1px}
 .rflag{flex:none;color:var(--coral);align-self:center;display:inline-flex}
 .own{flex:none;align-self:center;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--teal-soft);color:var(--teal)}
@@ -1025,8 +1029,17 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.9';
+const VERSION='4.2.0';
 const CHANGELOG=[
+  {v:'4.2.0',d:'2026-11-10',t:'Easier to read on the phone',items:[
+    'Line 2 of a row wraps to a second line instead of cutting off the yield, and "at your price · below 82" is now just "at your price 82".',
+    'Funds get short names in the lists (MSCI World, Emerging Markets IMI, Euro Corp Bonds …). The full name stays in the sheet; change it under "Name in lists" in the holding\'s settings.',
+    'The price age shows once, in the line under the title; the extra chip in the Today line is gone. That line is shorter too: "26 holdings · € 123k · as of 6 Nov".',
+    'The Today line says what is at its level: "1 idea at level" or "2 holdings at level", so Portfolio no longer shows "1 at level" above an empty Add zone.',
+    'When a stock has no yield history (or no level), its score bars say so and explain why the other bars count for more, instead of "54/86 · n/a".',
+    'Next to "no cut for N years", a year with fewer payments than usual is named (Vinci: "2020 skipped, 1 payment instead of 2"), so it no longer looks at odds with "raised 4 years in a row".',
+    'The buy, sell and review forms open at their top instead of in the middle of the checklist.',
+  ]},
   {v:'4.1.9',d:'2026-11-10',t:'Four small fixes',items:[
     'The business table on the phone now opens at the newest year; scroll left for older ones.',
     'On a card, a long stage word and the stars no longer run into the price: they move to a second line.',
@@ -1441,6 +1454,8 @@ function bizRaw(sym){
     // streak = years paid without a cut; raises and cuts compare complete years only
     let streak=0, lastRaise=null;
     for(let k=dv.length-1;k>0&&dv[k].y===dv[k-1].y+1;k--) streak++;
+    // v4.2.0: complete years inside that run with fewer payments than usual (Vinci 2020: 1 instead of 2) are named, not hidden
+    const gaps=()=>dv.filter(d=>!full(d)&&d.y<curY&&d.y>dv[dv.length-1].y-streak);
     const fd=dv.filter(full), dl=fd[fd.length-1], d5=fd.find(d=>dl&&d.y===dl.y-5);
     for(let k=fd.length-1;k>0;k--){ const a=fd[k], b=fd[k-1];
       if(a.v<b.v*.95){ streak=Math.min(streak,dv[dv.length-1].y-a.y); break; }
@@ -1472,7 +1487,7 @@ function bizRaw(sym){
     const psG=ys.length>=3&&ps(0)>0&&o.ps>0?cagr(ps(0),o.ps,ys.length-1):null;
     if(psG!=null&&psG<=-10&&!F.some(f=>f.id==='ps')&&!W.some(f=>f.id==='ps1'))
       W.push({id:'psT',key,t:`${B.ps} down ${fmtN(-psG,0)} %/yr since ${o.fy}`,d:`${f2(o.ps)} → ${f2(ps(0))}. Fine if ${o.fy} was a peak year, worth a look if not.`});
-    r={sym,m,B,c,ys,dv,typ,streak,lastRaise,dg,psG,F,W,next:c.nextEarnings&&c.nextEarnings>=today()?c.nextEarnings:null,time:c.time,stale:!!c.stale};
+    r={sym,m,B,c,ys,dv,typ,streak,gaps:gaps(),lastRaise,dg,psG,F,W,next:c.nextEarnings&&c.nextEarnings>=today()?c.nextEarnings:null,time:c.time,stale:!!c.stale};
   }
   bizCache.set(sym,r); return r;
 }
@@ -1519,7 +1534,7 @@ function bizHtml(sym,owner,kind){
   </tbody></table></div>`:'';
   const dvs=b.dv.slice(-10), mx=Math.max(...dvs.map(d=>d.v),0);
   const bars=dvs.length?`<div class="dvbars" title="Dividends per share by calendar year (faded: fewer payments than usual recorded)">${dvs.map(d=>`<i style="height:${mx?Math.max(4,d.v/mx*100):0}%" class="${d.n!=null&&b.typ!=null&&d.n<b.typ?'gap':''}" title="${d.y}: ${fmtN(d.v,2)}${d.paid?`, ${d.paid} payments, counted as ${d.n}`:d.n!=null?`, ${d.n} payments`:''}"><s>${String(d.y).slice(2)}</s></i>`).join('')}</div>`:'';
-  const dtext=b.dv.length?[b.streak?`no cut for ${b.streak}${b.streak>=24?'+':''} years`:'',b.lastRaise?`last raised ${b.lastRaise}`:'',b.dg!=null?`${fmtPct(b.dg,1)}/yr over 5 years`:''].filter(Boolean).join(' · '):'Pays no dividend.';
+  const dtext=b.dv.length?[b.streak?`no cut for ${b.streak}${b.streak>=24?'+':''} years`:'',...(b.gaps||[]).map(d=>`${d.y} skipped (${d.n} payment${d.n===1?'':'s'} instead of ${b.typ})`),b.lastRaise?`last raised ${b.lastRaise}`:'',b.dg!=null?`${fmtPct(b.dg,1)}/yr over 5 years`:''].filter(Boolean).join(' · '):'Pays no dividend.';
   const flag=(f,red)=>`<div class="bzf ${red?'r':'w'} ${f.ok?'ok':''}"><b>${f.ok?'✓':red?'!':'·'}</b><div><div class="t">${esc(f.t)}</div><div class="d">${esc(f.d||'')}</div>
     ${red?(f.ok?`<div class="d">Checked ${fmtDate(f.ok.date)}${f.ok.note?': '+esc(f.ok.note):''} <a href="#" data-unck="${f.id}">undo</a></div>`
       :`<div class="ck" data-ck="${f.id}"><button class="btn small" data-ckopen>Checked, it's fine</button></div>`):''}</div></div>`;
@@ -1833,9 +1848,9 @@ function render(){ applyVis(); if(focus) renderFocus(); else view==='port'?rende
 function renderSub(){
   let t;
   if(view==='port'){ const H=holdings(), T=depotTotal();
-    t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtEur(T)}`:''} · ${depot?'statement '+fmtDay(depot.asOf):'no statement yet'}`; }
+    t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtK(T)}`:''} · ${depot?'as of '+fmtDay(depot.asOf):'no statement yet'}`; }
   else if(view==='next') t=`ranked by discount to your fair value${depot?'':' · no statement, so no mix check'}`;
-  else if(view==='depot'){ const T=depotTotal(); t=depot?`${T!=null?fmtEur(T)+' · ':''}statement ${fmtDay(depot.asOf)}`:'no statement on this device yet'; }
+  else if(view==='depot'){ const T=depotTotal(); t=depot?`${T!=null?fmtK(T)+' · ':''}as of ${fmtDay(depot.asOf)}`:'no statement on this device yet'; }
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
     t=showTable()?'':`${n} idea${n===1?'':'s'}${st?' · '+st.label:''}`; }
   $('#subTxt').textContent=t;
@@ -1871,7 +1886,7 @@ function sortIdeas(a){
 }
 // ---------- v3 list: one row per stock, grouped by tier ----------
 const FLAG=`<span class="rflag" title="Red flag in the business, open for details" aria-label="red flag"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 2a1 1 0 0 1 1 1v1h12.4a1 1 0 0 1 .8 1.6L16.6 9l2.6 3.4a1 1 0 0 1-.8 1.6H6v7a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1z"/></svg></span>`;
-const yTxt=(y,h)=>y==null?'':`${fmtN(y,1)} %${h?(h.v==='cheap'?' <span class="ar up">▲</span>':h.v==='expensive'?' <span class="ar dn">▼</span>':''):''}`;
+const yTxt=(y,h)=>y==null?'':`<span class="nw">${fmtN(y,1)} %${h?(h.v==='cheap'?' <span class="ar up">▲</span>':h.v==='expensive'?' <span class="ar dn">▼</span>':''):''}</span>`;   // nw: the arrow never wraps alone
 const lvl=v=>fmtN(v,v>=1000?0:2);
 const daysSince=d=>d?(Date.now()-new Date(d+'T00:00:00'))/864e5:0;
 // price column: € first, the listing price small underneath
@@ -1918,7 +1933,7 @@ function ideaRow(i,due){
   if(i.status==='out'&&i.passed){ const P=i.passed, since=P.price>0&&c>0?(c/P.price-1)*100:null;
     bits.push(`${P.reason==='sold'?'sold':passLabel(P.reason).toLowerCase()} ${fmtDay(P.date)}${P.price>0?` at ${lvl(P.price)}`:''}${since!=null?` · ${fmtPct(since,0)} since`:''}`); }
   else if(!c) bits.push(!q&&errOf(i)?`no quote for ${esc(symOf(i))}`:'waiting for the first price');
-  else if(bp) bits.push(bp.above<=0?(lvl2Of(i)&&c<=lvl2Of(i)?`<b class="up">at your 2nd level</b> · below ${lvl(lvl2Of(i))}`:`<b class="up">at your price</b> · below ${lvl(i.buyBelow)}`):`${abv(bp.above)} % above ${lvl(i.buyBelow)}`);
+  else if(bp) bits.push(bp.above<=0?(lvl2Of(i)&&c<=lvl2Of(i)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(i))}`:`<b class="up">at your price</b> ${lvl(i.buyBelow)}`):`${abv(bp.above)} % above ${lvl(i.buyBelow)}`);
   else bits.push(rp&&rp.pos<=.15?'no buy price · near 52w low':rp&&rp.pos>=.85?'no buy price · near 52w high':'no buy price');
   if(y!=null) bits.push(yTxt(y,h));
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
@@ -2065,7 +2080,10 @@ function valWire(p,levelSel,cur){
   upd(); }
 const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
 // v3.5.0: the detail sheet says the tier once. One block: decision line → the three score bars → the level line.
-const sbarsHtml=(s,lbl)=>`<div class="bars">${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'n/a'}</b></div>`;}).join('')}</div>`;
+const PART_W={buy:60,yld:30,rng:10};   // the normal weights (scoreOf); a missing input's points are shared by the others
+const sbarsHtml=(s,lbl)=>{ const miss=['buy','yld','rng'].filter(k=>!s.parts.find(p=>p.k===k));
+  return `<div class="bars">${['buy','yld','rng'].map(k=>{const x=s.parts.find(p=>p.k===k); return `<div class="sbar"><span>${lbl[k]}</span><i><em style="width:${x?(x.f*100).toFixed(0):0}%;background:${PART[k].c}"></em></i><b class="num">${x?`${Math.round(x.pts)}/${Math.round(x.max)}`:'no data'}</b></div>`;}).join('')}</div>`
+   +(miss.length&&s.parts.length?`<p class="sbnote">No data for ${miss.map(k=>lbl[k]).join(' and ')}, so ${miss.length>1?'their':'its'} ${miss.reduce((t,k)=>t+PART_W[k],0)} points are shared out: the others count for ${s.parts.map(x=>Math.round(x.max)).join(' and ')} instead of ${s.parts.map(x=>PART_W[x.k]).join(' and ')}.</p>`:''); };
 const decBlk=(tier,dec,s,lbl,lvlLine)=>`<div class="c2blk"><div class="c2dec"><b>${tier}</b> · ${dec}</div>${s?sbarsHtml(s,lbl):''}${lvlLine?`<div class="c2lvl">${lvlLine}</div>`:''}</div>`;
 const lvlLineHtml=(word,v,cur,l2,extra='')=>v>0?`${word} below <b>${mN(v,cur)}</b>${eurTag(v,cur)}${extra}${l2?` · 2nd level <b>${mN(l2,cur)}</b>${eurTag(l2,cur)}`:''}`:'';
 const rngTxt=rp=>rp&&rp.pos>=.85?' · near 52w high':rp&&rp.pos<=.15?' · near 52w low':'';
@@ -2294,7 +2312,7 @@ function openRead(id){
         logDecision(i,{kind:'pass',reason:'broken',changed:r.changed,checked:r.checked,price:c,cur,sym:symOf(i),text:`Passed (Thesis broken)${c?` at ${fmtP(c,cur)}`:''}. ${revText(r)}`});
         i.passed={date:today(),price:c,reason:'broken'}; i.nextReview=r.next; setStage(i,'out'); return; }
       saveReview(i,r,c,cur,symOf(i)); persist(); openRead(i.id); toast('Review saved'); }});
-  if($('#iRev')) $('#iRev').onclick=()=>{ revIdea(false); $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); };
+  if($('#iRev')) $('#iRev').onclick=()=>{ revIdea(false); $('#buyform').scrollIntoView({behavior:'smooth',block:'start'}); };
   if(reviewDue(i)&&i.status!=='out') revIdea(true);
   wireBiz($('#dossier'),()=>openRead(i.id));
   $('#btnNote').onclick=()=>{ const i=liveIdea(i0);
@@ -2323,12 +2341,12 @@ function buyFlow(i){
   decisionForm($('#buyform'),{kind:'buy',title:'Mark as bought',go:'Mark as bought',c,cur,sym,
     ctx:{c,cur,lvl:i.buyBelow,val:valNorm(i.val),sym,kill:i.kill,word:'buy'},
     onSave:e=>{ i=liveIdea(i); i.boughtPrice=e.price; i.boughtDate=e.date; delete i.broken; logDecision(i,e); setStage(i,'bought'); }});
-  $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); }
+  $('#buyform').scrollIntoView({behavior:'smooth',block:'start'}); }
 function passFlow(i){
   const c=curOf(i), cur=curOfI(i), sym=symOf(i), sold=i.status==='bought';
   decisionForm($('#buyform'),sold?{kind:'sell',title:'Sold',go:'Mark as sold',c,cur,sym,onSave:e=>{ i=liveIdea(i); i.passed={date:e.date,price:e.price,reason:'sold'}; logDecision(i,e); setStage(i,'out'); }}
     :{kind:'pass',title:'Pass on it',go:'Pass',c,cur,sym,reasons:PASS_WHY.filter(x=>x[0]!=='broken'),onSave:e=>{ i=liveIdea(i); i.passed={date:e.date,price:e.price,reason:e.reason}; logDecision(i,e); setStage(i,'out'); }});
-  $('#buyform').scrollIntoView({behavior:'smooth',block:'center'}); }
+  $('#buyform').scrollIntoView({behavior:'smooth',block:'start'}); }
 function setStage(i,k){ i=liveIdea(i);
   const from=stageOf(i).label; i.status=k; i.updatedAt=now();
   persist(); openRead(i.id); toast(`${from} → ${stageOf(i).label}`);
@@ -2677,6 +2695,7 @@ function hWhy(h,s){
 function wtHtml(h,w){ if(w==null) return ''; const cap=capOf(h), f=isFund(h), over=!f&&w>cap;
   return `<span class="wt num ${over?'over':''}" title="${f?'Share of the depot':`Share of the depot, your max is ${fmtN(cap,1)} %`}"><i><em style="width:${Math.min(100,w/(f?25:cap)*100).toFixed(0)}%"></em></i>${fmtN(w,1)} %${f?'':`<small> / ${fmtN(cap,1)}</small>`}</span>`; }
 const fmtEur=v=>v==null?'—':'€ '+Math.round(v).toLocaleString('de-DE');
+const hName=h=>h&&(h.nick||h.name)||'';   // v4.2.0: optional short list name (funds), the full name stays in the sheet
 const fmtK=v=>v==null?'—':v>=10000?'€ '+(v/1000).toLocaleString('de-DE',{maximumFractionDigits:1})+'k':fmtEur(v);
 
 function portRows(){
@@ -2735,7 +2754,7 @@ function holdCard(r){
     <div class="c2top">
       <div class="c2sc" title="Add score${s?`: ${s.score} of 100`:''}">${s?s.score:'–'}</div>
       <div class="c2id">
-        <div class="c2nm"><span class="tk">${esc(h.short||h.symbol)||'?'}</span><span class="nm">${esc(h.name)}</span></div>
+        <div class="c2nm"><span class="tk">${esc(h.short||h.symbol)||'?'}</span><span class="nm">${esc(hName(h))}</span></div>
         <div class="c2st">${w!=null?wtHtml(h,w):''}${v?`<span class="val num" title="${v.live?'shares × live price':'value on the statement'}">${fmtK(v.eur)}</span>`:''}${idea?`<span class="lnk" title="Has a Radar card">↗ Radar</span>`:''}${w==null&&!v&&!idea?`<span>${fund?(h.kind==='bond'?'Bond fund':'Fund'):'Stock'}</span>`:''}</div>
       </div>
       <div class="c2px num">
@@ -2815,7 +2834,7 @@ function holdRow(r,due){
   const over=!fund&&w!=null&&w>capOf(h);
   const extra=(w!=null?`<span class="w ${over?'over':''}" title="share of the depot">${fmtN(w,1)} %</span>`:'')+(biz&&biz.red.length?FLAG:'')+(fund?'':qualPill(hSym(h),h)+earnPill(hSym(h)));
   return rowEl({tc:hTone(h,s),tile:s?s.score:fund?(h.kind==='bond'?'Bond':'ETF'):'!',txt:!s,
-    tk:h.short||h.symbol,nm:h.name,extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
+    tk:h.short||h.symbol,nm:hName(h),extra,line2:bits.join(' · '),px:pxCol(c,cur),onOpen:()=>openHold(h.id)});
 }
 // ---------- decision journal (v3.3.0) ----------
 // Decisions are journal notes with a kind: {date, text, kind, price, cur, sym, verdict?, reason?, checks?}.
@@ -2923,7 +2942,7 @@ function noteRows(notes){
 function allDecisions(){
   const out=[];
   for(const i of data.ideas.filter(x=>!x.deletedAt)) for(const n of i.notes||[]) if(n&&n.kind) out.push({n,tk:i.ticker,nm:i.name,sym:n.sym||symOf(i),open:()=>{closeAll();openRead(i.id);}});
-  for(const h of holdings()){ if(textSrc(h)!==h) continue; for(const n of h.notes||[]) if(n&&n.kind) out.push({n,tk:h.short||h.symbol,nm:h.name,sym:n.sym||hSym(h),open:()=>{closeAll();openHold(h.id);}}); }
+  for(const h of holdings()){ if(textSrc(h)!==h) continue; for(const n of h.notes||[]) if(n&&n.kind) out.push({n,tk:h.short||h.symbol,nm:hName(h),sym:n.sym||hSym(h),open:()=>{closeAll();openHold(h.id);}}); }
   for(const d of out){ const c=curOf({symbol:d.sym}); d.now=c; d.since=d.n.price>0&&c>0?(c/d.n.price-1)*100:null; }
   return out.sort((a,b)=>(b.n.date||'').localeCompare(a.n.date||'')); }
 function openDecisions(){
@@ -3002,7 +3021,7 @@ function nextCands(){
   for(const h of holdings()){ if(isFund(h)||!hSym(h)) continue;
     const x=px(h), z=valOfH(h), a=addOf(h), w=weightOf(h,T), v=valueOf(h);
     seen.add(hSym(h));
-    out.push({kind:'hold',id:h.id,tk:h.short||h.symbol,nm:h.name,sym:hSym(h),x,c:curOf(x),cur:curOfI(x),val:z?z.v:null,lvl:a?a.v:null,
+    out.push({kind:'hold',id:h.id,tk:h.short||h.symbol,nm:hName(h),sym:hSym(h),x,c:curOf(x),cur:curOfI(x),val:z?z.v:null,lvl:a?a.v:null,
       y:yldOf(x),cc:ccOf(h.isin,hSym(h)),rc:hRec(h),sector:sectorOf(hSym(h),h.sector),w,eur:v?v.eur:0,cap:capOf(h),inDepot:!depot||!!posOf_(h),broken:brokenOf(textSrc(h)),open:()=>openHold(h.id)}); }
   for(const i of live()){ if(i.status==='out'||seen.has(symOf(i))) continue;
     out.push({kind:'idea',id:i.id,tk:i.ticker,nm:i.name,sym:symOf(i),x:i,c:curOf(i),cur:curOfI(i),val:valNorm(i.val),lvl:i.buyBelow>0?i.buyBelow:null,
@@ -3269,7 +3288,7 @@ function renderIncome0(){
     const rows=holdings().filter(h=>hSym(h)).map(h=>{ const x=px(h), y=yldOf(x), cc=isFund(h)?null:ccOf(h.isin,hSym(h)); return {h,x,y,net:y!=null?y*(1-(isFund(h)?0:leakOf(cc,hRec(h)))):null}; })
       .filter(r=>r.y>0).sort((a,b)=>b.net-a.net);
     box.innerHTML=`<h4 class="shd">Dividend income</h4><p class="ink">The € figures need your statement on this device (import it below). Until then, the yields: today's trailing yield and what's left after withholding you can't credit.</p>`;
-    list.appendChild(groupEl('Yield, after withholding',rows.map(r=>rowEl({tc:'var(--t-none)',tile:fmtN(r.net,1),txt:true,tk:r.h.short||r.h.symbol,nm:r.h.name,
+    list.appendChild(groupEl('Yield, after withholding',rows.map(r=>rowEl({tc:'var(--t-none)',tile:fmtN(r.net,1),txt:true,tk:r.h.short||r.h.symbol,nm:hName(r.h),
       line2:r.net<r.y-.005?`${fmtN(r.net,2)} % after withholding`:'no withholding lost',px:{main:fmtN(r.y,2)+' %',sub:'yield'},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),'No yields yet.','inc.list'));
     box.appendChild(list); return; }
   const pb=I.P, mo=v=>fmtEur(v/12);
@@ -3292,7 +3311,7 @@ function renderIncome0(){
     <div class="incgr">${gr}</div>`;
   const tile=r=>I.G>0?fmtN(r.eur/I.G*100,0)+' %':'–';
   const line2=r=>{ const b=[]; if(r.yoc!=null) b.push(`${fmtN(r.yoc,1)} % on your cost`); if(r.y!=null) b.push(`yield ${fmtN(r.y,1)} %`); if(r.leakEur>=.5) b.push(`<span class="dn">−${fmtEur(r.leakEur)} ${esc(r.cc)} tax lost</span>`); return b.join(' · ')||(r.fund?(r.h.kind==='bond'?'bond fund':'fund'):''); };
-  list.appendChild(groupEl('Who pays it · share of your income',I.R.map(r=>rowEl({tc:'var(--teal)',tile:tile(r),txt:true,tk:r.h.short||r.h.symbol,nm:r.h.name,line2:line2(r),
+  list.appendChild(groupEl('Who pays it · share of your income',I.R.map(r=>rowEl({tc:'var(--teal)',tile:tile(r),txt:true,tk:r.h.short||r.h.symbol,nm:hName(r.h),line2:line2(r),
     px:{main:fmtEur(r.eur),sub:'a year'},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),'No dividends found.','inc.list'));
   box.appendChild(list);
   const nm=a=>a.map(r=>esc(r.h.short||r.h.symbol||r.h.name)).join(', ');
@@ -3344,7 +3363,7 @@ function renderLeak(){
     box.innerHTML=`<h4 class="shd">Withholding tax you lose</h4><p class="ink">The € figures need your statement on this device. Until then, the rates: what is withheld, what Germany credits, what comes back with a reclaim and what is lost.</p>`;
     stk.sort((p,q)=>leakOf(q.cc,q.rec)-leakOf(p.cc,p.rec));
     list.appendChild(groupEl('Foreign withholding Germany doesn\'t credit',stk.map(o=>{ const w=WHT[o.cc];
-      return rowEl({tc:o.rec?'var(--teal)':LOST[o.cc]?'var(--coral)':'var(--ochre)',tile:esc(o.cc),txt:true,tk:o.h.short||o.h.symbol,nm:o.h.name,
+      return rowEl({tc:o.rec?'var(--teal)':LOST[o.cc]?'var(--coral)':'var(--ochre)',tile:esc(o.cc),txt:true,tk:o.h.short||o.h.symbol,nm:hName(o.h),
       line2:`${pcW(w.rate)} withheld · ${pcW(w.cred)} credited`,
       line3:[w.back>0?`${pcW(w.back)} ${o.rec?'back':'to reclaim'} <span class="rcl ${o.rec?'on':''}">${o.rec?'✓ you reclaim':'reclaim'}</span>`:'',LOST[o.cc]?`${pcW(LOST[o.cc])} lost`:''].filter(Boolean).join(' · '),px:{main:'−'+pcW(leakOf(o.cc,o.rec)),sub:''},onOpen:()=>{ closeAll(); openHold(o.h.id); }}); }),'Nothing: all your stocks are fully credited.'));
     box.appendChild(list);
@@ -3359,7 +3378,7 @@ function renderLeak(){
   // line 2: gross and lost for good; line 3 only where a reclaim can bring money back
   const line2=r=>`gross ${eurW(r.eur)} · lost ${eurW(r.lostEur)}`;
   const line3=r=>backOf(r.cc)>0?`${eurW(r.backEur+r.recEur)} ${r.rec?'back':'reclaimable'} <span class="rcl ${r.rec?'on':''}">${r.rec?'✓ you reclaim':'reclaim'}</span>`:'';
-  list.appendChild(groupEl('Who loses it · € a year',R.map(r=>rowEl({tc:r.miss<.5?'var(--teal)':r.lostEur>=.5?'var(--coral)':'var(--ochre)',tile:esc(r.cc),txt:true,tk:r.h.short||r.h.symbol,nm:r.h.name,
+  list.appendChild(groupEl('Who loses it · € a year',R.map(r=>rowEl({tc:r.miss<.5?'var(--teal)':r.lostEur>=.5?'var(--coral)':'var(--ochre)',tile:esc(r.cc),txt:true,tk:r.h.short||r.h.symbol,nm:hName(r.h),
     line2:line2(r),line3:line3(r),px:{main:r.miss>=.5?'−'+fmtEur(r.miss):eurW(r.miss),sub:'a year'},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),'Nothing: all your dividends are fully credited.'));
   box.appendChild(list);
   box.insertAdjacentHTML('beforeend',todo(R)+credTxt);
@@ -3436,7 +3455,7 @@ function renderXray(){
   const kV=kTop?`The biggest is <b>${esc(CC_NAME[kTop.k]||kTop.k)}</b> at ${fmtN(kTop.w,1)} %, across ${ctry.filter(g=>!g.grey).length} countries.`:'';
   // 4. the five biggest stocks, each with a tick at its own max weight
   const big=[...stk].sort((a,b)=>b.eur-a.eur), t5=big.slice(0,5), S=a=>a.reduce((s,r)=>s+r.eur,0);
-  const top=[...t5.map(r=>({k:r.tk,label:`${r.tk} · ${r.h.name||''}`,eur:r.eur,w:r.w,cap:r.cap,who:[]})),
+  const top=[...t5.map(r=>({k:r.tk,label:`${r.tk} · ${hName(r.h)}`,eur:r.eur,w:r.w,cap:r.cap,who:[]})),
     ...(big.length>5?[{k:'rest',label:`The other ${big.length-5} stocks`,eur:S(big.slice(5)),w:S(big.slice(5))/T*100,grey:true,who:[]}]:[]),
     ...xrGroup(X,'none').filter(g=>g.grey)];
   const t5w=S(t5)/T*100, full=t5.filter(r=>r.w>r.cap);
@@ -3525,7 +3544,7 @@ function renderBench(){
   box.innerHTML=`<h4 class="shd">Your picks vs ${BENCH.short}</h4>
     <p class="ink">Each holding against your world ETF since you bought it: the honest test of picking single stocks.</p>${sum}`;
   if(ok.length){ const tk=r=>esc(r.h.short||r.h.symbol);
-    box.appendChild(groupEl(`Since you bought · vs ${BENCH.short}`,ok.map(r=>rowEl({tc:r.o.gap>=0?'var(--t-buy)':'var(--t-exp)',tile:`${r.o.gap>=0?'+':'−'}${fmtN(Math.abs(r.o.gap),0)}`,tk:r.h.short||r.h.symbol,nm:r.h.name,
+    box.appendChild(groupEl(`Since you bought · vs ${BENCH.short}`,ok.map(r=>rowEl({tc:r.o.gap>=0?'var(--t-buy)':'var(--t-exp)',tile:`${r.o.gap>=0?'+':'−'}${fmtN(Math.abs(r.o.gap),0)}`,tk:r.h.short||r.h.symbol,nm:hName(r.h),
       line2:`<span class="${r.o.s>=0?'up':'dn'}">${fmtPct(r.o.s,0)}</span> vs ${BENCH.short} <span class="${r.o.b>=0?'up':'dn'}">${fmtPct(r.o.b,0)}</span>`,
       line3:r.o.sA!=null?`${fmtPct(r.o.sA,1)} vs ${fmtPct(r.o.bA,1)} a year`:'',px:{main:heldTxt(r.o.yrs),sub:'since '+sinceTxt(r.o.d)},onOpen:()=>{ closeAll(); openHold(r.h.id); }})),null,'bench.list')); }
   const tail=document.createElement('div');
@@ -3566,8 +3585,9 @@ function renderToday(){
   const el=$('#today'); if(!el) return; const D=todayCache=todayData();
   const parts=TODAY.filter(p=>p.k==='level'||D[p.k].length).map(p=>{ const n=D[p.k].length;
     const cls=[p.k==='level'?'lvl':'',p.k==='level'&&!n?'zero':'',p.k==='due'||p.k==='stale'?'warn':'',focus===p.k?'on':''].join(' ');
-    return `<button type="button" data-k="${p.k}" class="${cls}" title="${p.title}"><b>${n}</b> ${n===1?p.one:p.many}</button>`; });
-  if(prices.updated){ const old=pxStaleH(); parts.push(`<button type="button" class="px ${old?'old':''}" data-k="px" title="Age of the last price change. Tap for details.">prices ${agoShort(prices.updated)}</button>`); }
+    const ki=p.k==='level'&&n?new Set(D.level.map(o=>o.kind)):null;   // v4.2.0: "1 idea at level" on the Portfolio tab, not a bare "1 at level"
+    const word=ki&&ki.size===1?(ki.has('idea')?(n===1?'idea':'ideas'):(n===1?'holding':'holdings'))+' at level':n===1?p.one:p.many;
+    return `<button type="button" data-k="${p.k}" class="${cls}" title="${p.title}"><b>${n}</b> ${word}</button>`; });
   el.innerHTML=parts.join('');
   el.querySelectorAll('button').forEach(b=>b.onclick=()=>todayTap(b.dataset.k));
 }
@@ -3656,7 +3676,7 @@ function openHold(id,keep){   // keep: a re-render of the open sheet that puts b
   const card=holdCard({h,x,s,v,w,y,mm}); card.removeAttribute('tabindex'); card.onclick=null; card.onkeydown=null;
   $('#holdBody').innerHTML=`
     ${card.outerHTML}
-    <div class="dmeta">${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)}${h.sector?' · '+esc(h.sector):''} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}${idea?` · <a href="#" id="hIdea" class="lnk">↗ Radar card (${esc(stageOf(idea).label)})</a>`:''}</div>
+    <div class="dmeta">${h.nick&&h.name?esc(h.name)+' · ':''}${esc((KINDS.find(k=>k.k===h.kind)||KINDS[0]).label)}${h.sector?' · '+esc(h.sector):''} · ${esc(hSym(h)||'no symbol')}${h.isin?' · '+esc(h.isin):''}${idea?` · <a href="#" id="hIdea" class="lnk">↗ Radar card (${esc(stageOf(idea).label)})</a>`:''}</div>
     <div class="dbox" id="hDec" hidden></div>
     ${flagFirst?bizHtml(hSym(h),h,'hold'):''}
     ${mm!=null?`<div class="warnbox">The live quote for ${esc(hSym(h))} converts to ${fmtP(v.unit,'EUR')}, the statement says ${fmtP(p.priceEur,'EUR')}. That is ${fmtPct(mm*100,0)} apart, so the Yahoo symbol is probably the wrong line or share class.</div>`:''}
@@ -3705,6 +3725,7 @@ function openHold(id,keep){   // keep: a re-render of the open sheet that puts b
       <label>Max weight %<input id="h_maxWeight" type="number" step="0.5" inputmode="decimal" value="${h.maxWeight??''}" placeholder="${fmtN(Math.max(1,capDefault()+((convOf(h)??3)-3)*CONV_STEP),1)} (from stars)"></label>
       ${own?`<label>Next review<input id="h_review" type="date" value="${esc(h.nextReview||'')}"></label>`:''}
       <label>Short name<input id="h_short" value="${esc(h.short)}"></label>
+      <label>Name in lists<input id="h_nick" value="${esc(h.nick||'')}" placeholder="${esc(h.name||'')}"></label>
       <label>Yahoo symbol<input id="h_symbol" value="${esc(h.symbol)}" style="text-transform:uppercase"></label>
       <label>Currency<input id="h_currency" value="${esc(h.currency)}" style="text-transform:uppercase"></label>
       <label>Type<select id="h_kind">${KINDS.map(k=>`<option value="${k.k}" ${h.kind===k.k?'selected':''}>${k.label}</option>`).join('')}</select></label>
@@ -3719,7 +3740,7 @@ function openHold(id,keep){   // keep: a re-render of the open sheet that puts b
     </div>
     <p class="hint">The buy price and date stay in this browser, like your share counts. For several purchases, take a date roughly in the middle: it starts the comparison with EUNL and, for foreign stocks, splits your € return into the stock's own move and the currency's. Everything else is saved to GitHub.</p>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
-  $('#holdT').innerHTML=sheetT(h.short||h.symbol,h.name); segSheet($('#holdBody'),'hold',h.id);
+  $('#holdT').innerHTML=sheetT(h.short||h.symbol,hName(h)); segSheet($('#holdBody'),'hold',h.id);
   const toIdea=e=>{ e&&e.preventDefault(); if(!leaveOk()) return; closeAll(); openRead(idea.id); };
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
   wireBiz($('#holdBody'),()=>openHold(h.id,true));
@@ -3727,7 +3748,7 @@ function openHold(id,keep){   // keep: a re-render of the open sheet that puts b
   const notes=()=>{ $('#hNoteList').innerHTML=noteRows(srcNow().notes); };
   notes();
   const saveH=msg=>{ idea?persist():persistPort(); if(idea) persistPort(); openHold(h.id,true); toast(msg); };
-  const box=$('#hDec'), sym=hSym(h), go=()=>box.scrollIntoView({behavior:'smooth',block:'center'});
+  const box=$('#hDec'), sym=hSym(h), go=()=>box.scrollIntoView({behavior:'smooth',block:'start'});
   const revH=due=>reviewForm(box,{due,kill:src.kill,months:6,isHold:true,onSave:r=>{ saveReview(srcNow(),r,c,cur,sym); saveH(r.verdict==='broken'?'Saved. Next € holds it back until a review says it holds again.':'Review saved'); }});
   $('#hRev').onclick=()=>{ revH(false); go(); };
   if(!fund){
@@ -3744,7 +3765,8 @@ function openHold(id,keep){   // keep: a re-render of the open sheet that puts b
     setCost(h,Number($('#h_cost').value),$('#h_costDate')?$('#h_costDate').value||null:costDateOf(h));
     Object.assign(h,{short:val('#h_short'),symbol:val('#h_symbol').toUpperCase(),currency:curNorm(val('#h_currency'),val('#h_symbol')),
       kind:$('#h_kind').value,addBelow:num($('#h_addBelow').value),addBelow2:num($('#h_addBelow2').value),conviction:num($('#h_conv').value),maxWeight:num($('#h_maxWeight').value),idea:val('#h_idea').toUpperCase()||null,
-      sector:val('#h_sector'),note:val('#h_note'),updatedAt:now()});
+      sector:val('#h_sector'),note:val('#h_note'),nick:val('#h_nick')||null,updatedAt:now()});
+    if(!h.nick) delete h.nick;
     if(!fund){ const nv=valRead('hv_',h.val,c); if(nv) h.val=nv; else delete h.val; }
     if(own){ h.nextReview=val('#h_review')||null; h.thesis=val('#h_thesis')||'';
       if($('#h_bull')) Object.assign(h,{bull:val('#h_bull'),bear:val('#h_bear'),kill:val('#h_kill')}); }

@@ -18,7 +18,8 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-06T17:47:06+00:00"
+      "updatedAt": "2026-11-10T06:55:50.000Z",
+      "nick": "Euro Corp Bonds"
     },
     {
       "id": "h-US56035L1044",
@@ -277,7 +278,8 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "updatedAt": "2026-11-10T06:55:50.000Z",
+      "nick": "Euro Stoxx 50"
     },
     {
       "id": "h-DE0008404005",
@@ -333,7 +335,8 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "updatedAt": "2026-11-10T06:55:50.000Z",
+      "nick": "MSCI World"
     },
     {
       "id": "h-FR0000125486",
@@ -886,7 +889,8 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "updatedAt": "2026-11-10T06:55:50.000Z",
+      "nick": "All-World High Dividend"
     },
     {
       "id": "h-US1912161007",
@@ -949,7 +953,8 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-06T17:41:27+00:00"
+      "updatedAt": "2026-11-10T06:55:50.000Z",
+      "nick": "Emerging Markets IMI"
     }
   ]
 }
