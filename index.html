@@ -526,6 +526,7 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .r1 .w{font-size:13px;color:var(--ink2);flex:none;font-variant-numeric:tabular-nums}
 .r1 .w.over{color:var(--coral);font-weight:700}
 .r2{font-size:13px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.row2 .r3{white-space:normal}
 .row2 .r2{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.35}   /* v4.2.0: wraps to a 2nd line instead of cutting off the yield */
 .r2 b{font-weight:700}
 .nw{white-space:nowrap}
@@ -1030,8 +1031,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.3.0';
+const VERSION='4.4.0';
 const CHANGELOG=[
+  {v:'4.4.0',d:'2026-11-10',t:'Price vs your fair value',items:[
+    'At the bottom of Portfolio, a new list puts every stock you hold that has a valuation in order of how far today\'s price is from your own fair value, cheapest first. The tile shows the gap in %: green below fair value, ochre up to 20 % above, red further above.',
+    'The groups above still go by your add level; this list goes by fair value, so it shows where the two disagree (a stock well below fair value but above a strict add level, or one far above fair value you may want to stop adding to). Each row also says when the valuation was made, whether it is stale, and whether its two methods are far apart. Tap a row for the holding.',
+  ]},
   {v:'4.3.0',d:'2026-11-10',t:'"Last seen at this level"',items:[
     'Under every buy and add level, the sheet now says when the price was last there and how often in the last five years ("Last seen at this level: Sep 2026 · 6 of the last 60 month-ends"). A level the stock has not touched in five years, or ever, shows in ochre with the five-year low next to it, so you can tell a real plan from a wish.',
     'It uses month-end closing prices, so a dip that recovered within the month does not count. Scores and rankings do not change.',
@@ -3683,7 +3688,24 @@ function renderPort(){
   ];
   for(const [t,list,empty,isDue,fk] of groups){ if(!list.length&&!empty) continue;
     body.appendChild(groupEl(t,list.map(r=>holdRow(r,isDue||r.st.due&&r.st.group==='zone')),empty,fk)); }
+  const fv=fairRows(rows); if(fv.length) body.appendChild(groupEl(FAIR.title,fv.map(fairRow),null,'port.fair'));
 }
+// ---------- Price vs your fair value (v4.4.0) ----------
+// Every stock in the depot with a valuation, cheapest first: how far today's price is from your own fair value (val.base).
+// A second view next to the groups above, which go by your add level. Information only: no score or group reads it.
+const FAIR={title:'Price vs your fair value',far:20};   // far: above this % the tile turns coral ("well above")
+function fairRows(rows){
+  return rows.filter(r=>r.st.inDepot&&!r.st.fund).map(r=>{ const z=valOfH(r.h), c=curOf(r.x); if(!z||!(z.v.base>0)||!(c>0)) return null;
+    return {r,z,c,cur:curOfI(r.x),gap:(c/z.v.base-1)*100,sp:valSpread(z.v),age:valAge(z.v,hSym(r.h))}; }).filter(Boolean)
+    .sort((a,b)=>a.gap-b.gap); }
+function fairRow(o){ const {r,z,c,cur,gap,sp,age}=o, h=r.h, a=addOf(h), v=z.v;
+  const tc=gap<=0?'var(--t-buy)':gap<FAIR.far?'var(--ochre)':'var(--t-exp)';
+  const lo=sp&&sp.wide&&sp.lo<v.base?(c/sp.lo-1)*100:null;
+  const line2=`${gap<=0?`<b class="up">${fmtN(Math.abs(gap),0)} % below</b>`:`${fmtN(gap,0)} % above`} fair ${mN(v.base,cur)}${a?` · add below ${mN(a.v,cur)}`:''}`;
+  const sg=x=>`${x<=0?'−':'+'}${fmtN(Math.abs(x),0)} %`;
+  const line3=[sp&&sp.wide?`<b class="wd">methods ${fmtN(sp.gap,0)} % apart</b>${lo!=null?`, lower one ${sg(lo)}`:''}`:'',
+    age&&age.stale?'<b class="wd">valuation stale</b>':'', z.src==='radar'?'from the Radar card':'', !(sp&&sp.wide)&&v.date?'valued '+fmtDay(v.date):''].filter(Boolean).join(' · ');
+  return rowEl({tc,tile:`${gap<=0?'−':'+'}${fmtN(Math.abs(gap),0)}`,txt:true,tk:h.short||h.symbol,nm:hName(h),line2,line3,px:pxCol(c,cur),onOpen:()=>openHold(h.id)}); }
 $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.target.value=capDefault(); return; }
   port.settings={...(port.settings||{}),maxWeight:v,updatedAt:now()}; persistPort(); toast(`Max per stock: ${fmtN(v,1)} %`); };
 
