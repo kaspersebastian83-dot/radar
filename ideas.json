@@ -493,6 +493,161 @@
         "bearWhy": "25 % cut on the Caesars lease → AFFO $2.30 × 9×",
         "g": 2.5
       }
+    },
+    {
+      "id": "d29n4tmwamt1lx",
+      "ticker": "AI",
+      "name": "Air Liquide",
+      "sector": "Basic materials – industrial gases",
+      "source": "Claude chat 2026-11-10",
+      "status": "radar",
+      "loggedDate": "2026-11-10",
+      "loggedPrice": 189.46,
+      "currency": "EUR",
+      "symbol": "AI.PA",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": null,
+      "conviction": 3,
+      "thesis": "World no. 2 in industrial gases; long take-or-pay contracts make earnings steady. Fills the empty Basic Materials sector. At €189 it trades on ~29x 2026e EPS €6.42 with a ~1.95 % yield (DPS €3.36 for 2025, ~€3.65 expected for 2026), so this is a watch-and-wait idea, no level yet.",
+      "bull": "No dividend cut for 17 years; consensus EPS growth ~11 % into 2027 (€7.15); French 12.8 % withholding is fully credited at Trade Republic.",
+      "bear": "Up ~30 % in 2026 and at its all-time high; yield below its own 5-yr average (~2.07 %); payout ~61 %; a de-rating to 22x would mean ~€140.",
+      "kill": "Return on capital falls for two years running or the dividend is not raised.",
+      "nextReview": "2027-02-10",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-10",
+          "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov close. No valuation or buy level yet."
+        }
+      ],
+      "createdAt": "2026-11-10T11:53:33.285Z",
+      "updatedAt": "2026-11-10T11:53:33.285Z"
+    },
+    {
+      "id": "cg6gx1mwamt1lx",
+      "ticker": "LIN",
+      "name": "Linde",
+      "sector": "Basic materials – industrial gases",
+      "source": "Claude chat 2026-11-10",
+      "status": "radar",
+      "loggedDate": "2026-11-10",
+      "loggedPrice": 520.33,
+      "currency": "USD",
+      "symbol": "LIN",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": null,
+      "conviction": 3,
+      "thesis": "Largest industrial gas company, best margins in the sector. 2026 adjusted EPS guidance $17.82–17.92, dividend $6.40 (1.2 % yield), payout ~42 %, raised 33 years in a row. Quality is not in doubt; the price is: ~29x this year's adjusted EPS.",
+      "bull": "Electronics and project backlog drive growth; low payout leaves room for raises and buybacks; reportedly no withholding tax at source on the dividend.",
+      "bear": "Lowest yield of the group; trailing P/E ~34.6; Irish plc: Radar treats it as a US stock (15 % credited), the real withholding position needs checking before a buy.",
+      "kill": "Adjusted EPS growth drops below 5 % a year while the multiple stays near 30x.",
+      "nextReview": "2027-02-10",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-10",
+          "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov close. No valuation or buy level yet."
+        }
+      ],
+      "createdAt": "2026-11-10T11:53:33.285Z",
+      "updatedAt": "2026-11-10T11:53:33.285Z"
+    },
+    {
+      "id": "y72lcymwamt1lx",
+      "ticker": "APD",
+      "name": "Air Products",
+      "sector": "Basic materials – industrial gases",
+      "source": "Claude chat 2026-11-10",
+      "status": "radar",
+      "loggedDate": "2026-11-10",
+      "loggedPrice": 311.08,
+      "currency": "USD",
+      "symbol": "APD",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": null,
+      "conviction": 2,
+      "thesis": "Industrial gases turnaround after scaling back its clean-energy projects. Dividend $7.24 (2.3 % yield), raised 44 years in a row; fiscal Q4 2026 adjusted EPS $3.61 (+6.5 %). The catch: free cash flow was about −$0.3bn over the last 12 months (capex ~$3.5bn for fiscal 2026).",
+      "bull": "Capex is coming down, so free cash flow should turn positive; payout ~54 % of adjusted EPS; highest yield of the three gas companies.",
+      "bear": "Dividend not covered by free cash flow today (Radar will likely red-flag it); project execution and debt; up ~25 % in 2026 already.",
+      "kill": "Free cash flow is still negative in fiscal 2027 or the dividend raise stops.",
+      "nextReview": "2027-02-10",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-10",
+          "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov close. No valuation or buy level yet."
+        }
+      ],
+      "createdAt": "2026-11-10T11:53:33.285Z",
+      "updatedAt": "2026-11-10T11:53:33.285Z"
+    },
+    {
+      "id": "6ztzu7mwamt1lx",
+      "ticker": "SY1",
+      "name": "Symrise",
+      "sector": "Basic materials – flavours and fragrances",
+      "source": "Claude chat 2026-11-10",
+      "status": "radar",
+      "loggedDate": "2026-11-10",
+      "loggedPrice": 94.36,
+      "currency": "EUR",
+      "symbol": "SY1.DE",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": null,
+      "conviction": 2,
+      "thesis": "Flavours, fragrances and cosmetic ingredients for 6,000+ customers; German, so no foreign withholding at all. Dividend €1.25 (1.3 % yield), raised 15 years in a row. 2026 guidance: organic growth 2–4 %, EBITDA margin 21.5–22.5 %. ~25x 2026e earnings, below its own 30–41x of 2023–2025.",
+      "bull": "Q3 organic growth 5.3 %, volume-driven; management bought shares after the drop; cheaper than its own history.",
+      "bear": "Fell ~10 % on the Q3 report (margin pressure); shares still ~21 % lower than five years ago; low yield, so the return must come from growth.",
+      "kill": "EBITDA margin falls below 20 % or organic growth stays under 2 % for two years.",
+      "nextReview": "2027-03-05",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-10",
+          "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov Xetra close. No valuation or buy level yet. Annual report 3 Mar 2027."
+        }
+      ],
+      "createdAt": "2026-11-10T11:53:33.285Z",
+      "updatedAt": "2026-11-10T11:53:33.285Z"
+    },
+    {
+      "id": "wxpovvmwamt1lx",
+      "ticker": "RIO",
+      "name": "Rio Tinto",
+      "sector": "Basic materials – mining",
+      "source": "Claude chat 2026-11-10",
+      "status": "radar",
+      "loggedDate": "2026-11-10",
+      "loggedPrice": 6431,
+      "currency": "GBp",
+      "symbol": "RIO.L",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": null,
+      "conviction": 2,
+      "thesis": "Iron ore, aluminium and copper miner; the income pick of the group. Last two dividends 254 + 211 US cents (~348p a year, ~5.4 % yield at 6,431p), payout ~54 %, P/E ~11. The dividend moves with the cycle, so it only works bought when the price reflects weak commodity prices.",
+      "bull": "No UK withholding tax; low-cost Pilbara iron ore; copper and lithium growth; ~23 % below its 52-week high of 8,325p.",
+      "bear": "Variable dividend, no streak; iron ore price and China demand; a cyclical valued on today's earnings can look cheap right before earnings fall.",
+      "kill": "Iron ore stays low enough that the payout policy (a share of earnings) gives less than a 3.5 % yield on my buy price.",
+      "nextReview": "2027-02-20",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-10",
+          "text": "2026-11-10: screened as a Basic Materials candidate. Logged at 6,431p from 9 Nov about 16:00 UK time, shortly before the close. No valuation or buy level yet. Full-year results in February."
+        }
+      ],
+      "createdAt": "2026-11-10T11:53:33.285Z",
+      "updatedAt": "2026-11-10T11:53:33.285Z"
     }
   ]
 }
