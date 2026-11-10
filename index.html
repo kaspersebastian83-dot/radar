@@ -708,6 +708,22 @@ main{padding:6px 16px calc(128px + env(safe-area-inset-bottom))}
 .rpx b{font-size:16px}.rpx small{font-size:12.5px}
 .rempty{padding:16px;font-size:15px;color:var(--ink2)}
 .rmore{min-height:48px;padding:12px 16px;font-size:15px;color:var(--acc);border-top:1px solid var(--line)}
+.hlp{font-size:15px;line-height:1.5;color:var(--ink)}
+.hlp>p.lead{margin:0 0 12px;color:var(--ink2)}
+.hlp .sfold{border-top:1px solid var(--line)}.hlp .sfold:first-of-type{border-top:0}
+.hlp .sfold>summary{padding:0 4px 0 0}.hlp .sfold .sfb{padding:0 0 16px}
+.hlp p{margin:0 0 10px}.hlp ul{margin:0 0 10px;padding-left:20px}.hlp li{margin:0 0 6px}
+.hlp .hex{background:var(--acc-soft);border-radius:var(--r2);padding:12px 14px;margin:0 0 12px;font-variant-numeric:tabular-nums}
+.hlp .hex>b:first-child{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin:0 0 6px}
+.hlp .hex p:last-child,.hlp .hex ul:last-child{margin-bottom:0}
+.hlp .hex.mine{background:var(--teal-soft,var(--acc-soft))}
+.hlp .calc{display:block;font-weight:700;margin:2px 0 8px}
+.hlp dl{margin:0}.hlp dt{font-weight:700;margin:10px 0 0}.hlp dd{margin:0;color:var(--ink2)}
+.hlp .tiers{margin:0 0 10px}
+#mHelp{z-index:30}
+.helpgo{border:0;background:transparent;padding:6px 0;min-height:32px;font:inherit;font-size:13px;font-weight:700;color:var(--acc);text-align:left;cursor:pointer}
+.btn.helpbig{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;height:auto;border-radius:24px;gap:2px;width:100%;margin:0 0 12px;padding:12px 16px;text-align:left;white-space:normal}
+.helpbig b{font-size:17px;font-weight:700}.helpbig span{font-size:13px;font-weight:500;color:var(--ink2)}
 .rmore.peek{border-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmode{position:static;box-shadow:inset 0 0 0 1px var(--acc-soft);margin:0 0 14px;background:var(--glass)}
 .grp .ghint{margin:-4px 4px 10px;font-size:13px;color:var(--ink2);line-height:1.4}
@@ -929,6 +945,7 @@ input[type=file]{display:none}
   <div class="sortopts" id="sortOpts"></div>
   <div class="explain">
     <h4>How the Buy score works</h4>
+    <p><button type="button" class="helpgo" data-help="score">New to this? The whole thing explained from scratch</button></p>
     <p>0 to 100. It only measures how cheap the stock is <b>against your own thesis</b>. Conviction stays separate (the stars).</p>
     <div class="sbar"><span>60 points</span><i><em style="width:100%;background:var(--teal)"></em></i><b></b></div>
     <p style="margin-top:-6px">Distance to your buy-below price. Full points at or under it, zero at 25 % above.</p>
@@ -980,8 +997,15 @@ input[type=file]{display:none}
   </div>
 </div></div>
 
+<!-- beginner's guide (v4.7.0) -->
+<div class="modal" id="mHelp"><div class="sheet" style="max-width:640px">
+  <h3>How Radar works<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <div class="hlp" id="helpBody"></div>
+</div></div>
+
 <div class="modal" id="mMenu"><div class="sheet">
   <h3>Settings<span class="sp"></span><button class="btn small quiet" data-close aria-label="Close">✕</button></h3>
+  <button class="btn helpbig" type="button" data-help="idea"><b>How Radar works</b><span>Fair value, buy price, score and taxes, explained from scratch</span></button>
   <div class="verrow"><span>Radar <b class="num" id="verMenu"></b> <span id="verDate"></span></span><span class="sp"></span><button class="btn small" id="btnDec">Decision journal</button><button class="btn small" id="btnLog">What's new</button></div>
   <div class="msec">
     <h4>Live prices</h4>
@@ -1035,8 +1059,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.6.0';
+const VERSION='4.7.0';
 const CHANGELOG=[
+  {v:'4.7.0',d:'2026-11-10',t:'How Radar works',items:[
+    'A new window explains everything from scratch, for someone who has never valued a stock: what fair value is and how the two methods get to it, the safety margin and the bear case, the 0–100 score and the groups, dividend words, red flags and quality, the Next € return, taxes, the EUNL comparison, and a small dictionary. One made-up company runs through all of it so the numbers add up, and a box shows the same steps with one of your own stocks.',
+    'Open it from ⋯ (top of Settings). The Valuation section of every stock, the Next € explainer and the score explainer link straight to the matching chapter. It opens on top of what you were looking at; closing it brings you back there.',
+  ]},
   {v:'4.6.0',d:'2026-11-10',t:'Shorter Portfolio and Next €',items:[
     'Portfolio has two views at the top: "By add level" (the groups as before) and "By fair value" (cheapest against your own fair value first). The fair-value list no longer sits under the groups, so each stock is listed once per view. The app remembers which view you used.',
     'Next €: when nothing is at your level, only the box at the top says so (no empty group under it). "Held back", "Lowest expected return in your depot" and "Not ranked" fold to one line with their tickers; tap to open.',
@@ -2074,6 +2102,7 @@ function valHtml(v,c,cur,lvl,word,sym,src){
       ${v.bear>0?`<p><b>Bear case ${mP(v.bear,cur)}</b>${v.bearWhy?`: ${esc(v.bearWhy)}`:''}</p>`:''}
       ${v.reverse?`<p><b>What the price implies:</b> ${esc(v.reverse)}</p>`:''}
     </div>
+    <p><button type="button" class="helpgo" data-help="fair">How a valuation like this is worked out</button></p>
     <p class="hint">${v.date?`Estimate from ${fmtDate(v.date)}${v.price>0?` at ${mP(v.price,cur)}`:''}.`:'No estimate date.'} ${a&&a.res?`<span class="stl">Results came out on ${fmtDate(a.res)}, after this estimate. Time to redo it.</span>`:a&&a.stale?`<span class="stl">${Math.round(a.days/30)} months old. Time to redo it.</span>`:''}</p></div>`; }
 // Edit form block, shared by the idea editor and the holding settings (p = id prefix).
 function valForm(p,v,cur){ v=v||{}; const m=v.methods||[], vv=x=>x==null?'':esc(String(x)), c=esc(cur||'');
@@ -2314,7 +2343,9 @@ function typedOf(){ const m=SHEET.kind&&$(SHEET_EL[SHEET.kind]), o={}; if(!m) re
   for(const e of sheetFields(m)){ const b=SHEET.base&&SHEET.base.has(e)?SHEET.base.get(e):fieldDef(e); if(fieldVal(e)!==b) o[e.id]=fieldVal(e); }
   return o; }
 const leaveOk=()=>!Object.keys(typedOf()).length||confirm('Discard what you typed?');
-function tryClose(){ if(leaveOk()) closeAll(); }
+// v4.7.0: the guide (#mHelp) opens on top of another sheet; ✕, Escape, a tap outside and the drag handle close only the guide
+const helpOn=()=>$('#mHelp').classList.contains('on');
+function tryClose(){ if(helpOn()){ $('#mHelp').classList.remove('on'); return; } if(leaveOk()) closeAll(); }
 // v4.1.6: a sync can replace the idea or holding while its sheet is open (merge/mergeP swap in GitHub's newer copy).
 // Every button that writes looks the object up again through these, so the write lands on the copy that gets saved.
 const liveIdea=i=>data.ideas.find(x=>x.id===i.id)||i;
@@ -2456,7 +2487,7 @@ $$('.sheet').forEach(sh=>{ const g=document.createElement('div'); g.className='g
   let y0=null, dy=0;
   g.addEventListener('touchstart',e=>{ y0=e.touches[0].clientY; dy=0; sh.style.transition='none'; },{passive:true});
   g.addEventListener('touchmove',e=>{ if(y0==null) return; e.preventDefault(); dy=Math.max(0,e.touches[0].clientY-y0); sh.style.transform=`translateY(${dy}px)`; },{passive:false});   // preventDefault: no native scroll or fling starts, which would swallow the next tap
-  const end=()=>{ if(y0==null) return; y0=null; const far=dy>90&&leaveOk(); sh.style.transition='transform .2s'; sh.style.transform=far?'translateY(100%)':''; if(far) setTimeout(()=>{ closeAll(); sh.style.transition='none'; sh.style.transform=''; },190); };
+  const end=()=>{ if(y0==null) return; y0=null; const far=dy>90&&(helpOn()||leaveOk()); sh.style.transition='transform .2s'; sh.style.transform=far?'translateY(100%)':''; if(far) setTimeout(()=>{ if(helpOn()) $('#mHelp').classList.remove('on'); else closeAll(); sh.style.transition='none'; sh.style.transform=''; },190); };
   g.addEventListener('touchend',end); g.addEventListener('touchcancel',end); g.addEventListener('click',()=>{}); });
 
 // ---------- import from claude ----------
@@ -3219,6 +3250,7 @@ function renderNext(){
   body.appendChild(g);
   const ex=document.createElement('details'); ex.className='cs nxex';
   ex.innerHTML=`<summary><b>How this is worked out</b></summary><div class="vtxt">
+    <p><button type="button" class="helpgo" data-help="next">New to this? Explained from scratch, with an example</button></p>
     <p>Each stock with a valuation gets an expected return a year over the next ${NX.years} years, in percent:</p>
     <ul><li><b>Hurdle</b>: ${NX.hurdle} %, the return your fair values are built on. A stock bought exactly at fair value should earn it, as dividends plus growth, whatever the split between the two. Growth and buybacks are already inside the fair value, so they aren't added again.</li>
     <li><b>Fair</b>: the yearly move if the price closes the gap to your fair value over ${NX.years} years. Negative when the price is above fair value. When your two valuation methods are ${VAL_WIDE} % or more apart, only the lower one counts, because the average hides that one of them may be wrong.</li>
@@ -4014,6 +4046,137 @@ function openLog(){
   seenVer=VERSION; try{ localStorage.setItem(LS_SEEN,VERSION); }catch{} renderVersion();
 }
 $('#verBtn').onclick=openLog;
+// ---------- How Radar works (v4.7.0): a guide for someone who has never valued a stock ----------
+// One made-up company runs through every section so the numbers add up; the box "From your Radar" shows the same
+// steps with one of your own valuations (the stock whose sheet is open, else the first idea or holding that has two methods).
+function helpMine(){
+  const cand=[]; const add=(nm,tk,v,c,cur,lvl,word)=>{ if(v&&v.base>0) cand.push({nm,tk,v,c,cur,lvl,word}); };
+  const I=i=>add(i.name,i.ticker,valNorm(i.val),curOf(i),curOfI(i),i.buyBelow,'buy price');
+  const H=h=>{ const z=valOfH(h), x=px(h), a=addOf(h); if(z) add(hName(h),h.short||h.symbol,z.v,curOf(x),curOfI(x),a?a.v:null,'add level'); };
+  // the stock whose sheet is open comes first; otherwise the clearest example: two methods that agree, with a margin
+  if(SHEET.kind==='read'){ const i=data.ideas.find(x=>x.id===SHEET.id); if(i) I(i); }
+  if(SHEET.kind==='hold'){ const h=port.holdings.find(x=>x.id===SHEET.id); if(h) H(h); }
+  if(cand.length) return cand[0];
+  live().filter(i=>i.status!=='out').forEach(I); holdings().filter(h=>!isFund(h)).forEach(H);
+  const two=o=>o.v.methods.filter(m=>m.v>0).length>=2&&o.v.discount!=null;
+  return cand.find(o=>two(o)&&!valSpread(o.v)?.wide)||cand.find(two)||cand[0]||null; }
+function helpMineHtml(){ const o=helpMine(); if(!o) return '';
+  const {v,cur}=o, n=x=>fmtN(x)+' '+esc(cur||''), mv=v.methods.filter(m=>m.v>0), lv=levelFromVal(v);
+  return `<div class="hex mine"><b>From your Radar: ${esc(o.nm||o.tk)}</b>
+    ${mv.length?`<ul>${mv.map(m=>`<li>${esc(m.t)||'method'} → <b>${n(m.v)}</b></li>`).join('')}</ul>`:''}
+    <p>Fair value: <b>${n(v.base)}</b>${mv.length>1?' (the average)':''}.${v.discount!=null&&lv?` Minus ${fmtN(v.discount,0)} % safety margin → ${o.word} <b>${n(o.lvl>0?o.lvl:niceRound(lv))}</b>.`:''}${v.bear>0?` Bear case: <b>${n(v.bear)}</b>.`:''}${o.c>0?` Today's price: <b>${n(o.c)}</b>, ${o.c<=v.base?fmtN((1-o.c/v.base)*100,0)+' % below':fmtN((o.c/v.base-1)*100,0)+' % above'} fair value.`:''}</p></div>`; }
+const HELP=[
+['idea','The idea in one minute',()=>`
+  <p>A share is a small piece of a company. Its <b>price</b> jumps around every day. What the company is <b>worth</b> changes slowly. Radar exists for one job: to tell you when the price of a good company is clearly below what you think it is worth.</p>
+  <p>For that, every stock gets three numbers:</p>
+  <ul><li><b>Fair value</b>: what one share is worth, by your own estimate.</li>
+  <li><b>Buy price</b> (for ideas) or <b>add level</b> (for stocks you own): the fair value minus a safety margin. At or below it, Radar says "Buy zone" or "Add zone".</li>
+  <li><b>Bear case</b>: what the share could be worth if things go badly. It shows what you risk.</li></ul>
+  <div class="hex"><b>The example used in this guide</b><p>"Brot AG", a made-up bakery chain. It earns 5 € per share a year and pays out part of it as a dividend. You will see below how this gives a fair value of 81 €, a buy price of 61 € and a bear case of 52 €.</p></div>
+  <p>Everything else in the app (the score, the groups, Next €) is built on these three numbers. If the fair value is wrong, the rest is wrong too. That is why it's worth understanding how it is made.</p>`],
+['fair','Fair value: what is a share worth?',()=>`
+  <p>Nobody knows the exact value of a company. So Radar uses <b>two different ways</b> to estimate it and takes the average. If both land close to each other, you can trust the number more.</p>
+  <div class="hex"><b>Way 1: profit × a normal price tag</b>
+    <p>Brot AG earns 5 € per share a year. Over the years, buyers have usually paid about 18 times the yearly profit for this kind of company.</p>
+    <span class="calc">5 € × 18 = 90 €</span>
+    <p>The "18 times" is called the multiple, or P/E. Radar takes the company's own long-term average, or a bit less to be careful.</p></div>
+  <div class="hex"><b>Way 2: what the cash is worth to you</b>
+    <p>Brot AG has 3,60 € per share a year left over in cash for its owners, and that grows about 3 % a year. You want to earn ${NX.hurdle} % a year on your money. The growth gives you 3 of those ${NX.hurdle} points, so the cash has to give the other 5.</p>
+    <span class="calc">3,60 € ÷ 0,05 = 72 €</span>
+    <p>Check: 3,60 € on 72 € is 5 %. Plus 3 % growth makes your ${NX.hurdle} %. In the cards this way is called "Gordon".</p></div>
+  <div class="hex"><b>Together</b><span class="calc">(90 € + 72 €) ÷ 2 = 81 € fair value</span>
+    <p>When the two ways are ${VAL_WIDE} % or more apart, Radar writes "methods … % apart" in ochre. Then one of them may be wrong, and the fair value is soft. Next € uses only the lower one in that case.</p></div>
+  ${helpMineHtml()}
+  <p>A valuation gets old. After the company publishes new results, or after about half a year, Radar marks it "stale": time to redo it.</p>`],
+['level','Buy price, safety margin and bear case',()=>`
+  <p>An estimate can be wrong. So you don't buy at fair value, you wait for a discount. That discount is the <b>safety margin</b>: bigger for shaky businesses, smaller for very steady ones.</p>
+  <div class="hex"><b>Brot AG</b><span class="calc">81 € − 25 % = about 61 € buy price</span>
+    <p>If the price is 61 € or lower, Radar puts the stock in the Buy zone. For a stock you already own, the same number is called the add level. A "2nd level" is an even lower price where you'd buy more.</p></div>
+  <p>The <b>bear case</b> asks: what if it goes badly? Lower profit, and buyers pay a lower multiple.</p>
+  <div class="hex"><b>Brot AG, bad years</b><span class="calc">4 € profit × 13 = 52 € bear case</span>
+    <p>Bought at 61 €, you could gain 33 % up to fair value and lose 15 % down to the bear case. Bought at 81 €, the same bad years cost you 36 %. That difference is what the safety margin buys you.</p></div>
+  <p>Two more lines you'll see in a stock's sheet:</p>
+  <ul><li><b>"What the price implies"</b>: how much growth the company needs for today's price to make sense. If that looks too hopeful, the stock is expensive.</li>
+  <li><b>"Last seen at this level"</b>: when the price was last this low. If it never was in five years, your level may be too strict to ever be reached.</li></ul>`],
+['score','The score from 0 to 100, and the groups',()=>`
+  <p>The number in the tile says how cheap a stock is <b>against your own buy price</b>. It is made of three parts:</p>
+  <ul><li><b>60 points: distance to your buy price.</b> All 60 at or below it, none when the price is 25 % above. Brot AG at 67 € is 10 % above 61 €, which gives 36 points.</li>
+  <li><b>30 points: dividend yield against its own 5-year average.</b> A higher yield than usual means the stock is cheaper than usual.</li>
+  <li><b>10 points: where the price sits between its lowest and highest of the last year.</b> Kept small, because a stock near its low is often cheap for a reason.</li></ul>
+  <div class="tiers"><span style="--tc:var(--t-buy)">75+ Buy zone</span><span style="--tc:var(--t-close)">55–74 Getting close</span><span style="--tc:var(--t-wait)">35–54 Wait</span><span style="--tc:var(--t-exp)">under 35 Expensive</span></div>
+  <p>Three rules sit on top, so a nice yield can't fool you:</p>
+  <ul><li>Buy zone only <b>at or below</b> your buy price. Even 1 % above stops at "Getting close".</li>
+  <li>A <b>red flag</b> in the business, or a thesis you marked as broken, stops the stock at "Wait".</li>
+  <li>An idea <b>without a buy price</b> gets no score. It waits under "Needs a buy price".</li></ul>
+  <p>On the Portfolio tab it works the same with your add level. The groups there are called Add zone, Getting close and Hold. "Full" means the stock is already a bigger part of your depot than your maximum, so Radar won't suggest adding.</p>`],
+['div','Dividends: yield, payout, raises',()=>`
+  <dl><dt>Dividend</dt><dd>The part of the profit a company pays its owners in cash, usually once to four times a year.</dd>
+  <dt>Yield</dt><dd>The dividend of one year divided by the price. 2 € dividend on a 50 € share is 4 %. If the price falls to 40 €, the yield rises to 5 %. So ▲ next to a yield (higher than usual) means cheaper than usual, ▼ means more expensive.</dd>
+  <dt>Payout</dt><dd>How much of the profit or cash goes out as dividend. 50 % is comfortable. Above 100 % the company pays more than it earns, which can't last.</dd>
+  <dt>Raised in a row</dt><dd>How many years running the dividend went up. A long run shows the company treats the dividend as a promise.</dd>
+  <dt>Div. growth 5 yr</dt><dd>How fast the dividend grew per year over five years. A 3 % yield growing 7 % a year beats a 5 % yield that stands still, given enough time.</dd>
+  <dt>Yield on cost</dt><dd>Today's dividend divided by the price <i>you</i> paid. It shows how your income from an old purchase has grown.</dd></dl>`],
+['biz','Is the business healthy? Red flags and quality',()=>`
+  <p>A cheap price is no use if the business is getting worse. The Business tab in each stock's sheet checks the last few yearly reports for you.</p>
+  <p><b>Red flags</b> (a small red flag in the lists) mean: look before you buy.</p>
+  <ul><li>The cash earned per share fell two years in a row.</li>
+  <li>The dividend was bigger than the cash earned, two years together.</li>
+  <li>The dividend was cut.</li>
+  <li>Many new shares were issued without the business growing with them, so your piece got smaller.</li>
+  <li>Debt is high and still rising.</li></ul>
+  <p>Sometimes a flag has a harmless reason, like a one-off payment. Then tap "Checked, it's fine" and write why. Next year's figures raise it again if the problem is still there.</p>
+  <p>The <b>quality tag</b> is separate: it says how good the business is, not where it is heading. <b>Wonderful</b> companies earn a lot on the money invested in them, carry little debt and raise the dividend year after year. <b>Fair</b> ones are weak on the main test. <b>Good</b> is in between and shows no tag. It's information only and doesn't change the score.</p>`],
+['next','Next €: where should new money go?',()=>`
+  <p>This tab gives each stock an <b>expected return per year</b> and ranks them.</p>
+  <ul><li><b>${NX.hurdle} % to start.</b> Your fair values are built so that a stock bought exactly at fair value earns ${NX.hurdle} % a year, as dividends plus growth.</li>
+  <li><b>Plus the catch-up.</b> If you buy below fair value and the price climbs to it over ${NX.years} years, you earn that on top. Above fair value it's a minus.</li>
+  <li><b>Minus lost foreign tax</b> on the dividend (see the tax section).</li>
+  <li><b>Minus a small penalty</b> if the purchase would make one industry or one foreign currency too big a part of your depot.</li></ul>
+  <div class="hex"><b>Brot AG bought at 61 €</b>
+    <p>From 61 € up to the fair value of 81 € is +33 %. Spread over ${NX.years} years that is about 5,8 % a year.</p>
+    <span class="calc">${NX.hurdle} % + 5,8 % = about 13,8 % a year</span></div>
+  <p>Only stocks <b>at or below your level</b> can be the pick at the top. A stock with a red flag, a broken thesis, or one that is already "full" is held back, however good its number. The dashed bond line is your low-risk alternative: a stock should clearly beat it to be worth the risk.</p>
+  <p>The number is an estimate built on an estimate. Use it to compare stocks with each other, not as a promise.</p>`],
+['tax','Taxes: what arrives in your account',()=>`
+  <p>The Depot tab shows your yearly dividend income three times: <b>gross</b>, <b>after withholding</b>, and <b>after German tax</b>.</p>
+  <ul><li><b>Withholding tax</b>: the country a company sits in keeps part of the dividend before it reaches you. Germany counts up to 15 % of that against your German tax, so that part costs you nothing extra. Anything above 15 % is lost, unless you send a reclaim form to that country.</li>
+  <li><b>German tax</b> (Abgeltungsteuer with Soli): ${fmtN(INC.tax,3)} % on dividends and on gains when you sell. The first ${fmtEur(INC.single)} a year (${fmtEur(INC.joint)} for couples) is tax-free: the Sparer-Pauschbetrag.</li></ul>
+  <div class="hex"><b>100 € dividend</b>
+    <p>From the US: 15 € withheld, all of it counted in Germany. Nothing lost.</p>
+    <p>From Italy: 26 € withheld, 15 € counted, <b>11 € lost</b>.</p>
+    <p>From Canada: 25 € withheld, 15 € counted, 10 € you can get back with a form.</p></div>
+  <p>"Selling this to fund it" in Next € uses the same tax: selling a stock with a gain costs you tax right away, so the stock you buy instead has to be better by more than that.</p>`],
+['bench','Against your world ETF',()=>`
+  <p>A world ETF (yours is EUNL) buys a little of everything and needs no work. Picking single stocks only makes sense if, over the years, your picks do at least as well.</p>
+  <p>So for every stock with a "Bought around" date, Radar compares: what did this stock return since then, dividends included, and what would the same money have done in EUNL over exactly the same time? "+12 pp ahead" means your pick did 12 percentage points better.</p>
+  <p>One good or bad year says little. Look at it over several years, and at all your picks together (Depot tab, "Your picks vs EUNL").</p>`],
+['words','Small dictionary',()=>`
+  <dl><dt>EPS (earnings per share)</dt><dd>The company's yearly profit divided by the number of shares.</dd>
+  <dt>P/E or multiple</dt><dd>Price divided by yearly profit per share. "18×" means buyers pay 18 years of today's profit.</dd>
+  <dt>Free cash flow (FCF)</dt><dd>The cash left after running the business and paying for new machines and buildings. It's what could be paid out.</dd>
+  <dt>FFO / cash from operations</dt><dd>The cash measure used for property companies and utilities, where normal profit is distorted by big write-downs on buildings and plants.</dd>
+  <dt>Hurdle</dt><dd>The yearly return you want before you accept the risk of a stock. Radar uses ${NX.hurdle} %.</dd>
+  <dt>Margin of safety</dt><dd>The discount to fair value you ask for before buying.</dd>
+  <dt>52-week range</dt><dd>The lowest and highest price of the last year. The bar in each sheet shows where today's price sits in it.</dd>
+  <dt>Return on capital (ROIC)</dt><dd>Profit per year on the money tied up in the business. Above 15 % is very good.</dd>
+  <dt>Net debt / EBITDA</dt><dd>How many years of operating profit it would take to pay back the debt. Under 2 is comfortable for most companies.</dd>
+  <dt>Thesis</dt><dd>Your reason for owning the stock, in a few sentences. "I'm wrong if…" says what would make you sell.</dd>
+  <dt>pp (percentage points)</dt><dd>The plain difference between two percentages: 10 % vs 7 % is 3 pp.</dd></dl>`],
+['limits','What Radar can\'t tell you',()=>`
+  <ul><li>It doesn't predict prices. A stock in the Buy zone can keep falling for a long time.</li>
+  <li>Fair values are estimates. Two careful people can be 20 % apart on the same company.</li>
+  <li>The business figures come from Yahoo and sometimes contain errors. When a number looks odd, check the company's own report.</li>
+  <li>It only knows the stocks you put in. It can't tell you what you're missing.</li></ul>
+  <p>Treat it as a checklist that keeps you patient and honest, and make the decision yourself.</p>`],
+];
+function openHelp(sec){
+  $('#helpBody').innerHTML=`<p class="lead">Written for someone who has never valued a stock. Tap a heading to open it.</p>`
+    +HELP.map(([k,t,f])=>`<details class="sfold" data-h="${k}" ${k===(sec||'idea')?'open':''}><summary>${t}</summary><div class="sfb">${f().replace(/(\d) (€|%)/g,'$1\u00a0$2')}</div></details>`).join('');   // "5 €" and "3 %" never break apart
+  $('#mHelp').classList.add('on');
+  const sh=$('#mHelp .sheet'), el=sec&&$(`#helpBody [data-h="${sec}"]`);
+  sh.scrollTop=0; if(el&&sec!=='idea') setTimeout(()=>{ sh.scrollTop=Math.max(0,el.offsetTop-70); },30);
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-help]'); if(!b) return; e.preventDefault(); e.stopPropagation(); openHelp(b.dataset.help); });
 $('#btnLog').onclick=openLog;
 $('#btnDec').onclick=openDecisions; $('#btnDec2').onclick=openDecisions;
 if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
