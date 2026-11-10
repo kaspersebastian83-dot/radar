@@ -426,7 +426,8 @@ details.vform .form{margin-top:10px}
 .bzf .d a{color:var(--mute)}
 .bzf .ck{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
 .bzf .ck input{flex:1;min-width:180px;font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
-.bztbl{overflow-x:auto;margin:0 -2px 10px}
+.bztbl{overflow-x:auto;margin:0 -2px 10px;direction:rtl}   /* v4.1.9: starts scrolled to the newest year */
+.bztbl table{direction:ltr}
 .bztbl table{border-collapse:collapse;font-size:13px;min-width:100%}
 .bztbl th,.bztbl td{padding:5px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line2)}
 .bztbl th:first-child{text-align:left;font-weight:600;color:var(--ink2);position:sticky;left:0;background:var(--panel)}
@@ -795,7 +796,7 @@ input[type=file]{display:none}
 .bztbl th:first-child{background:var(--sheet-top)}
 @media (prefers-color-scheme:dark){.psegs button.on{background:#2a4a70}}
 #sync{border:0;background:transparent}
-.c2st{font-size:13px;min-width:0}.c2st .stars{font-size:10.5px;letter-spacing:0}.c2px .s{font-size:12.5px;white-space:nowrap}
+.c2st{font-size:13px;min-width:0;flex-wrap:wrap;row-gap:2px}.c2id{min-width:0}.c2st .stars{font-size:10.5px;letter-spacing:0}.c2px .s{font-size:12.5px;white-space:nowrap}
 .pane details.cs.kill{border-top:0;border-radius:14px;padding:12px;margin:6px 0}
 #viewDepot .ghd{font-size:16px;padding:0 2px 8px}
 #incBox .dfold{margin:4px -16px -16px;border-top:1px solid var(--line)}
@@ -955,8 +956,8 @@ input[type=file]{display:none}
 <!-- import from claude -->
 <div class="modal" id="mClaude"><div class="sheet">
   <h3>Import from Claude<span class="sp"></span><button class="btn small quiet" data-close>✕</button></h3>
-  <p class="hint">Paste the JSON block Claude gives you at the end of a stock discussion. One card or several. A card with a known <code>id</code> is updated, new ones land in Radar unless they carry a stage.</p>
-  <textarea id="claudeJson" style="min-height:180px;font-family:ui-monospace,Menlo,monospace;font-size:13px" placeholder='{"ticker":"PEP","name":"PepsiCo",...}'></textarea>
+  <p class="hint">Paste the JSON block Claude gives you at the end of a stock discussion. One card or several; text around it is fine. A card for a stock already on your Radar (same id, Yahoo symbol or ticker) is updated and keeps its stage and logged price. New ones land in Radar unless they carry a stage.</p>
+  <textarea id="claudeJson" style="min-height:180px;font-family:ui-monospace,Menlo,monospace;font-size:16px" placeholder='{"ticker":"PEP","name":"PepsiCo",...}'></textarea>
   <div class="foot2"><span class="sp"></span><button class="btn" data-close>Cancel</button><button class="btn primary" id="btnClaudeGo">Import</button></div>
 </div></div>
 
@@ -1024,8 +1025,14 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.8';
+const VERSION='4.1.9';
 const CHANGELOG=[
+  {v:'4.1.9',d:'2026-11-10',t:'Four small fixes',items:[
+    'The business table on the phone now opens at the newest year; scroll left for older ones.',
+    'On a card, a long stage word and the stars no longer run into the price: they move to a second line.',
+    '"I\'m wrong if I\'m wrong if …": when your text already starts with those words, they are not shown twice.',
+    'Import from Claude takes the JSON even with text around it, and with the curly quotes the iPhone keyboard puts in. The box no longer zooms in when you tap it, and its hint now says how cards are matched.',
+  ]},
   {v:'4.1.8',d:'2026-11-10',t:'"Raised in a row" counts small raises',items:[
     'A year now counts as a raise as soon as the dividend went up at all (from +0.1 %). Before, it had to rise at least 1 %, so slow raisers looked young: Chevron showed 8 years and Realty Income 10. An unchanged dividend still ends the run, and only a drop of 5 % or more counts as a cut. This also feeds the quality tag\'s dividend test.',
   ]},
@@ -1556,6 +1563,7 @@ function divStats(sym){
   const y0=b.ys[0];
   return {b,g,dl,d5,n,all,stop,pay:y0?y0.pay:null,fy:y0?y0.fy:null,m:b.m,none:!b.dv.length};
 }
+const killTxt=t=>String(t||'').replace(/^\s*I['’]m wrong if\b\s*(?:…|\.\.\.)?\s*[:,–—-]?\s*/i,'');   // v4.1.9: the label already says it
 const divWord=(v,T)=>{ for(const [t,w,c] of T) if(v>=t) return [w,c]; return ['','']; };
 function divBoxHtml(sym){
   const s=divStats(sym), dash='–', none=s&&s.none;
@@ -2272,7 +2280,7 @@ function openRead(id){
     ${q?`<div class="quote">${liveDot(i)}${esc(symOf(i))} ${fmtP(q.price,q.currency)}${q.divTTM?`, ${fmtN(q.divTTM)} ${esc(q.currency)} dividends in the last 12 months`:''}, 52-week range ${fmtN(q.yearLow)}–${fmtN(q.yearHigh)}. ${q.stale?'Last update failed, price from':'Updated'} ${ago(q.time)}.${fxNote(q.currency)}${i.currency&&q.currency&&i.currency!==q.currency?` <span class="warn">Quote is in ${esc(q.currency)}, the card in ${esc(i.currency)}.</span>`:''}</div>`
        :errOf(i)?`<div class="quote"><span class="warn">No quote for ${esc(symOf(i))}.</span> Set the Yahoo Finance symbol in Edit, e.g. ENI.MI (Milan), SAP.DE (Xetra), NESN.SW (Zurich), ULVR.L (London); US stocks just the ticker.</div>`:''}
     ${sec('Thesis',i.thesis)}
-    <div class="folds">${fold('Bull case',i.bull,'bull')}${fold('Bear case',i.bear,'bear')}${fold("I'm wrong if",i.kill,'kill')}</div>
+    <div class="folds">${fold('Bull case',i.bull,'bull')}${fold('Bear case',i.bear,'bear')}${fold("I'm wrong if",killTxt(i.kill),'kill')}</div>
     <div class="sec journal"><h4>Journal</h4>
       ${i.status!=='out'?`<div class="dbtns"><button class="btn small" id="iRev">Review now</button></div>`:''}
       <div id="noteList"></div>
@@ -2385,10 +2393,18 @@ const openClaude=()=>{ closeAll(); $('#claudeJson').value=''; $('#mClaude').clas
 $('#addClaude').onclick=openClaude;
 $('#addHand').onclick=()=>{ closeAll(); if(view==='port') switchView('board'); openEdit(null); };
 $('#sync').onclick=()=>$('#btnMenu').click();
+// v4.1.9: as pasted first; then the block from the first { or [ to the last } or ]; then each with iOS curly quotes and
+// no-break spaces made plain (tried last, so a straight-quoted JSON with “quotes” inside a text stays as it is).
+function parseLoose(txt){
+  const tries=[txt], a=txt.search(/[[{]/);
+  if(a>0){ const b=txt.lastIndexOf(txt[a]==='{'?'}':']'); if(b>a) tries.push(txt.slice(a,b+1)); }
+  for(const t of tries.slice()) tries.push(t.replace(/[\u201C\u201D\u201E\u201F\u2033]/g,'"').replace(/[\u2018\u2019\u201A\u2032]/g,"'").replace(/\u00A0/g,' '));
+  for(const t of tries){ try{ return JSON.parse(t); }catch{} }
+  return undefined; }
 $('#btnClaudeGo').onclick=()=>{
   let txt=$('#claudeJson').value.trim();
   txt=txt.replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
-  let obj; try{ obj=JSON.parse(txt); }catch{ toast('That is not valid JSON'); return; }
+  const obj=parseLoose(txt); if(obj===undefined){ toast('That is not valid JSON'); return; }
   if(obj&&!Array.isArray(obj)&&Array.isArray(obj.holdings)){ // portfolio update: add levels, symbols, notes
     const n=importHoldings(obj.holdings); closeAll(); persistPort(); toast(`Updated ${n} holding${n===1?'':'s'}`); return; }
   const arr=Array.isArray(obj)?obj:(obj.ideas||[obj]);
@@ -2879,7 +2895,7 @@ function decisionForm(box,o){
 function reviewForm(box,o){
   box.hidden=false;
   box.innerHTML=`<div class="dform rev"><b class="dh">${o.due?'Review due':'Review'}</b>
-    ${String(o.kill||'').trim()?`<p class="kq"><span>I'm wrong if</span>${esc(o.kill)}</p>`:`<p class="kq none">No "I'm wrong if" written yet. Add one in ${o.isHold?'the settings below':'Edit'}, so the next review has something to test.</p>`}
+    ${String(o.kill||'').trim()?`<p class="kq"><span>I'm wrong if</span>${esc(killTxt(o.kill))}</p>`:`<p class="kq none">No "I'm wrong if" written yet. Add one in ${o.isHold?'the settings below':'Edit'}, so the next review has something to test.</p>`}
     ${dq('What did you look at?','tap all you checked')}${chipsHtml('chk',REV_CHECK,1)}
     ${dq('So the thesis…')}${chipsHtml('v',Object.entries(VERDICT),0,['holds'])}
     <div id="r_chg" hidden>${dq('What changed?','pick at least one')}${chipsHtml('chg',CHANGED,1)}</div>
@@ -3671,7 +3687,7 @@ function openHold(id,keep){   // keep: a re-render of the open sheet that puts b
       :hSym(h)&&errOf(x)?`<div class="quote"><span class="warn">No quote for ${esc(hSym(h))}.</span> Set the Yahoo symbol below, e.g. ALV.DE, DG.PA, ENEL.MI, 8058.T.</div>`:''}
     ${idea?`<p class="hint" style="margin:0">Thesis, cases, review date and journal come from the Radar card. <a href="#" id="hIdea2" class="lnk">Edit them there ↗</a></p>`:''}
     <div class="sec"><h4>${fund?'Why I hold it':'Thesis'}</h4><p class="${src.thesis?'':'none'}">${src.thesis?esc(src.thesis):'Nothing written yet.'}</p></div>
-    ${fund?'':`<div class="folds">${fold('Bull case',src.bull,'bull')}${fold('Bear case',src.bear,'bear')}${fold("I'm wrong if",src.kill,'kill')}</div>`}
+    ${fund?'':`<div class="folds">${fold('Bull case',src.bull,'bull')}${fold('Bear case',src.bear,'bear')}${fold("I'm wrong if",killTxt(src.kill),'kill')}</div>`}
     <div class="sec journal"><h4>Journal</h4>
       <div class="dbtns"><button class="btn small" id="hRev">Review now</button>${fund?'':'<button class="btn small" id="hAdd">I added</button><button class="btn small" id="hTrim">I trimmed</button><button class="btn small" id="hSold">I sold</button>'}</div>
       <div id="hNoteList"></div>
