@@ -1024,8 +1024,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.1.6';
+const VERSION='4.1.7';
 const CHANGELOG=[
+  {v:'4.1.7',d:'2026-11-10',t:'What you type stays until you decide',items:[
+    'Tapping a quality tier or "I reclaim this" on a holding no longer wipes what you typed but have not saved yet (an add level, a note). The same goes for "Checked, it\'s fine", a logged review or buy, and the currency rate arriving.',
+    'If you typed something in a sheet and then tap outside, swipe it down, press ✕ or Cancel, Radar asks "Discard what you typed?" first. Nothing typed: it closes as before.',
+  ]},
   {v:'4.1.6',d:'2026-11-09',t:'Edits survive a sync while the sheet is open',items:[
     'If a newer copy of a stock arrived from GitHub while you had its sheet open (for example after switching back to the app), a note, a review, a stage change, a holding Save, the quality or reclaim chips or "Checked, it\'s fine" could land on the old copy and be lost silently. They now always go to the current one.',
   ]},
@@ -2213,10 +2217,22 @@ const sheetT=(tk,nm)=>`${esc(nm||tk||'?')}${nm&&tk?`<small>${esc(tk)}</small>`:'
 // The three sheets about one stock: 'read' = idea sheet (#mRead), 'edit' = idea editor (#mEdit, id null = new idea),
 // 'hold' = holding sheet (#mHold). SHEET says which one is open and for which id. Only sheetOn() and closeAll() change it.
 // Not yet (follow-ups in the state-machine audit): the buttons inside a sheet still use the object the sheet was
-// opened with (fixed in v4.1.6, see liveIdea / liveHold), and typed-but-unsaved input isn't tracked.
+// opened with (fixed in v4.1.6, see liveIdea / liveHold); typed-but-unsaved input: see typedOf (v4.1.7).
 const SHEET={kind:null,id:null};
 const SHEET_EL={read:'#mRead',edit:'#mEdit',hold:'#mHold'};
-function sheetOn(kind,id){ SHEET.kind=kind; SHEET.id=id; $(SHEET_EL[kind]).classList.add('on'); }
+function sheetOn(kind,id){ SHEET.kind=kind; SHEET.id=id; $(SHEET_EL[kind]).classList.add('on'); sheetBase(); }
+// v4.1.7: what you typed in the open sheet. sheetOn() notes every field's value once the sheet is filled (SHEET.base);
+// typedOf() lists the fields that differ now. A dismiss asks before throwing them away (tryClose), and a re-render of the
+// same holding sheet puts them back (openHold(id, true)). Fields added later (review, buy, sell forms) count from their defaults.
+const sheetFields=m=>[...m.querySelectorAll('input,textarea,select')].filter(e=>e.id&&!/^(file|button|submit|hidden)$/.test(e.type));
+const fieldVal=e=>e.type==='checkbox'?String(e.checked):e.value;
+const fieldDef=e=>e.tagName==='SELECT'?([...e.options].find(o=>o.defaultSelected)||e.options[0]||{value:''}).value:e.type==='checkbox'?String(e.defaultChecked):e.defaultValue;
+function sheetBase(){ const m=$(SHEET_EL[SHEET.kind]); SHEET.base=new Map(sheetFields(m).map(e=>[e,fieldVal(e)])); }
+function typedOf(){ const m=SHEET.kind&&$(SHEET_EL[SHEET.kind]), o={}; if(!m) return o;
+  for(const e of sheetFields(m)){ const b=SHEET.base&&SHEET.base.has(e)?SHEET.base.get(e):fieldDef(e); if(fieldVal(e)!==b) o[e.id]=fieldVal(e); }
+  return o; }
+const leaveOk=()=>!Object.keys(typedOf()).length||confirm('Discard what you typed?');
+function tryClose(){ if(leaveOk()) closeAll(); }
 // v4.1.6: a sync can replace the idea or holding while its sheet is open (merge/mergeP swap in GitHub's newer copy).
 // Every button that writes looks the object up again through these, so the write lands on the copy that gets saved.
 const liveIdea=i=>data.ideas.find(x=>x.id===i.id)||i;
@@ -2307,7 +2323,7 @@ function setStage(i,k){ i=liveIdea(i);
   persist(); openRead(i.id); toast(`${from} → ${stageOf(i).label}`);
 }
 function renderNotes(i){ $('#noteList').innerHTML=noteRows(i.notes); }
-$('#btnEdit').onclick=()=>{ const id=SHEET.id; closeAll(); openEdit(id); };
+$('#btnEdit').onclick=()=>{ const id=SHEET.id; if(!leaveOk()) return; closeAll(); openEdit(id); };
 
 // ---------- edit sheet ----------
 $('#f_status').innerHTML=STATUSES.map(s=>`<option value="${s.k}">${s.label}</option>`).join('');
@@ -2349,16 +2365,16 @@ $('#btnDelete').onclick=()=>{
   closeAll(); persist(); toast('Deleted');
 };
 $('#fab').onclick=()=>$('#mAdd').classList.add('on');
-$$('[data-close]').forEach(b=>b.onclick=closeAll);
-$$('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) closeAll(); }));
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeAll(); });
-function closeAll(){ $$('.modal').forEach(m=>m.classList.remove('on')); SHEET.kind=null; SHEET.id=null; }
+$$('[data-close]').forEach(b=>b.onclick=tryClose);   // v4.1.7: ✕, Cancel, a tap outside, Escape and the drag handle ask first if you typed something
+$$('.modal').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) tryClose(); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') tryClose(); });
+function closeAll(){ $$('.modal').forEach(m=>m.classList.remove('on')); SHEET.kind=null; SHEET.id=null; SHEET.base=null; }
 // v4.0.0: a handle on every sheet; drag it down to close (only the handle, so a scroll or a form never closes it by accident)
 $$('.sheet').forEach(sh=>{ const g=document.createElement('div'); g.className='grab'; g.setAttribute('aria-hidden','true'); sh.prepend(g);
   let y0=null, dy=0;
   g.addEventListener('touchstart',e=>{ y0=e.touches[0].clientY; dy=0; sh.style.transition='none'; },{passive:true});
   g.addEventListener('touchmove',e=>{ if(y0==null) return; e.preventDefault(); dy=Math.max(0,e.touches[0].clientY-y0); sh.style.transform=`translateY(${dy}px)`; },{passive:false});   // preventDefault: no native scroll or fling starts, which would swallow the next tap
-  const end=()=>{ if(y0==null) return; y0=null; const far=dy>90; sh.style.transition='transform .2s'; sh.style.transform=far?'translateY(100%)':''; if(far) setTimeout(()=>{ closeAll(); sh.style.transition='none'; sh.style.transform=''; },190); };
+  const end=()=>{ if(y0==null) return; y0=null; const far=dy>90&&leaveOk(); sh.style.transition='transform .2s'; sh.style.transform=far?'translateY(100%)':''; if(far) setTimeout(()=>{ closeAll(); sh.style.transition='none'; sh.style.transform=''; },190); };
   g.addEventListener('touchend',end); g.addEventListener('touchcancel',end); g.addEventListener('click',()=>{}); });
 
 // ---------- import from claude ----------
@@ -2582,7 +2598,7 @@ function fxOn(c,date){ if(!c||c==='EUR') return 1; const k=c+'@'+date; if(fxh[k]
   if(!fxPending.has(k)){ fxPending.add(k);
     fetch(`https://api.frankfurter.dev/v1/${date}?from=EUR&to=${c}`).then(r=>r.ok?r.json():null).then(j=>{ const v=j&&j.rates&&j.rates[c]; if(!v) return;
       fxh[k]=v; try{ localStorage.setItem(LS_FXH,JSON.stringify(fxh)); }catch{} render();
-      const a=document.activeElement; if(SHEET.kind==='hold'&&!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))) openHold(SHEET.id); }).catch(()=>{}); }
+      const a=document.activeElement; if(SHEET.kind==='hold'&&!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))) openHold(SHEET.id,true); }).catch(()=>{}); }
   return null; }
 // Thesis, kill criteria, review and journal: from the linked Radar card if there is one, otherwise the holding's own.
 const textSrc=h=>ideaOf(h)||h;
@@ -3608,7 +3624,8 @@ $('#capIn').onchange=e=>{ const v=Number(e.target.value); if(!(v>0&&v<=100)){ e.
   port.settings={...(port.settings||{}),maxWeight:v,updatedAt:now()}; persistPort(); toast(`Max per stock: ${fmtN(v,1)} %`); };
 
 // ---------- holding sheet ----------
-function openHold(id){
+function openHold(id,keep){   // keep: a re-render of the open sheet that puts back what you typed (v4.1.7)
+  const typed=keep&&SHEET.kind==='hold'&&SHEET.id===id?typedOf():null, sh0=$('#mHold .sheet'), top0=sh0?sh0.scrollTop:0;
   const h=port.holdings.find(x=>x.id===id); if(!h) return; const h0=h, srcNow=()=>textSrc(liveHold(h0));
   const T=depotTotal(), s=hScore(h,T), x=px(h), c=curOf(x), d=dayOf(x), y=yldOf(x), hi=histOf(x), q=quoteOf(x), p=posOf_(h), v=valueOf(h), w=weightOf(h,T), a=addOf(h), idea=ideaOf(h), cur=curOfI(x), tb=toBuyOf(x), mm=mismatchOf(h);
   const fund=isFund(h), src=textSrc(h), rt=hRetOf(h), own=!idea;
@@ -3684,13 +3701,13 @@ function openHold(id){
     <p class="hint">The buy price and date stay in this browser, like your share counts. For several purchases, take a date roughly in the middle: it starts the comparison with EUNL and, for foreign stocks, splits your € return into the stock's own move and the currency's. Everything else is saved to GitHub.</p>
     <div class="foot2"><button class="btn danger quiet" id="hDel">Remove holding</button><span class="sp"></span><button class="btn primary" id="hSave">Save</button></div></div>`;
   $('#holdT').innerHTML=sheetT(h.short||h.symbol,h.name); segSheet($('#holdBody'),'hold',h.id);
-  const toIdea=e=>{ e&&e.preventDefault(); closeAll(); openRead(idea.id); };
+  const toIdea=e=>{ e&&e.preventDefault(); if(!leaveOk()) return; closeAll(); openRead(idea.id); };
   if(idea){ $('#hIdea').onclick=toIdea; $('#hIdea2').onclick=toIdea; }
-  wireBiz($('#holdBody'),()=>openHold(h.id));
+  wireBiz($('#holdBody'),()=>openHold(h.id,true));
   if(!fund) valWire('hv_','#h_addBelow',cur);
   const notes=()=>{ $('#hNoteList').innerHTML=noteRows(srcNow().notes); };
   notes();
-  const saveH=msg=>{ idea?persist():persistPort(); if(idea) persistPort(); openHold(h.id); toast(msg); };
+  const saveH=msg=>{ idea?persist():persistPort(); if(idea) persistPort(); openHold(h.id,true); toast(msg); };
   const box=$('#hDec'), sym=hSym(h), go=()=>box.scrollIntoView({behavior:'smooth',block:'center'});
   const revH=due=>reviewForm(box,{due,kill:src.kill,months:6,isHold:true,onSave:r=>{ saveReview(srcNow(),r,c,cur,sym); saveH(r.verdict==='broken'?'Saved. Next € holds it back until a review says it holds again.':'Review saved'); }});
   $('#hRev').onclick=()=>{ revH(false); go(); };
@@ -3714,14 +3731,16 @@ function openHold(id){
       if($('#h_bull')) Object.assign(h,{bull:val('#h_bull'),bear:val('#h_bear'),kill:val('#h_kill')}); }
     persistPort(); openHold(h.id); toast('Saved');
   };
-  if($('#h_reclaim')) $('#h_reclaim').onclick=()=>{ const h=liveHold(h0), sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0;
-    h.reclaim=!hRec(h); if(!h.reclaim&&!recOf(idea)) delete h.reclaim; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
+  if($('#h_reclaim')) $('#h_reclaim').onclick=()=>{ const h=liveHold(h0);
+    h.reclaim=!hRec(h); if(!h.reclaim&&!recOf(idea)) delete h.reclaim; h.updatedAt=now(); persistPort(); openHold(h.id,true);
     toast(h.reclaim?'Counted as reclaimed':'Counted as lost again'); };
-  $$('#h_qual .chip').forEach(b=>b.onclick=()=>{ const h=liveHold(h0), sh=$('#mHold .sheet'), top=sh?sh.scrollTop:0, k=b.dataset.q;
-    if(QUAL_SET.includes(k)) h.quality=k; else delete h.quality; h.updatedAt=now(); persistPort(); openHold(h.id); const s2=$('#mHold .sheet'); if(s2) s2.scrollTop=top;
+  $$('#h_qual .chip').forEach(b=>b.onclick=()=>{ const h=liveHold(h0), k=b.dataset.q;
+    if(QUAL_SET.includes(k)) h.quality=k; else delete h.quality; h.updatedAt=now(); persistPort(); openHold(h.id,true);
     toast(QUAL_SET.includes(k)?`Quality set to ${k}`:'Quality back to auto'); });
   $('#hDel').onclick=()=>{ const h=liveHold(h0); if(!confirm(`Remove ${h.short||h.name} from the portfolio list?`)) return; h.deletedAt=now(); h.updatedAt=now(); closeAll(); persistPort(); toast('Removed'); };
   sheetOn('hold',h.id);
+  if(typed){ for(const [k,v] of Object.entries(typed)){ const e=document.getElementById(k); if(!e) continue; if(e.type==='checkbox') e.checked=v==='true'; else e.value=v; }
+    if(sh0) sh0.scrollTop=top0; }
 }
 
 // Portfolio updates pasted from Claude: {"holdings":[{"symbol":"ALV.DE","addBelow":420,…}]}. Matched by id, ISIN or symbol.
