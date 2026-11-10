@@ -637,6 +637,7 @@ details.syncset summary{cursor:pointer;font-weight:800;font-size:15px;margin-bot
 .c2blk{display:flex;flex-direction:column;gap:8px;background:var(--panel2);border-radius:var(--r2);padding:11px 12px}
 .c2blk .bars{display:flex;flex-direction:column;gap:6px}
 .c2lvl{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}.c2lvl b{color:var(--ink);font-weight:800}
+.c2seen{margin-top:4px;font-size:12.5px;line-height:1.4}.c2seen.far{color:var(--ochre)}.c2seen.far b{color:var(--ochre)}
 .nxsec p{margin:0 0 6px}
 /* ================= v4.0.0: iPhone-first, pastel blue glass =================
    Tokens first (most of the app is drawn from them), then the new pieces: large title, floating tab bar,
@@ -1029,8 +1030,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.2.0';
+const VERSION='4.3.0';
 const CHANGELOG=[
+  {v:'4.3.0',d:'2026-11-10',t:'"Last seen at this level"',items:[
+    'Under every buy and add level, the sheet now says when the price was last there and how often in the last five years ("Last seen at this level: Sep 2026 · 6 of the last 60 month-ends"). A level the stock has not touched in five years, or ever, shows in ochre with the five-year low next to it, so you can tell a real plan from a wish.',
+    'It uses month-end closing prices, so a dip that recovered within the month does not count. Scores and rankings do not change.',
+  ]},
   {v:'4.2.0',d:'2026-11-10',t:'Easier to read on the phone',items:[
     'Line 2 of a row wraps to a second line instead of cutting off the yield, and "at your price · below 82" is now just "at your price 82".',
     'Funds get short names in the lists (MSCI World, Emerging Markets IMI, Euro Corp Bonds …). The full name stays in the sheet; change it under "Name in lists" in the holding\'s settings.',
@@ -2086,6 +2091,26 @@ const sbarsHtml=(s,lbl)=>{ const miss=['buy','yld','rng'].filter(k=>!s.parts.fin
    +(miss.length&&s.parts.length?`<p class="sbnote">No data for ${miss.map(k=>lbl[k]).join(' and ')}, so ${miss.length>1?'their':'its'} ${miss.reduce((t,k)=>t+PART_W[k],0)} points are shared out: the others count for ${s.parts.map(x=>Math.round(x.max)).join(' and ')} instead of ${s.parts.map(x=>PART_W[x.k]).join(' and ')}.</p>`:''); };
 const decBlk=(tier,dec,s,lbl,lvlLine)=>`<div class="c2blk"><div class="c2dec"><b>${tier}</b> · ${dec}</div>${s?sbarsHtml(s,lbl):''}${lvlLine?`<div class="c2lvl">${lvlLine}</div>`:''}</div>`;
 const lvlLineHtml=(word,v,cur,l2,extra='')=>v>0?`${word} below <b>${mN(v,cur)}</b>${eurTag(v,cur)}${extra}${l2?` · 2nd level <b>${mN(l2,cur)}</b>${eurTag(l2,cur)}`:''}`:'';
+// ---------- "Last seen at this level" (v4.3.0) ----------
+// How often the month-end close was at or below a level, from history.json (same listing currency as the level).
+// Tells a level that is a real plan from one that is a wish. Information only: no score reads it.
+const SEEN={win:60};   // months looked at for "N of the last 60"
+function seenOf(sym,lvl,cur,c){
+  const S=typeof hist!=='undefined'&&hist&&hist.series&&hist.series[sym];
+  if(!S||!S.px||!(lvl>0)||S.cur!==cur) return null;
+  const px=S.px, n0=Math.max(0,px.length-SEEN.win), W=px.slice(n0).filter(v=>v!=null); if(W.length<12) return null;
+  let last=-1; px.forEach((v,k)=>{ if(v!=null&&v<=lvl) last=k; });
+  let lowK=-1; px.forEach((v,k)=>{ if(k>=n0&&v!=null&&(lowK<0||v<px[lowK])) lowK=k; });
+  const mon=k=>ymEnd(S.from,k).toLocaleDateString('en-GB',{month:'short',year:'numeric',timeZone:'UTC'});
+  return {now:c>0&&c<=lvl,n:W.filter(v=>v<=lvl).length,win:W.length,last:last<0?null:mon(last),inWin:last>=n0,
+    low:lowK<0?null:px[lowK],lowAt:lowK<0?null:mon(lowK),yrs:Math.round(px.length/12)}; }
+function seenHtml(sym,lvl,cur,c){ const o=seenOf(sym,lvl,cur,c); if(!o) return '';
+  const cnt=`${o.n} of the last ${o.win} month-ends`, low=o.low!=null?` · ${o.win>=SEEN.win?'5-yr':o.yrs+'-yr'} low ${mN(o.low,cur)} (${o.lowAt})`:'';
+  const t=o.now?`There now · at or below it at ${cnt}`
+    :o.last&&o.inWin?`Last seen at this level: <b>${o.last}</b> · ${cnt}`
+    :o.last?`Last seen at this level: <b>${o.last}</b> · not once in the last ${Math.round(o.win/12)} years${low}`
+    :`<b>Never</b> at this level in ${o.yrs} years of month-end prices${low}`;
+  return `<div class="c2seen${!o.now&&!o.inWin?' far':''}" title="Month-end closing prices. A dip that recovered within the month does not count.">${t}</div>`; }
 const rngTxt=rp=>rp&&rp.pos>=.85?' · near 52w high':rp&&rp.pos<=.15?' · near 52w low':'';
 // "Price at its usual yield" only means something when it's within 25 % of your fair value.
 const usualOk=(hi,v)=>!!(hi&&hi.fair&&v&&v.base>0&&hi.fair<=v.base*1.25);
@@ -2131,7 +2156,7 @@ function cardEl(i,inSheet){
         <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
       </div>
     </div>
-    ${inSheet?decBlk(tier,esc(dec),sc,{buy:PART.buy.label,yld:PART.yld.label,rng:PART.rng.label},lvlLineHtml('Buy',i.buyBelow,cur,lvl2Of(i))):`<div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>`}
+    ${inSheet?decBlk(tier,esc(dec),sc,{buy:PART.buy.label,yld:PART.yld.label,rng:PART.rng.label},lvlLineHtml('Buy',i.buyBelow,cur,lvl2Of(i))+seenHtml(symOf(i),i.buyBelow,cur,c)):`<div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>`}
     ${valLine(valNorm(i.val),c,cur,symOf(i))}
     ${earnLine(symOf(i))}
     ${bar}
@@ -2742,7 +2767,7 @@ function holdCard(r){
     else if(!s.full&&s.cap==='above'&&bp) dec+=`, so it stops at Getting close (would be ${s.raw})`;
     dec+=rngTxt(rp); }
   if(!fund&&brokenOf(textSrc(h))) dec='thesis broken'+(s&&!s.full&&s.cap==='broken'?` (would be ${s.raw})`:'')+' · '+dec;   // v4.1.2: the broken cap
-  const lvlLine=a?lvlLineHtml('Add',a.v,cur,lvl2Of(x),a.src==='radar'?' (from the Radar card)':''):'';
+  const lvlLine=a?lvlLineHtml('Add',a.v,cur,lvl2Of(x),a.src==='radar'?' (from the Radar card)':'')+seenHtml(hSym(h),a.v,cur,c):'';
   const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
   const yArr=hi?(hi.v==='cheap'?['▲','up']:hi.v==='expensive'?['▼','dn']:['≈','']):null;
   const rt=hRetOf(h), rc=rt==null||Math.abs(rt.pct)<.05?'':rt.pct>0?'up':'dn';
