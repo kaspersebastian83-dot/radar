@@ -507,7 +507,7 @@
       "symbol": "AI.PA",
       "currentPrice": null,
       "currentDate": null,
-      "buyBelow": null,
+      "buyBelow": 123,
       "conviction": 3,
       "thesis": "World no. 2 in industrial gases; long take-or-pay contracts make earnings steady. Fills the empty Basic Materials sector. At €189 it trades on ~29x 2026e EPS €6.42 with a ~1.95 % yield (DPS €3.36 for 2025, ~€3.65 expected for 2026), so this is a watch-and-wait idea, no level yet.",
       "bull": "No dividend cut for 17 years; consensus EPS growth ~11 % into 2027 (€7.15); French 12.8 % withholding is fully credited at Trade Republic.",
@@ -520,10 +520,35 @@
         {
           "date": "2026-11-10",
           "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov close. No valuation or buy level yet."
+        },
+        {
+          "date": "2026-11-11",
+          "text": "2026-11-11: Buy price €123 set. Q3 comparable sales +3 %, Electronics +12 %; targets ~10 %/yr EPS growth 2026–30 and +100 bp margin in 2026 and 2027. ~36 % below today."
         }
       ],
       "createdAt": "2026-11-10T11:53:33.285Z",
-      "updatedAt": "2026-11-10T11:53:33.285Z"
+      "updatedAt": "2026-11-11T20:22:21.033Z",
+      "val": {
+        "date": "2026-11-11",
+        "price": 192.16,
+        "methods": [
+          {
+            "t": "24× 2027e EPS ~€6.90 after the June 2026 bonus share (below its 25–30× of 2021–25)",
+            "v": 166
+          },
+          {
+            "t": "Gordon on FCF/sh €4.21 (2025: €6.52bn OCF − €3.84bn capex, 636M shares), g 4 %, 8 % hurdle",
+            "v": 109
+          }
+        ],
+        "base": 137,
+        "discount": 10,
+        "why": "Wide moat, long take-or-pay contracts; methods 51 % apart (heavy growth capex keeps FCF low) (≈2.7 % yield at the level)",
+        "g": 4,
+        "bear": 99,
+        "bearWhy": "€5.50 EPS × 18× (BEYOND margin plan stalls, Europe stays weak)",
+        "reverse": "At €192 the market implies ~5.7 %/yr FCF growth forever"
+      }
     },
     {
       "id": "cg6gx1mwamt1lx",
@@ -538,7 +563,7 @@
       "symbol": "LIN",
       "currentPrice": null,
       "currentDate": null,
-      "buyBelow": null,
+      "buyBelow": 365,
       "conviction": 3,
       "thesis": "Largest industrial gas company, best margins in the sector. 2026 adjusted EPS guidance $17.82–17.92, dividend $6.40 (1.2 % yield), payout ~42 %, raised 33 years in a row. Quality is not in doubt; the price is: ~29x this year's adjusted EPS.",
       "bull": "Electronics and project backlog drive growth; low payout leaves room for raises and buybacks; reportedly no withholding tax at source on the dividend.",
@@ -551,10 +576,35 @@
         {
           "date": "2026-11-10",
           "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov close. No valuation or buy level yet."
+        },
+        {
+          "date": "2026-11-11",
+          "text": "2026-11-11: Buy price $365 (≈ €329) set. 2026 guide adj. EPS $17.82–17.92 (+8–9 %), project backlog $11bn. A crash level: ~30 % below today."
         }
       ],
       "createdAt": "2026-11-10T11:53:33.285Z",
-      "updatedAt": "2026-11-10T11:53:33.285Z"
+      "updatedAt": "2026-11-11T20:22:21.033Z",
+      "val": {
+        "date": "2026-11-11",
+        "price": 525.85,
+        "methods": [
+          {
+            "t": "26× 2027e EPS $19.48 (below ~28× forward today and ~32× 5-yr median P/E)",
+            "v": 506
+          },
+          {
+            "t": "Gordon on FCF/sh ~$11.80 (2026e: OCF ~$10.8bn − capex ~$5.3bn), g 4 %, 8 % hurdle",
+            "v": 307
+          }
+        ],
+        "base": 406,
+        "discount": 10,
+        "why": "Wide moat, steadiest earnings in the group; methods 65 % apart so Radar already leans on the lower one (≈1.8 % yield at the level)",
+        "g": 4,
+        "bear": 340,
+        "bearWhy": "EPS flat at ~$17 × 20× (derating, Lincare drag, weak industry volumes)",
+        "reverse": "At $526 the market implies ~5.6 %/yr FCF growth forever"
+      }
     },
     {
       "id": "y72lcymwamt1lx",
@@ -569,7 +619,7 @@
       "symbol": "APD",
       "currentPrice": null,
       "currentDate": null,
-      "buyBelow": null,
+      "buyBelow": 210,
       "conviction": 2,
       "thesis": "Industrial gases turnaround after scaling back its clean-energy projects. Dividend $7.24 (2.3 % yield), raised 44 years in a row; fiscal Q4 2026 adjusted EPS $3.61 (+6.5 %). The catch: free cash flow was about −$0.3bn over the last 12 months (capex ~$3.5bn for fiscal 2026).",
       "bull": "Capex is coming down, so free cash flow should turn positive; payout ~54 % of adjusted EPS; highest yield of the three gas companies.",
@@ -582,10 +632,35 @@
         {
           "date": "2026-11-10",
           "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov close. No valuation or buy level yet."
+        },
+        {
+          "date": "2026-11-11",
+          "text": "2026-11-11: Buy price $210 (≈ €189) set. FY26 adj. EPS $13.45 (+12 %), FY27 guide +5–8 %, capex down to $3.0–3.5bn. The red flag (negative FCF, dividend not covered) is real, not a data glitch – leave it open until FCF turns positive."
         }
       ],
       "createdAt": "2026-11-10T11:53:33.285Z",
-      "updatedAt": "2026-11-10T11:53:33.285Z"
+      "updatedAt": "2026-11-11T20:22:21.033Z",
+      "val": {
+        "date": "2026-11-11",
+        "price": 314.11,
+        "methods": [
+          {
+            "t": "20× FY27e adj. EPS $14.33 (guide $14.15–14.50; below ~23× forward and ~27× 5-yr avg)",
+            "v": 287
+          },
+          {
+            "t": "Gordon on normalised FCF/sh ~$10 (OCF ~$4.8bn less ~$2.5bn steady capex once energy-transition projects end), g 3 %, 8 % hurdle",
+            "v": 206
+          }
+        ],
+        "base": 246,
+        "discount": 15,
+        "why": "Turnaround: $3.2bn project-exit charges, ~$2bn legacy capex still to spend, FCF only turning positive in FY27 (≈3.4 % yield at the level)",
+        "g": 3,
+        "bear": 184,
+        "bearWhy": "$11.50 EPS × 16× (more write-offs, weak volumes)",
+        "reverse": "At $314 the market implies ~4.7 %/yr growth forever on normalised FCF"
+      }
     },
     {
       "id": "6ztzu7mwamt1lx",
@@ -600,7 +675,7 @@
       "symbol": "SY1.DE",
       "currentPrice": null,
       "currentDate": null,
-      "buyBelow": null,
+      "buyBelow": 77,
       "conviction": 2,
       "thesis": "Flavours, fragrances and cosmetic ingredients for 6,000+ customers; German, so no foreign withholding at all. Dividend €1.25 (1.3 % yield), raised 15 years in a row. 2026 guidance: organic growth 2–4 %, EBITDA margin 21.5–22.5 %. ~25x 2026e earnings, below its own 30–41x of 2023–2025.",
       "bull": "Q3 organic growth 5.3 %, volume-driven; management bought shares after the drop; cheaper than its own history.",
@@ -613,10 +688,35 @@
         {
           "date": "2026-11-10",
           "text": "2026-11-10: screened as a Basic Materials candidate, logged at the 9 Nov Xetra close. No valuation or buy level yet. Annual report 3 Mar 2027."
+        },
+        {
+          "date": "2026-11-11",
+          "text": "2026-11-11: Buy price €77 set. Q3 organic +5.3 %, FY 2–4 % and EBITDA margin in the lower half of 21.5–22.5 %. German: no withholding."
         }
       ],
       "createdAt": "2026-11-10T11:53:33.285Z",
-      "updatedAt": "2026-11-10T11:53:33.285Z"
+      "updatedAt": "2026-11-11T20:22:21.033Z",
+      "val": {
+        "date": "2026-11-11",
+        "price": 95.44,
+        "methods": [
+          {
+            "t": "24× 2027e EPS ~€4.30 (well below its 30–41× of 2023–25)",
+            "v": 103
+          },
+          {
+            "t": "Gordon on FCF/sh ~€4.30 (2024 €4.67, 2025 €4.01), g 3 %, 8 % hurdle",
+            "v": 89
+          }
+        ],
+        "base": 96,
+        "discount": 20,
+        "why": "Good niche business but 2026 growth only 2–4 %, margin at the low end, 2025 write-down (≈1.6 % yield at the level)",
+        "g": 3,
+        "bear": 61,
+        "bearWhy": "€3.40 EPS × 18× (growth stuck at ~2 %, EBITDA margin ~20 %)",
+        "reverse": "At €95 the market implies ~3.3 %/yr FCF growth forever"
+      }
     },
     {
       "id": "wxpovvmwamt1lx",
@@ -631,7 +731,7 @@
       "symbol": "RIO.L",
       "currentPrice": null,
       "currentDate": null,
-      "buyBelow": null,
+      "buyBelow": 4250,
       "conviction": 2,
       "thesis": "Iron ore, aluminium and copper miner; the income pick of the group. Last two dividends 254 + 211 US cents (~348p a year, ~5.4 % yield at 6,431p), payout ~54 %, P/E ~11. The dividend moves with the cycle, so it only works bought when the price reflects weak commodity prices.",
       "bull": "No UK withholding tax; low-cost Pilbara iron ore; copper and lithium growth; ~23 % below its 52-week high of 8,325p.",
@@ -644,10 +744,35 @@
         {
           "date": "2026-11-10",
           "text": "2026-11-10: screened as a Basic Materials candidate. Logged at 6,431p from 9 Nov about 16:00 UK time, shortly before the close. No valuation or buy level yet. Full-year results in February."
+        },
+        {
+          "date": "2026-11-11",
+          "text": "2026-11-11: Buy price 4,250p (≈ €50.90) set. H1 2026 underlying EPS 421c (+42 %), interim 211c (50 % payout), net debt $14.1bn. Red flag (dividend > FCF 2024–25, cash/share down) is real: Simandou + Arcadium spending. UK plc: no withholding."
         }
       ],
       "createdAt": "2026-11-10T11:53:33.285Z",
-      "updatedAt": "2026-11-10T11:53:33.285Z"
+      "updatedAt": "2026-11-11T20:22:21.033Z",
+      "val": {
+        "date": "2026-11-11",
+        "price": 6385,
+        "methods": [
+          {
+            "t": "10× mid-cycle underlying EPS ~$7.30 (avg 2023–26e), at $1.33/£",
+            "v": 5500
+          },
+          {
+            "t": "Gordon on mid-cycle FCF/sh ~$4.00 after sustaining capex, g 2 %, 8 % hurdle",
+            "v": 5120
+          }
+        ],
+        "base": 5310,
+        "discount": 20,
+        "why": "Commodity cycle: iron ore and China drive earnings; valued at mid-cycle, not today's strong copper/aluminium prices (≈8 % yield at the level on the last 12 months' dividends)",
+        "g": 2,
+        "bear": 3390,
+        "bearWhy": "~$5 EPS at ~$70 iron ore × 9×",
+        "reverse": "At 6,385p the market implies ~3.1 %/yr growth forever on mid-cycle FCF"
+      }
     },
     {
       "id": "7ib4r3mwcjf0j8",
