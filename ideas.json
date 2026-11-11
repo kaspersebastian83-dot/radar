@@ -648,6 +648,58 @@
       ],
       "createdAt": "2026-11-10T11:53:33.285Z",
       "updatedAt": "2026-11-10T11:53:33.285Z"
+    },
+    {
+      "id": "7ib4r3mwcjf0j8",
+      "ticker": "MCO",
+      "name": "Moody's",
+      "sector": "Financials – credit ratings & analytics",
+      "source": "Claude chat 2026-11-11",
+      "status": "researching",
+      "loggedDate": "2026-11-11",
+      "loggedPrice": 510.71,
+      "currency": "USD",
+      "symbol": "MCO",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 385,
+      "conviction": 3,
+      "thesis": "One of two global ratings houses (with S&P) + Moody's Analytics (data/risk software, mostly recurring). FY26 guide: adj. EPS $16.50–17.00, FCF $2.7–2.9B, adj. op. margin 52–53 %. FCF/sh 6.45 → 10.22 → 13.80 → 14.31 (2022–25), TTM 16.91. Dividend $4.12 (2.48 in 2021, ~10.7 %/yr), payout ~25 %; ~$3B buybacks in 2026 (~3.4 % of market cap). Buy below $385 (≈ €347) = 15 % off a ~$456 base. At $511 (≈ €460) ~12 % above fair: a compounder at a full price, not an entry.",
+      "bull": "Private credit and first-time issuers (900–950 new mandates in 2026) plus a refinancing wall keep ratings fees rising; Analytics recurring revenue compounds; ~3 % fewer shares a year. 10–12 % EPS growth at 27× → ~$560 by end-2027.",
+      "bear": "Q3 2026: revenue +1 %, bank-loan ratings −27 %, missed estimates. Ratings follow debt issuance: GAAP EPS fell 37 % in 2022. $13.50 × 22× = ~$300. Regulator/lawsuit risk, AI pressure on Analytics. Only 0.8 % yield – the return comes from growth, not income. Tax: US 15 % withheld, fully credited in DE.",
+      "kill": "I'm wrong if the adjusted operating margin falls below 48 % for a full year, or the ratings business grows slower than global rated issuance for two years running (losing share).",
+      "nextReview": "2027-02-24",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-11",
+          "text": "2026-11-11: First analysis. Logged at the 10 Nov close $510.71. Not a buy: ~12 % above fair $456; buy below $385, 2nd look after Q4 results (Feb 2027)."
+        }
+      ],
+      "createdAt": "2026-11-11T19:54:12.212Z",
+      "updatedAt": "2026-11-11T19:54:12.212Z",
+      "val": {
+        "date": "2026-11-11",
+        "price": 510.71,
+        "methods": [
+          {
+            "t": "26× 2027e EPS ~$18.60 (below its ~31× 5-yr avg forward P/E)",
+            "v": 484
+          },
+          {
+            "t": "Gordon on FCF/sh ~$16.50, g 4 %, 8 % hurdle",
+            "v": 429
+          }
+        ],
+        "base": 456,
+        "discount": 15,
+        "why": "Wide-moat ratings duopoly, but ratings earnings follow the debt-issuance cycle (≈1.1 % yield at the level)",
+        "g": 4,
+        "bear": 300,
+        "bearWhy": "~$13.50 EPS (−20 %, issuance slump like 2022) × 22×",
+        "reverse": "At $511 the market implies ~4.6 %/yr FCF growth forever"
+      }
     }
   ]
 }
