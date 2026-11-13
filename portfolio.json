@@ -294,15 +294,15 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
-      "thesis": "Diversified primary insurer + PIMCO/AGI. Core EPS H1 26 €16.44 (+17.5 %, +10 % adj.), core RoE 20.7 %, Solvency II 225 % (highest since 2018). 2026 op. profit target €17.4bn ±1bn; 60 % payout + buybacks. Add when the multiple falls back to ~11x.",
+      "updatedAt": "2026-11-13T21:15:56.000Z",
+      "thesis": "Diversified primary insurer + PIMCO/AGI. 9M 26: operating profit €14.1bn (+7.8 %, record), core EPS €24.15 (+12.7 %, +8 % underlying without the India JV gain), core RoE 20.1 % (19 % underlying), Solvency II 219 %. Upper end of the 2026 operating-profit range raised to ~€18.6bn; €2.5bn buyback completed. 60 % payout + buybacks. Add when the multiple falls back to ~11x.",
       "bull": "EPS target +7–9 %/yr 2025–27 and running above it; dividend €17.10 (+11 %) with €2.5bn buyback; asset management record inflows (€84bn H1). Capital surplus allows more buybacks.",
       "bear": "Stock re-rated from ~11x to ~14x trailing; yield 3.8 % vs 4.7 % 5-yr avg. Motor margins thin (GDV), nat-cat year or a bond-market shock hits PIMCO flows + book value. German stock, no foreign WHT (26.4 % Abgeltungsteuer only).",
       "kill": "I'm wrong if core EPS growth falls below 5 % two years running, Solvency II drops under 180 %, or the dividend is held flat.",
       "nextReview": "2027-03-01",
       "val": {
-        "date": "2026-11-09",
-        "price": 451.1,
+        "date": "2026-11-13",
+        "price": 477.2,
         "methods": [
           {
             "t": "12.4× 2027e EPS ~€34 (own 2021–25 median P/E)",
@@ -320,7 +320,13 @@
         "bearWhy": "€25 EPS × 9×",
         "reverse": "At an 8 % hurdle the price needs only ~1 %/yr growth: cheap on my hurdle, rich vs its own multiple (the market uses ~10 % cost of equity)",
         "g": 3
-      }
+      },
+      "notes": [
+        {
+          "date": "2026-11-13",
+          "text": "Valuation redone after the 9M results (12 Nov 2026): underlying core EPS growth 8 %, inside the 7–9 % target, so 2027e EPS ~€34 stands. Fair value €490 and add level €370 unchanged. Q3 alone was softer (core EPS +3.5 %, P&C operating profit down on €1.1bn nat-cat); Solvency II 219 % vs 225 % at H1. Claude chat 2026-11-13."
+        }
+      ]
     },
     {
       "id": "h-IE00B4L5Y983",
@@ -391,15 +397,15 @@
       "maxWeight": null,
       "idea": "MUV2",
       "note": "Old Radar card had buy < €535.",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
-      "thesis": "World's #1 reinsurer + ERGO primary. 2026 net profit guide raised to €6.6bn (9M €5.7bn) on very low major losses. Ambition 2030: RoE >18 %, EPS >8 %/yr. Dividend €24 (2025), ~€27.5 expected. Add only when the soft cycle is in the price.",
+      "updatedAt": "2026-11-13T21:15:56.000Z",
+      "thesis": "World's #1 reinsurer + ERGO primary. 9M 26 net result €5.67bn (+9.5 %); Q3 €1.74bn (Q3 25: €2.0bn) with major losses at 14.9 % of revenue vs 18 % budget, P&C re combined ratio 80.0 %. 2026 guide €6.6bn (reinsurance €5.7bn, ERGO €0.9bn). Ambition 2030: RoE >18 %, EPS >8 %/yr. Dividend €24 (2025), ~€27.5 expected. Add only when the soft cycle is in the price.",
       "bull": "Diversified (ERGO, L&H re) cushions the P&C cycle; investment result up (5.5 % RoI Q2); reserve buffers; buybacks + 80 %-ish payout. Below-budget losses in 2026 fund reserves for 2027.",
       "bear": "Soft market deepening: cat rates −12–15 % at Jan 26, risk-adj. −5.5 % at July, S&P/Fitch expect 2027 declines as large as 2026; reinsurance revenue guide cut €40→38bn. 2026 profit leans on major losses at 4.9 % vs 18 % budget — not repeatable. No foreign WHT.",
       "kill": "I'm wrong if normalised EPS (with budgeted losses) falls below €45, P&C re combined ratio runs above 85 % in a normal-loss year, or the dividend isn't raised.",
       "nextReview": "2027-03-01",
       "val": {
-        "date": "2026-11-09",
-        "price": 569.2,
+        "date": "2026-11-13",
+        "price": 591.2,
         "methods": [
           {
             "t": "11.5× normalised EPS €50 (2026 target €6.3bn with budgeted major losses, ~126m shares)",
@@ -417,7 +423,13 @@
         "bearWhy": "€30 EPS (heavy cat year + soft pricing) × 9×",
         "reverse": "At an 8 % hurdle the price implies ~−1.6 %/yr; the market prices ~11–13 % cost of equity (Jefferies 13 %)",
         "g": 3
-      }
+      },
+      "notes": [
+        {
+          "date": "2026-11-13",
+          "text": "Valuation redone after the final Q3 figures (12 Nov 2026): they match the October pre-announcement, guidance €6.6bn was already in. Normalised EPS €50 (with budgeted major losses) stands; fair value €700 and add level €455 unchanged. Management plans to strengthen reserves in Q4. Claude chat 2026-11-13."
+        }
+      ]
     },
     {
       "id": "h-US0258161092",
@@ -735,15 +747,15 @@
       "maxWeight": null,
       "idea": null,
       "note": "",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
-      "thesis": "Europe's largest utility by customers; grids now ~half of the story (Italy, Spain, Brazil). H1 26 ordinary EBITDA €11.8bn (+3.2 %), ordinary EPS €0.40; 2026 EPS ~€0.74 (top of €0.72–0.74 guide), €0.80–0.82 by 2028; €53bn capex plan, dividend +6 %, €1bn buyback.",
+      "updatedAt": "2026-11-13T21:15:56.000Z",
+      "thesis": "Europe's largest utility by customers; grids now ~half of the story (Italy, Spain, Brazil). 9M 26: ordinary EBITDA €17.9bn (+4 %), ordinary net income €6.02bn (+6 %), ordinary EPS €0.61 (+8 %); Spain and the Americas offset falling retail margins in Italy. 2026 EPS ~€0.74 confirmed (top of the range), €0.80–0.82 by 2028; interim dividend €0.245 (+7 %), paid 20 Jan 2027.",
       "bull": "Regulated grid growth + Endesa (+22 % net income 9M) and LatAm; buybacks lift EPS; payout 70 % of ordinary income; FFO/net debt ~26 %.",
-      "bear": "Net debt up ~€4bn to €61bn in H1; Italy's 'Bollette' decree and generation margins squeezed; Italian state as shareholder sets the agenda. Italian WHT 26 %, only 15 % credited in DE → 11 pp of every dividend lost unless reclaimed in Italy (rarely worth it) — net yield ~4.5 % at today's price.",
+      "bear": "Net debt up to €66.2bn at 9M (from €61bn at H1): ~2.8x the 2026 EBITDA guide, close to my 3x line. Italian retail margins keep falling; the Italian state as shareholder sets the agenda. Italian WHT 26 %, only 15 % credited in DE → 11 pp of every dividend lost unless reclaimed in Italy (rarely worth it) — net yield ~4.5 % at today's price.",
       "kill": "I'm wrong if ordinary EPS falls below €0.70, net debt/EBITDA goes above 3x, or the dividend floor is cut.",
       "nextReview": "2027-03-01",
       "val": {
-        "date": "2026-11-09",
-        "price": 9.693,
+        "date": "2026-11-13",
+        "price": 9.955,
         "methods": [
           {
             "t": "11× 2027e EPS ~€0.77",
@@ -756,11 +768,17 @@
         ],
         "base": 9.45,
         "discount": 25,
-        "why": "Average uncertainty: Italian politics, €61bn net debt (≈7.3 % yield)",
+        "why": "Average uncertainty: Italian politics, €66bn net debt (≈7.3 % yield)",
         "bear": 4.8,
         "bearWhy": "€0.60 EPS × 8×",
         "g": 3
-      }
+      },
+      "notes": [
+        {
+          "date": "2026-11-13",
+          "text": "Valuation redone after the 9M results (12 Nov 2026): EPS guide ~€0.74 confirmed, interim dividend +7 %, so 2027e EPS ~€0.77 and the ~€0.52 dividend stand; fair value €9.45 and add level €7.10 unchanged. Watch: net debt rose to €66.2bn, about 2.8x EBITDA against the 3x in 'I'm wrong if'. Find out why at the full-year results before adding. Claude chat 2026-11-13."
+        }
+      ]
     },
     {
       "id": "h-DE000ENAG999",
@@ -775,15 +793,15 @@
       "maxWeight": null,
       "idea": null,
       "note": "Watch flag 'OCF/sh −11 %/yr since 2022' = 2022 energy-crisis peak, harmless; FCF is negative by design (grid capex).",
-      "updatedAt": "2026-11-09T10:07:51.000Z",
-      "thesis": "Germany's largest distribution-grid owner (+ UK/central Europe retail). 2026 guide adj. EBITDA €9.4–9.6bn, adj. net income €2.7–2.9bn (EPS €1.03–1.11) after a record 2025 (€9.8bn / €1.16); target €13bn EBITDA and €3.8bn net income by 2030. Dividend €0.57 (+~4 %/yr). Hold for the grid build-out; add only far lower.",
+      "updatedAt": "2026-11-13T21:15:56.000Z",
+      "thesis": "Germany's largest distribution-grid owner (+ UK/central Europe retail). 9M 26: adj. EBITDA €7.1bn (flat), adj. net income €2.2bn (+4 %), capex €5.2bn (€4.2bn grids). 2026 guide confirmed: adj. EBITDA €9.4–9.6bn, adj. net income €2.7–2.9bn (EPS €1.03–1.11) after a record 2025 (€9.8bn / €1.16); 2030 targets (€13bn EBITDA, €3.8bn net income) confirmed. Dividend €0.57 (+~4 %/yr). Hold for the grid build-out; add only far lower.",
       "bull": "€8.7bn/yr capex grows the regulated asset base; EPS ~7 %/yr to 2030 if regulation cooperates; low-risk earnings.",
       "bear": "At €19 it trades ~18x 2026 EPS and 3.0 % yield vs 4.1 % 5-yr average; 2026 earnings dip; German regulator (BNetzA) return-on-equity reset for the next period is the swing factor; capex delays in H1. German stock — no foreign WHT.",
       "kill": "I'm wrong if the regulatory reset cuts allowed returns enough that 2030 targets are withdrawn, or net debt/EBITDA goes above 5.5x.",
       "nextReview": "2027-03-20",
       "val": {
-        "date": "2026-11-09",
-        "price": 19.085,
+        "date": "2026-11-13",
+        "price": 19.47,
         "methods": [
           {
             "t": "14× 2027e adj. EPS ~€1.13",
@@ -801,7 +819,13 @@
         "bearWhy": "€0.90 EPS (bad regulatory reset) × 10×",
         "reverse": "At €19 the 3 % yield needs ~5 %/yr dividend growth forever",
         "g": 3
-      }
+      },
+      "notes": [
+        {
+          "date": "2026-11-13",
+          "text": "Valuation redone after the 9M results (11 Nov 2026): guidance and 2030 outlook unchanged, so fair value €13.90 and add level €11.10 stay. Open point: BNetzA's return on equity for the next regulatory period is still undecided. Claude chat 2026-11-13."
+        }
+      ]
     },
     {
       "id": "h-FR0000120578",
