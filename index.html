@@ -426,6 +426,9 @@ details.vform .form{margin-top:10px}
 .bzf .d a{color:var(--mute)}
 .bzf .ck{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
 .bzf .ck input{flex:1;min-width:180px;font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.vstart{display:flex!important;flex-direction:row!important;align-items:flex-start;gap:10px;cursor:pointer}
+.form .vstart input[type=checkbox]{appearance:auto;-webkit-appearance:checkbox;width:22px;height:22px;min-height:0;flex:none;margin:2px 0 0;padding:0;border:0;border-radius:4px;background:none;box-shadow:none;accent-color:var(--teal)}
+.vstart span{display:block;font-size:14px;line-height:1.35}.vstart small{display:block;font-weight:500;color:var(--mute);font-size:12.5px;margin-top:2px}
 .bztbl{overflow-x:auto;margin:0 -2px 10px;direction:rtl}   /* v4.1.9: starts scrolled to the newest year */
 .bztbl table{direction:ltr}
 .bztbl table{border-collapse:collapse;font-size:13px;width:100%;min-width:0}
@@ -1013,6 +1016,7 @@ input[type=file]{display:none}
     <h4>Live prices</h4>
     <p class="hint" id="pxStatus">No price file loaded yet.</p>
     <div class="row"><button class="btn" id="btnPxRefresh">Refresh prices now</button><span class="hint">Starts the price update on GitHub, about a minute.</span></div>
+    <p class="hint">With sync set up, Radar does this by itself when you open it and the prices are more than 2 hours old (GitHub's own timer only runs two or three times a day).</p>
   </div>
   <div class="msec">
     <h4>Your private data</h4>
@@ -1061,8 +1065,13 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.7.1';
+const VERSION='4.8.0';
 const CHANGELOG=[
+  {v:'4.8.0',d:'2026-11-13',t:'Starter levels and fresh prices',items:[
+    'Starter level: for a wonderful company whose two valuation methods agree, the buy or add level can sit at half the safety margin, for a first, smaller buy. The full margin stays as the 2nd level. It is a switch in the Valuation part of Edit ("Starter level at half the margin"); the Valuation section, the level line, Next € and the guide say when a level is a starter.',
+    'Switched on for five stocks: Zoetis (starter $96,50, 2nd level $82), Wolters Kluwer (€102, €88), Moody\'s ($422, $385), American Express ($309, $265) and Coca-Cola ($74, $68). Alphabet, Meta, ASML, Allianz and Main Street stay as they were.',
+    'Fresh prices when you open the app: with sync set up, Radar starts the price update itself when the prices are more than 2 hours old (or older than the last close). The pill says "updating" for about a minute. Reason: GitHub\'s own timer only ran two or three times a day, so mornings showed the previous close.',
+  ]},
   {v:'4.7.1',d:'2026-11-13',t:'Four fixes from the audit',items:[
     'Business table: on the phone the label column no longer covers the first digit of a number. Before, Nestlé\'s return on capital for 2023 read "2,8 %" (it is 32,8 %), and other stocks had the same slip. The labels now wrap and all years fit side by side.',
     'Return on capital: when Yahoo leaves the debt out of a company\'s capital, Radar now adds it back. Nestlé goes from 30 % to about 12 %, so its quality is "good", not "wonderful".',
@@ -1929,7 +1938,7 @@ function renderSub(){
 }
 $('#btnTable').onclick=()=>{ tableMode=!tableMode; try{localStorage.setItem(LS_TABLE,tableMode?'1':'0');}catch{} switchView('board'); };
 mqWide.addEventListener?.('change',()=>switchView(view));
-// Prices update every 2 h on weekdays. Older than that (weekends allowed for) = the update probably stopped.
+// GitHub's timer brings prices 2–3 times a day and the app asks for them when opened (autoPx). Much older than that (weekends allowed for) = the update probably stopped.
 function pxStaleH(){ const u=prices.updated; if(!u) return null; const h=(Date.now()-new Date(u))/36e5, wd=new Date().getDay();
   return h>(wd===1?78:wd===0?54:wd===6?30:28)?h:null; }
 function renderStale(){ const b=$('#staleBar'), h=pxStaleH(); b.hidden=!h; if(!h) return;
@@ -2003,7 +2012,7 @@ function ideaRow(i,due){
   if(i.status==='out'&&i.passed){ const P=i.passed, since=P.price>0&&c>0?(c/P.price-1)*100:null;
     bits.push(`${P.reason==='sold'?'sold':passLabel(P.reason).toLowerCase()} ${fmtDay(P.date)}${P.price>0?` at ${lvl(P.price)}`:''}${since!=null?` · ${fmtPct(since,0)} since`:''}`); }
   else if(!c) bits.push(!q&&errOf(i)?`no quote for ${esc(symOf(i))}`:'waiting for the first price');
-  else if(bp) bits.push(bp.above<=0?(lvl2Of(i)&&c<=lvl2Of(i)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(i))}`:`<b class="up">at your price</b> ${lvl(i.buyBelow)}`):`${abv(bp.above)} % above ${lvl(i.buyBelow)}`);
+  else if(bp) bits.push(bp.above<=0?(lvl2Of(i)&&c<=lvl2Of(i)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(i))}`:`<b class="up">at your ${startOn(valNorm(i.val))?'starter price':'price'}</b> ${lvl(i.buyBelow)}`):`${abv(bp.above)} % above ${lvl(i.buyBelow)}`);
   else bits.push(rp&&rp.pos<=.15?'no buy price · near 52w low':rp&&rp.pos>=.85?'no buy price · near 52w high':'no buy price');
   if(y!=null) bits.push(yTxt(y,h));
   const t=totalOf(i);   // return only once it says something: older than a month or ±5 %
@@ -2065,6 +2074,12 @@ function valSpread(v){ if(!v||!Array.isArray(v.methods)) return null; const mv=v
   const lo=Math.min(...mv), hi=Math.max(...mv), gap=(hi/lo-1)*100; return {lo,hi,gap,wide:gap>=VAL_WIDE,cautious:Math.min(v.base,lo)}; }
 const wideTag=sp=>sp&&sp.wide?`<b class="wd" title="Your two valuation methods are ${fmtN(sp.gap,0)} % apart">methods ${fmtN(sp.gap,0)} % apart</b>`:'';
 const levelFromVal=v=>v&&v.base>0&&v.discount!=null?v.base*(1-v.discount/100):null;
+// v4.8.0 starter level: `start: true` on a valuation means "buy a first, smaller piece at half the margin". The level
+// (buyBelow / addBelow) is then fair value × (1 − margin / 2) and the full margin gives the 2nd level. Meant for wonderful
+// companies whose two methods agree; it is a switch per stock, set by hand, never switched on by the app.
+const startOn=v=>!!(v&&v.start&&v.base>0&&v.discount>0);
+const starterFromVal=v=>startOn(v)?v.base*(1-v.discount/200):null;
+const startTag=v=>startOn(v)?', your starter level':'';
 function niceRound(x){ if(x==null) return null; const m=x>=10000?100:x>=1000?10:x>=100?1:x>=10?.5:.05; return Number((Math.round(x/m)*m).toFixed(2)); }
 // A holding uses its own valuation, else the one on a Radar card for the same symbol.
 function valOfH(h){ const o=valNorm(h.val); if(o) return {v:o,src:'own'};
@@ -2099,7 +2114,7 @@ function valBar(v,c,lvl,cur){
 function valHtml(v,c,cur,lvl,word,sym,src){
   if(!v) return `<div class="sec val"><h4>Valuation</h4><p class="none">No valuation yet. Add fair value, discount and bear case in ${word==='add'?'the settings below':'Edit'}, and the ${word} level follows from them.</p></div>`;
   const m=valMove(v,c), a=valAge(v,sym), calc=levelFromVal(v), atL=lvl>0?{up:(v.base/lvl-1)*100,dn:v.bear>0?(v.bear/lvl-1)*100:null}:null;
-  const hand=lvl>0&&calc&&Math.abs(lvl/calc-1)>.02;
+  const st=starterFromVal(v), hand=lvl>0&&calc&&Math.abs(lvl/(st||calc)-1)>.02;
   return `<div class="sec val"><h4>Valuation${src==='radar'?' <span class="bzn">from the Radar card</span>':''}${a&&a.stale?' <span class="stl">stale</span>':''}</h4>
     ${valBar(v,c,lvl,cur)}
     <div class="kpis">
@@ -2113,7 +2128,8 @@ function valHtml(v,c,cur,lvl,word,sym,src){
       ${(sp=>{ if(!sp||!sp.wide) return ''; const cl=v.discount!=null?niceRound(sp.lo*(1-v.discount/100)):null;
         return `<div class="wdbox"><p><b>The methods are ${fmtN(sp.gap,0)} % apart</b> (${mN(sp.lo,cur)} and ${mN(sp.hi,cur)}). The average hides that one of them may be wrong, so treat the fair value as soft.</p>
         <p>Next € counts only the lower one, ${mN(sp.lo,cur)}.${cl?` Your ${fmtN(v.discount,0)} % margin on the lower method would put the ${word} level at <b>${mN(cl,cur)}</b>${eurTag(cl,cur)}${lvl>0?(cl<lvl?`, ${fmtN((1-cl/lvl)*100,0)} % below today's ${mN(lvl,cur)}`:`; today's ${mN(lvl,cur)} is already at or below that`):''}.`:''}</p></div>`; })(valSpread(v))}
-      ${v.discount!=null?`<p><b>${fmtN(v.discount,0)} % margin of safety</b>${v.why?`: ${esc(v.why)}`:''} → ${mN(niceRound(calc),cur)}.${hand?` Your ${word} level ${mN(lvl,cur)} is set by hand.`:''}</p>`:''}
+      ${v.discount!=null?`<p><b>${fmtN(v.discount,0)} % margin of safety</b>${v.why?`: ${esc(v.why)}`:''} → ${mN(niceRound(calc),cur)}${st?', your 2nd level (the full buy)':''}.${hand?` Your ${word} level ${mN(lvl,cur)} is set by hand.`:''}</p>`:''}
+      ${st?`<p><b>Starter level at half the margin (${fmtN(v.discount/2,1)} %)</b> → ${mN(niceRound(st),cur)}${eurTag(niceRound(st),cur)}. For a wonderful company whose two methods agree, waiting for the full discount often means never buying. At the starter level you'd buy a first, smaller piece and keep the rest for the 2nd level.</p>`:''}
       ${v.bear>0?`<p><b>Bear case ${mP(v.bear,cur)}</b>${v.bearWhy?`: ${esc(v.bearWhy)}`:''}</p>`:''}
       ${v.reverse?`<p><b>What the price implies:</b> ${esc(v.reverse)}</p>`:''}
     </div>
@@ -2134,22 +2150,26 @@ function valForm(p,v,cur){ v=v||{}; const m=v.methods||[], vv=x=>x==null?'':esc(
     <label>Long-run growth %<input id="${p}g" type="number" step="any" inputmode="decimal" value="${vv(v.g)}" placeholder="g, e.g. 3"></label>
     <label class="w2">Bear case, how<input id="${p}bearWhy" value="${vv(v.bearWhy)}" placeholder="trough EPS × trough multiple"></label>
     <label class="w4">What today's price implies<input id="${p}rev" value="${vv(v.reverse)}" placeholder="reverse DCF, optional"></label>
+    <label class="w4 vstart"><input id="${p}start" type="checkbox" ${v.start?'checked':''}><span><b>Starter level at half the margin</b><small>For wonderful companies whose two methods agree: a first, smaller buy. The full margin becomes the 2nd level.</small></span></label>
     <div class="w4 vcalc"><span id="${p}calc"></span><button class="btn small" type="button" id="${p}use">Use as level</button></div>
   </div></details>`; }
 function valRead(p,prev,price){
   const g=k=>$('#'+p+k)?$('#'+p+k).value.trim():'';
-  const raw={methods:[{t:g('m1t'),v:g('m1v')},{t:g('m2t'),v:g('m2v')}],base:numOr(g('base')),discount:numOr(g('disc')),why:g('why'),bear:numOr(g('bear')),bearWhy:g('bearWhy'),reverse:g('rev'),g:numOr(g('g'))};
+  const raw={methods:[{t:g('m1t'),v:g('m1v')},{t:g('m2t'),v:g('m2v')}],base:numOr(g('base')),discount:numOr(g('disc')),why:g('why'),bear:numOr(g('bear')),bearWhy:g('bearWhy'),reverse:g('rev'),g:numOr(g('g')),start:!!($('#'+p+'start')&&$('#'+p+'start').checked)};
   const n=valNorm(raw); if(!n) return undefined;
   const date=g('date')||today();
-  const out={date,price:prev&&prev.date===date&&prev.price!=null?prev.price:(price>0?price:null),methods:n.methods,base:numOr(g('base'))??niceRound(n.base),discount:n.discount,why:raw.why,bear:n.bear,bearWhy:raw.bearWhy,reverse:raw.reverse,g:raw.g};
+  const out={date,price:prev&&prev.date===date&&prev.price!=null?prev.price:(price>0?price:null),methods:n.methods,base:numOr(g('base'))??niceRound(n.base),discount:n.discount,why:raw.why,bear:n.bear,bearWhy:raw.bearWhy,reverse:raw.reverse,g:raw.g,start:raw.start&&n.discount>0?true:null};
   Object.keys(out).forEach(k=>{ if(out[k]===''||out[k]==null) delete out[k]; });
   return out; }
 function valWire(p,levelSel,cur){
-  const upd=()=>{ const n=valNorm({methods:[{v:$('#'+p+'m1v').value},{v:$('#'+p+'m2v').value}],base:$('#'+p+'base').value,discount:$('#'+p+'disc').value});
-    const l=levelFromVal(n); $('#'+p+'calc').textContent=n?(l?`${mN(n.base,cur)} × (1 − ${fmtN(n.discount,0)} %) = ${mN(niceRound(l),cur)}`:`fair value ${mN(n.base,cur)}, add a margin of safety`):'Fill in a method value or the fair value.';
-    $('#'+p+'use').disabled=!l; return l; };
-  $$(`[id^="${p}"]`).forEach(el=>{ if(el.tagName==='INPUT') el.addEventListener('input',upd); });
-  $('#'+p+'use').onclick=()=>{ const l=upd(); if(l){ $(levelSel).value=niceRound(l); toast('Level set, save to keep it'); } };
+  const upd=()=>{ const n=valNorm({methods:[{v:$('#'+p+'m1v').value},{v:$('#'+p+'m2v').value}],base:$('#'+p+'base').value,discount:$('#'+p+'disc').value,start:$('#'+p+'start').checked});
+    const l=levelFromVal(n), st=starterFromVal(n);
+    $('#'+p+'calc').textContent=n?(st?`starter ${mN(n.base,cur)} × (1 − ${fmtN(n.discount/2,1)} %) = ${mN(niceRound(st),cur)} · 2nd level ${mN(niceRound(l),cur)}`:l?`${mN(n.base,cur)} × (1 − ${fmtN(n.discount,0)} %) = ${mN(niceRound(l),cur)}`:`fair value ${mN(n.base,cur)}, add a margin of safety`):'Fill in a method value or the fair value.';
+    $('#'+p+'use').disabled=!l; $('#'+p+'use').textContent=st?'Use as levels':'Use as level'; return {l,st}; };
+  $$(`[id^="${p}"]`).forEach(el=>{ if(el.tagName==='INPUT') el.addEventListener(el.type==='checkbox'?'change':'input',upd); });
+  $('#'+p+'use').onclick=()=>{ const {l,st}=upd(); if(!l) return;
+    if(st){ $(levelSel).value=niceRound(st); const e2=$(levelSel+'2'); if(e2) e2.value=niceRound(l); toast('Starter and 2nd level set, save to keep them'); }
+    else { $(levelSel).value=niceRound(l); toast('Level set, save to keep it'); } };
   upd(); }
 const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
 // v3.5.0: the detail sheet says the tier once. One block: decision line → the three score bars → the level line.
@@ -2199,7 +2219,7 @@ function cardEl(i,inSheet){
   // in the sheet: the same facts without repeating the tier or the level (both have their own place)
   let dec=dist;
   if(inSheet){ const l2=lvl2Of(i);
-    if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':'at your buy level'):`${abv(bp.above)} % above your buy level`):nl?'not ranked yet':'no buy price set';
+    if(sc){ dec=bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd level':startOn(valNorm(i.val))?'at your starter level, a first, smaller buy':'at your buy level'):`${abv(bp.above)} % above your buy level`):nl?'not ranked yet':'no buy price set';
       if(sc.cap==='flag') dec=`held at Wait by a red flag (would be ${sc.raw}) · `+dec;
       else if(sc.cap==='broken') dec=`held at Wait by a broken thesis (would be ${sc.raw}) · `+dec;
       else if(sc.cap==='above') dec+=`, so it stops at Getting close (would be ${sc.raw})`;
@@ -2227,7 +2247,7 @@ function cardEl(i,inSheet){
         <div class="s">${other?`${other}${d!=null?' · ':''}`:''}${d!=null?`<b class="${d>=0?'up':'dn'}" title="today">${fmtPct(d)}</b>`:''}</div>
       </div>
     </div>
-    ${inSheet?decBlk(tier,esc(dec),sc,{buy:PART.buy.label,yld:PART.yld.label,rng:PART.rng.label},lvlLineHtml('Buy',i.buyBelow,cur,lvl2Of(i))+seenHtml(symOf(i),i.buyBelow,cur,c),nl?{what:'buy price',field:'f_buyBelow',val:!!valNorm(i.val)}:null):`<div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>`}
+    ${inSheet?decBlk(tier,esc(dec),sc,{buy:PART.buy.label,yld:PART.yld.label,rng:PART.rng.label},lvlLineHtml('Buy',i.buyBelow,cur,lvl2Of(i),startTag(valNorm(i.val)))+seenHtml(symOf(i),i.buyBelow,cur,c),nl?{what:'buy price',field:'f_buyBelow',val:!!valNorm(i.val)}:null):`<div class="c2dec"><b>${tier}</b> · ${esc(dist)}</div>`}
     ${valLine(valNorm(i.val),c,cur,symOf(i))}
     ${earnLine(symOf(i))}
     ${bar}
@@ -2543,7 +2563,7 @@ $('#btnClaudeGo').onclick=()=>{
       KEEP.forEach(k=>delete o[k]); if(!o.ticker) delete o.ticker;
       if('currency' in o) o.currency=curNorm(o.currency,o.symbol||symOf(cur));
       if(o.val&&typeof o.val==='object'){ if(!o.val.date) o.val.date=today(); if(o.val.price==null){ const c=curOf(cur); if(c) o.val.price=c; }
-        if(!(raw.buyBelow>0)){ const l=levelFromVal(valNorm(o.val)); if(l) o.buyBelow=niceRound(l); } }
+        if(!(raw.buyBelow>0)){ const vn=valNorm(o.val), l=levelFromVal(vn), st=starterFromVal(vn); if(st){ o.buyBelow=niceRound(st); if(!(raw.buyBelow2>0)) o.buyBelow2=niceRound(l); } else if(l) o.buyBelow=niceRound(l); } }
       Object.assign(cur,o); if(qAuto) delete cur.quality;
       const have=new Set((cur.notes||[]).map(x=>(x.date||'')+'|'+(x.text||'')));
       cur.notes=[...(Array.isArray(cur.notes)?cur.notes:[]),...add.map(x=>({date:x.date||today(),...x})).filter(x=>!have.has(x.date+'|'+x.text))];
@@ -2553,7 +2573,7 @@ $('#btnClaudeGo').onclick=()=>{
     if(!o.loggedDate) o.loggedDate=today();
     if(!STATUSES.some(s=>s.k===o.status)) o.status='radar';
     if(o.val&&typeof o.val==='object'){ if(o.val.price==null&&o.loggedPrice>0) o.val.price=o.loggedPrice; if(!o.val.date) o.val.date=o.loggedDate;
-      if(!(o.buyBelow>0)){ const l=levelFromVal(valNorm(o.val)); if(l) o.buyBelow=niceRound(l); } }
+      if(!(o.buyBelow>0)){ const vn=valNorm(o.val), l=levelFromVal(vn), st=starterFromVal(vn); if(st){ o.buyBelow=niceRound(st); if(!(o.buyBelow2>0)) o.buyBelow2=niceRound(l); } else if(l) o.buyBelow=niceRound(l); } }
     o.updatedAt=now(); if(!o.createdAt) o.createdAt=o.updatedAt;
     n+=merge([o]);
   }
@@ -2644,7 +2664,7 @@ let syncTxt='saved on this device';
 function setSync(cls,txt){ const s=$('#sync'); s.className='status '+cls; syncTxt=txt==='local'?'saved on this device':txt; renderStatus(); }
 // One pill: the text is the price age, the dot the sync state; full wording in the tooltip and in ⋯.
 function renderStatus(){ const s=$('#sync'); if(!s) return; const n=Object.keys(prices.quotes||{}).length;
-  s.querySelector('span').textContent=n?ago(prices.updated).replace(/ ago$/,''):'no prices';
+  s.querySelector('span').textContent=pxAsking()?'updating':n?ago(prices.updated).replace(/ ago$/,''):'no prices';
   s.title=`${n?'Prices updated '+ago(prices.updated):'No prices loaded yet'} · ${syncTxt}`; s.setAttribute('aria-label',s.title); }
 
 async function pull(thenPush){
@@ -2701,13 +2721,49 @@ async function loadPrices(){
   if(f&&f.companies&&f.updated!==fund.updated){ fund=f; bizCache.clear(); ch=true; try{ localStorage.setItem(LS_FUND,JSON.stringify(f)); }catch{} }
   if(hj&&hj.series&&(!hist||hj.updated!==hist.updated)){ hist=hj; ch=true; try{ localStorage.setItem(LS_HIST,JSON.stringify(hj)); }catch{} }
   if(ch) render();
+  autoPx();
+}
+// ---------- fresh prices when you open the app (v4.8.0) ----------
+// GitHub starts only 2–3 of the 8 scheduled price runs a day, hours late (Actions log, 10–13 Nov 2026), so in the morning
+// Radar showed the previous close. With sync set up, Radar now asks for a run itself whenever it loads prices (on opening
+// and on coming back to the front) and finds them behind: older than AUTO_PX.old hours while a market is open, or older
+// than the last close afterwards. At most one request per AUTO_PX.gap minutes, and only one after a close (a run that
+// changes nothing leaves the file's time as it is, and must not be asked for again and again over a weekend).
+const LS_AUTOPX='radar.autoPx.v1';
+const AUTO_PX={old:2,gap:60,close:21.25};   // hours · minutes · Mon–Fri, UTC hour by which New York has closed (Tokyo opens at 0)
+function lastMarketMs(t){   // t itself while a market is open, else the last close before t
+  const d=new Date(t), wd=d.getUTCDay(), h=d.getUTCHours()+d.getUTCMinutes()/60;
+  if(wd>=1&&wd<=5&&h<AUTO_PX.close) return t;
+  const c=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),0,AUTO_PX.close*60));
+  if(c.getTime()>t) c.setUTCDate(c.getUTCDate()-1);
+  while(c.getUTCDay()===0||c.getUTCDay()===6) c.setUTCDate(c.getUTCDate()-1);
+  return c.getTime(); }
+function autoPxDue(nowMs,updatedIso,lastMs){
+  const upd=Date.parse(updatedIso||''); if(!(upd>0)) return false;
+  const m=lastMarketMs(nowMs), open=m===nowMs;
+  if(open?nowMs-upd<=AUTO_PX.old*36e5:upd>=m) return false;            // not behind
+  if(lastMs>0&&(nowMs-lastMs<AUTO_PX.gap*6e4||(!open&&lastMs>=m))) return false;   // asked recently, or already asked after this close
+  return true; }
+let pxAsk=0;   // when the last request went out; the pill says "updating" until newer prices arrive (3 minutes at most)
+const pxAsking=()=>pxAsk>0&&Date.now()-pxAsk<18e4&&!(Date.parse(prices.updated||'')>pxAsk-6e4);
+const pxDispatch=()=>fetch(`https://api.github.com/repos/${sync.repo}/actions/workflows/prices.yml/dispatches`,
+  {method:'POST',headers:{...hdr(),'Content-Type':'application/json'},body:JSON.stringify({ref:sync.branch})});
+const pxNoted=()=>{ pxAsk=Date.now(); try{ localStorage.setItem(LS_AUTOPX,String(pxAsk)); }catch{} };
+async function autoPx(){
+  if(!cfg()||document.hidden) return;
+  let last=0; try{ last=Number(localStorage.getItem(LS_AUTOPX))||0; }catch{}
+  if(!autoPxDue(Date.now(),prices.updated,last)) return;
+  const hrs=(Date.now()-Date.parse(prices.updated))/36e5, old=hrs<48?`${Math.round(hrs)} hours`:`${Math.round(hrs/24)} days`; pxNoted();
+  try{ const r=await pxDispatch();
+    if(r.status===204){ renderStatus(); toast(`Prices are ${old} old. Getting fresh ones, about a minute.`); [60,100,150].forEach(s=>setTimeout(loadPrices,s*1000)); setTimeout(renderStatus,181e3); }
+    else { pxAsk=0; console.warn('price update not started',r.status); }   // e.g. the token may not start Actions: stay quiet, the button in ⋯ explains it
+  }catch(e){ pxAsk=0; console.warn('price update not started',e); }
 }
 $('#btnPxRefresh').onclick=async()=>{
   if(!cfg()){ toast('Set up GitHub sync first'); return; }
   try{
-    const r=await fetch(`https://api.github.com/repos/${sync.repo}/actions/workflows/prices.yml/dispatches`,
-      {method:'POST',headers:{...hdr(),'Content-Type':'application/json'},body:JSON.stringify({ref:sync.branch})});
-    if(r.status===204){ toast('Price update started, about a minute'); closeAll(); [60,100,150].forEach(s=>setTimeout(loadPrices,s*1000)); }
+    const r=await pxDispatch();
+    if(r.status===204){ pxNoted(); renderStatus(); toast('Price update started, about a minute'); closeAll(); [60,100,150].forEach(s=>setTimeout(loadPrices,s*1000)); setTimeout(renderStatus,181e3); }
     else if(r.status===403||r.status===404) toast('Token needs Actions: read and write');
     else toast('Could not start the update: '+r.status);
   }catch(e){ toast('Could not start the update'); }
@@ -2835,13 +2891,13 @@ function holdCard(r){
   let dec=dist;
   if(s){ const l2=lvl2Of(x);
     dec=s.full?`already ${fmtN(s.w,1)} % of the depot, max ${fmtN(capOf(h),1)} % (would be ${s.rawTier.toLowerCase()}, ${s.score})`
-      :bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd add level':'at your add level'):`${abv(bp.above)} % above your add level`)
+      :bp?(bp.above<=0?(l2&&c<=l2?'at your 2nd add level':startOn((valOfH(h)||{}).v)?'at your starter level, a first, smaller add':'at your add level'):`${abv(bp.above)} % above your add level`)
       :s.capped||s.cap==='level'?'no add level yet, so it stops at Getting close':'no add level yet';
     if(!s.full&&s.cap==='flag') dec=`held at Hold by a red flag (would be ${s.raw}) · `+dec;
     else if(!s.full&&s.cap==='above'&&bp) dec+=`, so it stops at Getting close (would be ${s.raw})`;
     dec+=rngTxt(rp); }
   if(!fund&&brokenOf(textSrc(h))) dec='thesis broken'+(s&&!s.full&&s.cap==='broken'?` (would be ${s.raw})`:'')+' · '+dec;   // v4.1.2: the broken cap
-  const lvlLine=a?lvlLineHtml('Add',a.v,cur,lvl2Of(x),a.src==='radar'?' (from the Radar card)':'')+seenHtml(hSym(h),a.v,cur,c):'';
+  const lvlLine=a?lvlLineHtml('Add',a.v,cur,lvl2Of(x),(a.src==='radar'?' (from the Radar card)':'')+startTag((valOfH(h)||{}).v))+seenHtml(hSym(h),a.v,cur,c):'';
   const other=c&&isConv(cur)?fmtP(c,cur):c&&cur!=='EUR'&&eurOf(c,cur)!=null?'≈ '+fmtP(eurOf(c,cur),'EUR'):'';
   const yArr=hi?(hi.v==='cheap'?['▲','up']:hi.v==='expensive'?['▼','dn']:['≈','']):null;
   const rt=hRetOf(h), rc=rt==null||Math.abs(rt.pct)<.05?'':rt.pct>0?'up':'dn';
@@ -2925,7 +2981,7 @@ function holdRow(r,due){
   else if(fund&&!s) bits.push(h.kind==='bond'?'bond fund':'fund');
   else if(s&&s.full) bits.push(`full · max ${fmtN(capOf(h),1)} %`);
   else{
-    if(a&&bp) bits.push(bp.above<=0?(lvl2Of(x)&&c<=lvl2Of(x)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(x))}`:`<b class="up">at your add level</b> ${lvl(a.v)}`):`${abv(bp.above)} % above ${lvl(a.v)}`);
+    if(a&&bp) bits.push(bp.above<=0?(lvl2Of(x)&&c<=lvl2Of(x)?`<b class="up">at your 2nd level</b> ${lvl(lvl2Of(x))}`:`<b class="up">at your ${startOn((valOfH(h)||{}).v)?'starter':'add'} level</b> ${lvl(a.v)}`):`${abv(bp.above)} % above ${lvl(a.v)}`);
     else if(p!=null&&(p<=.15||p>=.85)) bits.push(p<=.15?'near 52w low':'near 52w high');
   }
   if(y!=null) bits.push(yTxt(y,hi)+(!a&&!fund&&hi&&!(s&&s.full)?` · usual ${fmtN(hi.avg,1)} %`:''));
@@ -3221,7 +3277,7 @@ function erParts(r){ let t=`hurdle ${pp(NX.hurdle)} ${r.rr>=0?'+':'−'} fair ${
   return t; }
 function nextRow(r,n){
   const bits=[]; const tone=r.st==='ready'?'var(--t-buy)':r.st==='wait'||r.st==='nolevel'?'var(--t-wait)':'var(--t-none)';
-  if(r.st==='ready') bits.push(r.x&&lvl2Of(r.x)&&r.c<=lvl2Of(r.x)?`<b class="up">at your 2nd level</b>, a bigger tranche`:`<b class="up">at your level</b>`);
+  if(r.st==='ready') bits.push(r.x&&lvl2Of(r.x)&&r.c<=lvl2Of(r.x)?`<b class="up">at your 2nd level</b>, a bigger tranche`:startOn(r.val)?`<b class="up">at your starter level</b>, a first, smaller buy`:`<b class="up">at your level</b>`);
   else if(r.st==='wait') bits.push(`${abv(r.above)} % above ${lvl(r.lvl)}`);
   else if(r.st==='nolevel') bits.push('no level set');
   else if(r.st==='flag') bits.push('<b class="dn">red flag</b>');
@@ -3244,7 +3300,7 @@ function renderNext(){
         <b class="tk">${esc(top.nm||top.tk)} <span>${esc(top.tk)}</span></b>
         <span class="er num">≈ ${pp(top.adj)} % a year</span>
         ${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}
-        <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax${(l=>l>=.5?`, after ${fmtEur(l)} a year withholding you can't credit`:'')(nextLeakOf(top))}.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
+        <span class="ex">${erParts(top)} %, over ${NX.years} years, before German tax${(l=>l>=.5?`, after ${fmtEur(l)} a year withholding you can't credit`:'')(nextLeakOf(top))}.${shares?` That's about ${fmtN(shares,shares<10?1:0)} share${shares>=1.05||shares<.95?'s':''} at ${pxCol(top.c,top.cur).main}.`:''}${startOn(top.val)&&!(lvl2Of(top.x)&&top.c<=lvl2Of(top.x))?` It is at its <b>starter level</b>${lvl2Of(top.x)?`, not yet at the full level ${mN(lvl2Of(top.x),top.cur)}`:''}: a first, smaller buy, not the whole amount.`:''}${top.age&&top.age.stale?' <span class="dn">The valuation is stale, check it first.</span>':''}${(e=>e&&e.dn!=null&&e.dn<=7?` <b>Results come out ${e.dn===0?'today':e.dn===1?'tomorrow':`on ${fmtDay(e.next)} (in ${e.dn} days)`}.</b> You may want to see them first.`:'')(earnOf(top.sym))}</span>
         ${R.ready[1]?`<span class="ex">Next best at your level: ${R.ready.slice(1,3).map(r=>`${esc(r.tk)} ${pp(r.adj)} %`).join(', ')}.</span>`:''}`
       :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b>${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}<span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
       :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?abv(r.above)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
@@ -3282,7 +3338,7 @@ function nextSecHtml(kind,id,sym){
   const R=nextRank(nextAmt), r=R.rows.find(x=>x.kind===kind&&x.id===id)||R.rows.find(x=>x.sym===sym);
   if(!r||r.er==null) return '';
   const rank=R.ready.indexOf(r), b=bondRef();
-  const st=r.st==='ready'?(rank>=0?`At your level: number ${rank+1} of ${R.ready.length} for your next ${fmtEur(nextAmt)}.`:'At your level.')
+  const st=r.st==='ready'?(rank>=0?`At your ${startOn(r.val)&&!(lvl2Of(r.x)&&r.c<=lvl2Of(r.x))?'starter level (a first, smaller buy)':'level'}: number ${rank+1} of ${R.ready.length} for your next ${fmtEur(nextAmt)}.`:'At your level.')
     :r.st==='wait'?`${abv(r.above)} % above your level, so it waits under "Not at your level yet".`
     :r.st==='nolevel'?'No level set yet, so it can\'t be "at your level".'
     :r.st==='flag'?'Held back by an open red flag.'
@@ -3940,7 +3996,7 @@ function importHoldings(arr){
     if(cur){ Object.assign(cur,o,{id:cur.id,updatedAt:now()}); if(qAuto) delete cur.quality; t=cur; n++; }
     else if(o.symbol||o.isin){ t={id:o.isin?'h-'+o.isin:uid(),kind:'stock',addBelow:null,maxWeight:null,idea:null,note:'',...o,updatedAt:now()}; port.holdings.push(t); n++; }
     if(t&&t.val&&typeof t.val==='object'){ if(!t.val.date) t.val.date=today(); if(t.val.price==null){ const c=curOf(px(t)); if(c) t.val.price=c; }
-      if(!(raw.addBelow>0)){ const l=levelFromVal(valNorm(t.val)); if(l) t.addBelow=niceRound(l); } }
+      if(!(raw.addBelow>0)){ const vn=valNorm(t.val), l=levelFromVal(vn), st=starterFromVal(vn); if(st){ t.addBelow=niceRound(st); if(!(raw.addBelow2>0)) t.addBelow2=niceRound(l); } else if(l) t.addBelow=niceRound(l); } }
   }
   return n;
 }
@@ -4079,7 +4135,7 @@ function helpMineHtml(){ const o=helpMine(); if(!o) return '';
   const {v,cur}=o, n=x=>fmtN(x)+' '+esc(cur||''), mv=v.methods.filter(m=>m.v>0), lv=levelFromVal(v);
   return `<div class="hex mine"><b>From your Radar: ${esc(o.nm||o.tk)}</b>
     ${mv.length?`<ul>${mv.map(m=>`<li>${esc(m.t)||'method'} → <b>${n(m.v)}</b></li>`).join('')}</ul>`:''}
-    <p>Fair value: <b>${n(v.base)}</b>${mv.length>1?' (the average)':''}.${v.discount!=null&&lv?` Minus ${fmtN(v.discount,0)} % safety margin → ${o.word} <b>${n(o.lvl>0?o.lvl:niceRound(lv))}</b>.`:''}${v.bear>0?` Bear case: <b>${n(v.bear)}</b>.`:''}${o.c>0?` Today's price: <b>${n(o.c)}</b>, ${o.c<=v.base?fmtN((1-o.c/v.base)*100,0)+' % below':fmtN((o.c/v.base-1)*100,0)+' % above'} fair value.`:''}</p></div>`; }
+    <p>Fair value: <b>${n(v.base)}</b>${mv.length>1?' (the average)':''}.${v.discount!=null&&lv?(startOn(v)?` Minus ${fmtN(v.discount,0)} % safety margin → <b>${n(niceRound(lv))}</b>, the full level. Minus half of that margin → starter level <b>${n(niceRound(starterFromVal(v)))}</b>.`:` Minus ${fmtN(v.discount,0)} % safety margin → ${o.word} <b>${n(o.lvl>0?o.lvl:niceRound(lv))}</b>.`):''}${v.bear>0?` Bear case: <b>${n(v.bear)}</b>.`:''}${o.c>0?` Today's price: <b>${n(o.c)}</b>, ${o.c<=v.base?fmtN((1-o.c/v.base)*100,0)+' % below':fmtN((o.c/v.base-1)*100,0)+' % above'} fair value.`:''}</p></div>`; }
 const HELP=[
 ['idea','The idea in one minute',()=>`
   <p>A share is a small piece of a company. Its <b>price</b> jumps around every day. What the company is <b>worth</b> changes slowly. Radar exists for one job: to tell you when the price of a good company is clearly below what you think it is worth.</p>
@@ -4107,6 +4163,8 @@ const HELP=[
   <p>An estimate can be wrong. So you don't buy at fair value, you wait for a discount. That discount is the <b>safety margin</b>: bigger for shaky businesses, smaller for very steady ones.</p>
   <div class="hex"><b>Brot AG</b><span class="calc">81 € − 25 % = about 61 € buy price</span>
     <p>If the price is 61 € or lower, Radar puts the stock in the Buy zone. For a stock you already own, the same number is called the add level. A "2nd level" is an even lower price where you'd buy more.</p></div>
+  <div class="hex"><b>Starter level</b><span class="calc">81 € − 12,5 % = about 71 € starter · 61 € stays the 2nd level</span>
+    <p>Very good companies rarely get 25 % cheaper than they are worth. If you only ever wait for the full discount, you may never own them. So for a company Radar rates "wonderful", and only when the two ways of valuing it agree, you can switch on a <b>starter level</b> at half the safety margin. There you buy a first, smaller piece. The full buy price stays as the 2nd level. The cushion on that first piece is thinner: that is the price of not waiting forever.</p></div>
   <p>The <b>bear case</b> asks: what if it goes badly? Lower profit, and buyers pay a lower multiple.</p>
   <div class="hex"><b>Brot AG, bad years</b><span class="calc">4 € profit × 13 = 52 € bear case</span>
     <p>Bought at 61 €, you could gain 33 % up to fair value and lose 15 % down to the bear case. Bought at 81 €, the same bad years cost you 36 %. That difference is what the safety margin buys you.</p></div>

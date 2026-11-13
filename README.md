@@ -32,7 +32,7 @@ Setup:
 3. Actions tab → *prices* → **Run workflow** once to test. `prices.json` appears in the repo.
 4. Optional, for the "Refresh prices now" button in `⋯`: edit your token and add **Actions: Read and write**.
 
-Runs every 2 hours (07:17–21:17 UTC, Mon–Fri) and whenever `ideas.json` changes, so a new card gets its price within a minute. Change the `cron` line to taste.
+Scheduled every 2 hours (07:17–21:17 UTC, Mon–Fri) and run whenever `ideas.json` changes, so a new card gets its price within a minute. In practice GitHub starts only two or three of the scheduled runs a day, so since v4.8.0 the app (with sync set up) starts a run itself when it is opened and the prices are more than 2 hours old.
 
 Symbols: the card's **Yahoo symbol** field, or the ticker if empty. US stocks work as-is (`KO`, `PEP`);
 everything else needs the exchange suffix: `ENI.MI` (Milan), `SAP.DE` (Xetra), `NESN.SW` (Zurich), `ULVR.L` (London, in GBp), `NOVN.SW`, `ASML.AS`.
