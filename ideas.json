@@ -825,6 +825,58 @@
         "bearWhy": "~$13.50 EPS (−20 %, issuance slump like 2022) × 22×",
         "reverse": "At $511 the market implies ~4.6 %/yr FCF growth forever"
       }
+    },
+    {
+      "id": "5jb7z1mwetwlac",
+      "ticker": "NESN",
+      "name": "Nestlé",
+      "sector": "Consumer staples – food & beverages",
+      "source": "Claude chat 2026-11-13",
+      "status": "researching",
+      "loggedDate": "2026-11-13",
+      "loggedPrice": 86.57,
+      "currency": "CHF",
+      "symbol": "NESN.SW",
+      "currentPrice": null,
+      "currentDate": null,
+      "buyBelow": 66,
+      "conviction": 3,
+      "thesis": "World's largest food company (Nescafé, Nespresso, Purina, KitKat, Maggi), refocusing on coffee, petcare, nutrition, food & snacks. Turnaround under CEO Navratil is working: RIG 2.8 % in Q3 2026, 1.9 % for 9M; UTOP margin 16.4 % in H1 vs 15.7 % in H2-25. Dividend CHF 3.10, raised 30 years running, 3.6 % yield at CHF 86.57. Fair value ≈ CHF 78 (≈ €84.50); buy only ≤ CHF 66 (≈ €71.50, 4.7 % yield).",
+      "bull": "RIG-led growth for five quarters, positive in every zone in Q3. CHF 3bn cost savings by end-2027 aimed at a 17 %+ margin. FCF guided above CHF 9bn; waters JV brings ≈ CHF 2.8bn cash in 2027, ice cream goes to Froneri. 18× 2027e EPS vs 21.4× 10-yr average. Petcare and coffee are over half of sales.",
+      "bear": "Dividend takes ≈ 87 % of FCF (CHF 8.0bn of 9.2bn), ≈ 90 % after Russia was seized in Sept 2026 (3–4 % of UTOP and FCF, CHF 1.6bn written off). Net debt CHF 56bn, 2.85× EBITDA. Franc strength: 9M-26 reported sales growth 0.0 %, dividend raises only ~1.6 %/yr. H1-26 net profit −31 % on write-downs and restructuring; 16,000 job cuts and the infant-formula recall still running. Tax: Switzerland withholds 35 %, Germany credits 15 %, 20 pp only via ESTV form 85 (3 years) – without it the yield is effectively 2.9 %. Same sector as KO.",
+      "kill": "I'm wrong if RIG falls back under 1 % for two half-years, the UTOP margin is still below 16.5 % in 2027 despite the savings, FCF drops under CHF 8.5bn (dividend no longer covered), or net debt/EBITDA rises above 3.2×.",
+      "nextReview": "2027-02-19",
+      "boughtDate": "",
+      "boughtPrice": null,
+      "notes": [
+        {
+          "date": "2026-11-13",
+          "text": "2026-11-13: Logged at CHF 86.57 (SIX close 12 Nov, ≈ €93.75 at EUR/CHF 0.9234), 1 % under the 52-week high of 87.54. About 11 % above fair value 78 – not a buy here. FY-2026 results expected 18 Feb 2027: watch H2 margin, FCF vs the CHF 8.0bn dividend, and the size of the dividend raise."
+        }
+      ],
+      "createdAt": "2026-11-13T10:23:20.772Z",
+      "updatedAt": "2026-11-13T10:23:20.772Z",
+      "val": {
+        "date": "2026-11-13",
+        "price": 86.57,
+        "methods": [
+          {
+            "t": "18× 2027e EPS CHF 4.74 (below its 21.4× 10-yr avg)",
+            "v": 85
+          },
+          {
+            "t": "Gordon on FCF/sh CHF 3.45 (2025 FCF 9.15bn ex Russia), g 3 %, 8 % hurdle",
+            "v": 71
+          }
+        ],
+        "base": 78,
+        "discount": 15,
+        "why": "Wide moat, but mid-turnaround, 2.85× net debt/EBITDA and dividend ≈ 90 % of FCF (≈4.7 % yield at the level)",
+        "g": 3,
+        "bear": 62,
+        "bearWhy": "CHF 4.10 EPS (margin stuck at 16 %, Russia gone, stronger franc) × 15×",
+        "reverse": "At CHF 86.57 the market implies ~3.9 %/yr FCF growth forever (in CHF)"
+      }
     }
   ]
 }
