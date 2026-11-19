@@ -999,6 +999,17 @@ input:focus,select:focus,textarea:focus{box-shadow:inset 0 0 0 1.5px var(--acc);
 .ovmore>summary::-webkit-details-marker{display:none}.ovmore>summary small{font-weight:500;font-size:13px;color:var(--mute)}
 .ovmore>summary::after{content:"Show ▾";position:absolute;right:18px;font-size:13px;font-weight:600;color:var(--acc)}.ovmore>summary{position:relative}.ovmore[open]>summary::after{content:"Hide ▴"}
 .ovmore[open]>summary{margin-bottom:12px}
+/* v4.13.0: depot value over time */
+.cc.wide{grid-column:1/-1}
+.cmore{align-self:flex-start;border:0;background:none;padding:6px 0 0;font:inherit;font-size:13.5px;font-weight:600;color:var(--acc);cursor:pointer}
+.cdh{margin-top:6px}.dhr{margin:4px 0 8px}
+.dhsvg{width:100%;height:200px;display:block;touch-action:pan-y}
+.dhp{fill:none;stroke:var(--acc);stroke-width:2;vector-effect:non-scaling-stroke}.dhb{fill:none;stroke:var(--mute);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
+.dha{fill:var(--acc-soft);stroke:none}
+.dhread{min-height:20px;margin:2px 0 6px}
+.dhstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:4px 0 6px}.dhstats div{display:flex;flex-direction:column;min-width:0}.dhstats span{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dhstats b{font-size:17px}
+@media(max-width:420px){.dhstats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#homeBody .dhstats .up{color:var(--teal)}#homeBody .dhstats .dn{color:var(--coral)}
 </style>
 </head>
 <body>
@@ -1236,8 +1247,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.12.0';
+const VERSION='4.13.0';
 const CHANGELOG=[
+  {v:'4.13.0',d:'2026-11-19',t:'Your depot over time, morning digest',items:[
+    'Tap "Value over time" on the Your depot card: what the shares you own today were worth at every month-end over 1, 3, 5 or 10 years, against the same money in MSCI World (dashed). Below it: price change, change with dividends, MSCI World and the worst fall. Touch the chart to read a month.',
+    'Phone alerts: one "Radar this morning" message after 8:00 when something is at your add level or in a buy-the-dip signal, with the market mood. Nothing on quiet days. Turn it off with the repo variable NTFY_DIGEST = off.']},
   {v:'4.12.0',d:'2026-11-19',t:'Simpler: a calm Home screen',items:[
     'Home now answers four questions in plain words: what your depot is worth and how it did today, what (if anything) to do now, your dividends a month after tax, and where your next money should go.',
     'All the detail panels (ticker strip, signals, movers, heat map, market mood, gold and Bitcoin, risk) fold away under "Market details" on Home. Open it when you want it; Radar remembers.',
@@ -2372,6 +2386,60 @@ function renderDivPlus(){
   box.querySelectorAll('.dtr[data-hid]').forEach(e=>e.onclick=()=>openHold(e.dataset.hid));
   const d=$('#dsDivPlus'); if(d) d.textContent=`${fmtEur(I.net2/12)} a month now · ${R2.length?fmtEur(R2[R2.length-1].net/12)+' in '+R2[R2.length-1].y+' years':''}`;
 }
+// ---------- Depot value over time (v4.13.0) ----------
+// Today's share counts × month-end prices from history.json, in € at that month's exchange rate. It answers "how has what I
+// own now done", not "what did my account show" (Radar has no record of past buys and sales). The dashed line is the same
+// start value put into MSCI World (EUNL). Stats use total return, so dividends count on both sides.
+const LS_DHR='radar.depHistRange.v1';
+let dhRange='3y'; try{ const v=localStorage.getItem(LS_DHR); if(['1y','3y','5y','10y'].includes(v)) dhRange=v; }catch{}
+function depHist(range){
+  if(!depot||!hist||!hist.series||!hist.month) return null;
+  const n={'1y':12,'3y':36,'5y':60,'10y':120}[range], ends=[];
+  for(let k=n;k>=0;k--) ends.push(ymEnd(hist.month,-k+0).toISOString().slice(0,10));
+  const d0=ends[0], H=[], miss=[]; let Tnow=0;
+  for(const h of holdings()){ const p=posOf_(h), v=valueOf(h); if(!p||!v) continue; Tnow+=v.eur;
+    const S=hist.series[hSym(h)]; if(!S||serVal(S.from,S.px,d0,null)==null){ miss.push(h); continue; }
+    H.push({h,S,sh:p.shares,u:fxCode(S.cur)[1]||1,now:v.eur}); }
+  if(!H.length) return null;
+  const val=(d,key)=>{ let s=0; for(const o of H){ const p=serVal(o.S.from,o.S[key],d,null), f=fxSer(o.S.cur,d); if(p==null||!f) return null; s+=o.sh*p/o.u/f; } return s; };
+  const pts=ends.map(d=>({t:Date.parse(d+'T12:00:00Z'),v:val(d,'px')})).filter(p=>p.v!=null);
+  const vNow=H.reduce((a,o)=>a+o.now,0); pts.push({t:Date.now(),v:vNow,live:1});
+  if(pts.length<3) return null;
+  // total return of the same holdings (dividends reinvested), and MSCI World from the same start
+  const tr0=val(d0,'tr'), trN=H.reduce((a,o)=>{ const t=trNow(hSym(o.h)), f=fxSer(o.S.cur,null); return a+(t!=null&&f?o.sh*t/o.u/f:o.now); },0);
+  const b0=trEur(BENCH.sym,d0), bN=trEur(BENCH.sym,null), bf=b0>0?pts[0].v/b0:null;
+  const bpts=bf?pts.map(p=>{ const b=p.live?bN:trEur(BENCH.sym,new Date(p.t).toISOString().slice(0,10)); return b!=null?{t:p.t,v:b*bf}:null; }).filter(Boolean):[];
+  let peak=pts[0].v, mdd=0, mddAt=null; for(const p of pts){ peak=Math.max(peak,p.v); const dd=(p.v/peak-1)*100; if(dd<mdd){ mdd=dd; mddAt=p.t; } }
+  return {pts,bpts,start:pts[0].v,now:vNow,chg:(vNow/pts[0].v-1)*100,trChg:tr0>0?(trN/tr0-1)*100:null,bChg:b0>0&&bN>0?(bN/b0-1)*100:null,mdd,mddAt,
+    cover:Tnow>0?vNow/Tnow*100:null,miss:miss.map(h=>h.short||h.symbol||h.name)}; }
+function depChart(D){
+  const A=D.pts, B=D.bpts, all=[...A,...B].map(p=>p.v); let lo=Math.min(...all), hi=Math.max(...all); const pad=(hi-lo)*.08||hi*.05; lo-=pad; hi+=pad;
+  const Wd=640, Ht=200, L=4, R=58, T=8, Bt=22, t0=A[0].t, t1=A[A.length-1].t, X=t=>L+(t-t0)/(t1-t0)*(Wd-L-R), Y=v=>T+(hi-v)/(hi-lo)*(Ht-T-Bt);
+  const path=P=>P.map((p,k)=>(k?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.v).toFixed(1)).join('');
+  const ticks=[0,1,2,3].map(j=>{ const v=lo+(hi-lo)*(j+.5)/4; return `<text x="${Wd-R+6}" y="${Y(v)+4}" class="cht">${fmtK(v).replace('€ ','')}</text><line x1="${L}" x2="${Wd-R}" y1="${Y(v)}" y2="${Y(v)}" class="chg"/>`; }).join('');
+  const yrs=[]; const y0=new Date(t0).getUTCFullYear(), y1=new Date(t1).getUTCFullYear(), st=Math.max(1,Math.ceil((y1-y0+1)/6));
+  for(let y=y0+1;y<=y1;y+=st){ const t=Date.UTC(y,0,1); if(t>t0&&t<t1) yrs.push(`<text x="${X(t)}" y="${Ht-6}" class="cht" text-anchor="middle">${y}</text>`); }
+  const area=`${path(A)}L${X(t1).toFixed(1)} ${Ht-Bt}L${X(t0).toFixed(1)} ${Ht-Bt}Z`;
+  return `<svg class="dhsvg" viewBox="0 0 ${Wd} ${Ht}" preserveAspectRatio="none" role="img" aria-label="Value of your current holdings over time">
+    ${ticks}${yrs.join('')}<path d="${area}" class="dha"/>${B.length?`<path d="${path(B)}" class="dhb"/>`:''}<path d="${path(A)}" class="dhp"/>
+    <line class="chx" x1="0" x2="0" y1="${T}" y2="${Ht-Bt}" style="display:none"/></svg>`; }
+function depHistHtml(){
+  const D=depHist(dhRange);
+  const chips=`<div class="hctl dhr">${['1y','3y','5y','10y'].map(r=>`<button type="button" class="chip ${r===dhRange?'on':''}" data-dhr="${r}">${r.replace('y',' yr')}</button>`).join('')}</div>`;
+  if(!D) return `${chips}<p class="cmuted">The chart needs the monthly price history (it arrives with the price update) and your statement.</p>`;
+  const s=(v,d=1)=>`<b class="num ${ovSg(v)}">${fmtPct(v,d)}</b>`;
+  return `${chips}<div class="dhbox" data-pts='${JSON.stringify(D.pts.map(p=>[p.t,Math.round(p.v)]))}' data-b='${JSON.stringify(D.bpts.map(p=>Math.round(p.v)))}'>${depChart(D)}<p class="dhread cmuted">&nbsp;</p></div>
+    <div class="dhstats"><div><span>Price change</span>${s(D.chg)}</div><div><span>With dividends</span>${D.trChg!=null?s(D.trChg):'—'}</div><div><span>MSCI World</span>${D.bChg!=null?s(D.bChg):'—'}</div><div><span>Worst fall</span><b class="num dn">${fmtN(-D.mdd,0)} %</b></div></div>
+    <p class="cmuted">Solid: what the shares you own today were worth at each month-end${D.cover!=null&&D.cover<99.5?` (${fmtN(D.cover,0)} % of your depot; no long history for ${esc(D.miss.slice(0,4).join(', '))}${D.miss.length>4?' and more':''})`:''}. Dashed: the same start value in MSCI World. It shows how what you own did, not your past buys and sales.</p>`; }
+function wireDepHist(root){
+  root.querySelectorAll('[data-dhr]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); dhRange=b.dataset.dhr; try{localStorage.setItem(LS_DHR,dhRange);}catch{} const box=root.querySelector('.cdh'); box.innerHTML=depHistHtml(); wireDepHist(root); });
+  const bx=root.querySelector('.dhbox'); if(!bx) return; const svg=bx.querySelector('svg'), rd=bx.querySelector('.dhread'), P=JSON.parse(bx.dataset.pts), Bv=JSON.parse(bx.dataset.b), ln=svg.querySelector('.chx');
+  const t0=P[0][0], t1=P[P.length-1][0];
+  const mv=e=>{ const r=svg.getBoundingClientRect(), fx=(e.clientX-r.left)/r.width*640, t=t0+(fx-4)/(640-62)*(t1-t0);
+    let k=0; for(let j=1;j<P.length;j++) if(Math.abs(P[j][0]-t)<Math.abs(P[k][0]-t)) k=j;
+    const X=4+(P[k][0]-t0)/(t1-t0)*(640-62); ln.setAttribute('x1',X); ln.setAttribute('x2',X); ln.style.display='';
+    rd.innerHTML=`${fmtDate(new Date(P[k][0]).toISOString().slice(0,10))}: <b>${fmtEur(P[k][1])}</b>${Bv[k]!=null?` · MSCI World ${fmtEur(Bv[k])}`:''}`; };
+  svg.onpointermove=mv; svg.onpointerdown=mv; svg.onpointerleave=()=>{ ln.style.display='none'; rd.innerHTML='&nbsp;'; }; }
 // ---------- Overview (v4.10.0) ----------
 // One screen with everything that matters, terminal style: a ticker strip on top, then small panels. Each panel
 // reads the same numbers as its own tab (nothing new is computed here) and links there for the detail.
@@ -2479,10 +2547,12 @@ function renderHome(){
   // v4.12.0: the calm part on top answers four questions in plain words; the terminal panels fold away below it
   const act=sig.filter(x=>x.r<=1), rest=sig.filter(x=>x.r>1), cnt=k=>rest.filter(x=>x.t===k).length;
   const restTxt=[cnt('Dip ?')&&`${cnt('Dip ?')} dip${cnt('Dip ?')>1?'s':''} to re-check`,cnt('Review')&&`${cnt('Review')} review${cnt('Review')>1?'s':''} due`,cnt('Results')&&`${cnt('Results')} result${cnt('Results')>1?'s':''} this week`].filter(Boolean).join(' · ');
+  let dhOpen=false; try{ dhOpen=localStorage.getItem('radar.depHistOpen.v1')==='1'; }catch{}
   const calm=`<div class="calm">
-    <section class="cc cc-dep"><span class="ck">Your depot</span>${noDep?'<p class="ovnil">Import your Trade Republic statement (Depot → Statement) to see it.</p>':`
+    <section class="cc cc-dep ${dhOpen?'wide':''}"><span class="ck">Your depot</span>${noDep?'<p class="ovnil">Import your Trade Republic statement (Depot → Statement) to see it.</p>':`
       <b class="cbig num">${fmtEur(D.T)}</b>
-      <p class="cline"><span class="num ${ovSg(D.dEur)}">${ovEur(D.dEur)} (${fmtPct(D.dPct,1)})</span> today${D.y1!=null?` · <span class="num ${ovSg(D.y1)}">${fmtPct(D.y1,1)}</span> in 12 months`:''}</p>`}</section>
+      <p class="cline"><span class="num ${ovSg(D.dEur)}">${ovEur(D.dEur)} (${fmtPct(D.dPct,1)})</span> today${D.y1!=null?` · <span class="num ${ovSg(D.y1)}">${fmtPct(D.y1,1)}</span> in 12 months`:''}</p>
+      <button type="button" class="cmore" data-dh>${dhOpen?'Hide history ▴':'Value over time ▾'}</button><div class="cdh" ${dhOpen?'':'hidden'}>${dhOpen?depHistHtml():''}</div>`}</section>
     ${I&&I.R.length?`<section class="cc cc-div"><span class="ck">Dividends</span><b class="cbig num">${fmtEur(I.net2/12)}<small> a month</small></b><p class="cline">after all taxes · ${fmtEur(I.net2)} a year</p></section>`:''}
     <section class="cc cc-act"><span class="ck">What to do now</span>${act.length?`<div class="cact">${act.slice(0,3).map(s=>`<button type="button" class="ca" ${s.at}><span class="cdot" style="background:${s.c}"></span><span><b>${esc(s.nm)}</b> ${esc(s.say)}</span><i>›</i></button>`).join('')}</div>${act.length>3?`<p class="cmuted">and ${act.length-3} more under Market details</p>`:''}`
       :`<p class="cok">✓ Nothing needs you today.${TD.near?` <span>Closest: ${esc(TD.near.tk)}, ${abv(TD.near.above)} % above its level.</span>`:''}</p>`}
@@ -2492,6 +2562,8 @@ function renderHome(){
   let more=false; try{ more=localStorage.getItem('radar.homeMore.v1')==='1'; }catch{}
   box.innerHTML=`${calm}<details class="ovmore" ${more?'open':''}><summary>Market details<small>prices, signals, movers, heat map, mood, gold &amp; Bitcoin, risk</small></summary>
     <div class="ovtape">${tape}</div><p class="ovstamp">${upd}${depot?` · statement of ${fmtDay(depot.asOf)}`:''}</p><div class="ovgrid">${P.join('')}</div></details>`;
+  const dh=box.querySelector('[data-dh]'); if(dh){ const card=dh.closest('.cc'); wireDepHist(card);
+    dh.onclick=()=>{ const o=!card.classList.contains('wide'); try{ localStorage.setItem('radar.depHistOpen.v1',o?'1':'0'); }catch{} renderHome(); }; }
   box.querySelector('.ovmore').addEventListener('toggle',e=>{ try{ localStorage.setItem('radar.homeMore.v1',e.target.open?'1':'0'); }catch{} });
   box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ switchView(b.dataset.go); window.scrollTo({top:0}); });
   box.querySelectorAll('[data-hid]').forEach(b=>b.onclick=()=>openHold(b.dataset.hid));
