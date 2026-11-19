@@ -1,5 +1,9 @@
 {
  "symbols": {
+  "4GLD.DE": {
+   "dip": 1,
+   "market": true
+  },
   "6367.T": {
    "dip": 0,
    "l1": 17000.0,
@@ -55,6 +59,10 @@
    "l2": null,
    "level": 0,
    "since": null
+  },
+  "BTC-EUR": {
+   "dip": 1,
+   "market": true
   },
   "CVX": {
    "dip": 0,
@@ -181,6 +189,10 @@
    "l2": null,
    "level": 0,
    "since": null
+  },
+  "XAD6.DE": {
+   "dip": 1,
+   "market": true
   }
  },
  "version": 1
