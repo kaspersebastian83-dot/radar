@@ -74,6 +74,10 @@ The first tab shows everything on one screen: a ticker strip (depot value, today
 - Home → Your depot → "Value over time": today's share counts × month-end prices from `history.json`, in € at each month's rate, against the same start value in MSCI World (EUNL). Stats use total return, so dividends count on both sides. It shows how what you own did, not your past trades.
 - `notify.py` sends one "Radar this morning" message a day (first run after 07:00 UTC) when a holding is at its add level or in a buy-the-dip signal, with the Fear & Greed reading. Set the repository variable `NTFY_DIGEST` to `off` to stop it.
 
+## Your real return (v4.15.0)
+
+Depot → "Your real return" reads a transactions CSV (Trade Republic's export, or `pytr export_transactions`) in the browser and keeps it in localStorage (`radar.tx.v1`, included in the private backup). Columns are found by header name in German or English, `;` `,` or tab separated. Per ISIN it keeps a running average cost with fees, realised gains on sales and dividends received. A holding uses that buy price and first buy date only when the shares add up to the statement (±2 %) and no own entry exists. The return a year is an XIRR over buys, sales, dividends and today's value of those holdings plus sold-out positions. Nothing of it goes to the repo.
+
 ## Workflow
 
 Radar → Researching → Watchlist → Bought → Passed / Sold
