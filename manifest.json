@@ -4,8 +4,8 @@
   "description": "Stock idea tracker",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#eef6fe",
-  "theme_color": "#eef6fe",
+  "background_color": "#f2f4f7",
+  "theme_color": "#f2f4f7",
   "icons": [
     {
       "src": "icon-192.png",
