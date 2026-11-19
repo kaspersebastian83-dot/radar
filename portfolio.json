@@ -809,7 +809,7 @@
           },
           {
             "t": "Gordon on €0.60 dividend, g 3 %, 8 % hurdle",
-            "v": 12.0
+            "v": 12
           }
         ],
         "base": 13.9,
@@ -995,6 +995,81 @@
       "note": "",
       "updatedAt": "2026-11-10T06:55:50.000Z",
       "nick": "Emerging Markets IMI"
+    },
+    {
+      "id": "h-CH0038863350",
+      "isin": "CH0038863350",
+      "short": "",
+      "name": "Nestlé S.A.",
+      "symbol": "",
+      "currency": "",
+      "kind": "stock",
+      "sector": "",
+      "addBelow": null,
+      "maxWeight": null,
+      "idea": null,
+      "note": "",
+      "updatedAt": "2026-11-19T18:17:35.048Z"
+    },
+    {
+      "id": "h-IE0003UVYC20",
+      "isin": "IE0003UVYC20",
+      "short": "",
+      "name": "JPM ETFs(I)-Glbl Eq.Pr.Inc.",
+      "symbol": "",
+      "currency": "",
+      "kind": "fund",
+      "sector": "",
+      "addBelow": null,
+      "maxWeight": null,
+      "idea": null,
+      "note": "",
+      "updatedAt": "2026-11-19T18:17:35.048Z"
+    },
+    {
+      "id": "h-JP3877600001",
+      "isin": "JP3877600001",
+      "short": "",
+      "name": "Marubeni Corp.",
+      "symbol": "",
+      "currency": "",
+      "kind": "stock",
+      "sector": "",
+      "addBelow": null,
+      "maxWeight": null,
+      "idea": null,
+      "note": "",
+      "updatedAt": "2026-11-19T18:17:35.048Z"
+    },
+    {
+      "id": "h-LU3170240538",
+      "isin": "LU3170240538",
+      "short": "",
+      "name": "Apollo Priv.Mkt-Aligned Alte",
+      "symbol": "",
+      "currency": "",
+      "kind": "stock",
+      "sector": "",
+      "addBelow": null,
+      "maxWeight": null,
+      "idea": null,
+      "note": "",
+      "updatedAt": "2026-11-19T18:17:35.048Z"
+    },
+    {
+      "id": "h-LU3176111881",
+      "isin": "LU3176111881",
+      "short": "",
+      "name": "EQT Nexus Fd-NXTF ELTIF",
+      "symbol": "",
+      "currency": "",
+      "kind": "stock",
+      "sector": "",
+      "addBelow": null,
+      "maxWeight": null,
+      "idea": null,
+      "note": "",
+      "updatedAt": "2026-11-19T18:17:35.048Z"
     }
   ]
 }
