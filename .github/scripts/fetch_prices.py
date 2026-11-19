@@ -23,7 +23,11 @@ import yfinance as yf
 IDEAS = pathlib.Path("ideas.json")
 PORT = pathlib.Path("portfolio.json")  # holdings: symbols and add levels only, never share counts
 PRICES = pathlib.Path("prices.json")
+MARKETS = pathlib.Path("markets.json")  # v4.9.0: gold, silver, Bitcoin (symbols only)
 HISTORY = pathlib.Path("history.json")
+WEEKLY = pathlib.Path("weekly.json")
+SENTIMENT = pathlib.Path("sentiment.json")   # v4.9.0: Fear & Greed   # v4.9.0: weekly closes for the price charts and trend signals
+WEEK_YEARS = 6      # 5 years on the chart + 1 year so the 52-week average starts with the chart
 BENCH = "EUNL.DE"   # iShares Core MSCI World (Acc), the benchmark Basti already owns
 HIST_YEARS = 15     # backfill depth
 
@@ -250,6 +254,115 @@ def update_history(symbols, codes, quotes=None):
     print(f"history: wrote {len(series)} symbols, {len(fx)} currencies, {len(errs)} errors")
 
 
+def update_weekly(symbols):
+    """weekly.json (v4.9.0): weekly closes (split-adjusted, not dividend-adjusted) for the last
+    WEEK_YEARS years, for the price chart, the 40- and 52-week moving averages and the trend signals
+    in the app. Per symbol: `from` = date of the first weekly bar, `w` = closes, one per week from there
+    (None for a week Yahoo skipped). The bar of the running week is left out; the app draws today's
+    price as the last point. Refetched once a day at most, or when a symbol is new."""
+    try:
+        prev = json.loads(WEEKLY.read_text(encoding="utf-8"))
+    except Exception:
+        prev = {}
+    today_s = pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d")
+    if prev.get("day") == today_s and set(symbols) <= set(prev.get("series", {})):
+        print("weekly: up to date")
+        return
+    this_week = (pd.Timestamp.now(tz="UTC").normalize() - pd.Timedelta(days=pd.Timestamp.now(tz="UTC").weekday())).tz_localize(None)
+    series, errs = {}, {}
+    for s in symbols:
+        try:
+            t = yf.Ticker(s)
+            h = t.history(period=f"{WEEK_YEARS}y", interval="1wk", auto_adjust=False, actions=False)
+            if h is None or h.empty or "Close" not in h:
+                raise ValueError("no weekly data")
+            c = h["Close"].dropna()
+            c.index = c.index.tz_localize(None) if c.index.tz is not None else c.index
+            c.index = c.index.normalize() - pd.to_timedelta(c.index.weekday, unit="D")   # Monday of each bar
+            c = c[~c.index.duplicated(keep="last")]
+            c = c[c.index < this_week]
+            if len(c) < 10:
+                raise ValueError("too little weekly data")
+            first = c.index.min()
+            n = int((c.index.max() - first).days // 7) + 1
+            w = [None] * n
+            for ix, v in c.items():
+                w[int((ix - first).days // 7)] = num(v, 4)
+            try:
+                cur = t.fast_info.currency
+            except Exception:
+                cur = None
+            series[s] = {"cur": cur, "from": first.strftime("%Y-%m-%d"), "w": w}
+        except Exception as e:
+            errs[s] = str(e)[:200]
+            if s in prev.get("series", {}):
+                series[s] = prev["series"][s]
+    out = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds"), "day": today_s,
+           "series": series, "errors": errs}
+    WEEKLY.write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    print(f"weekly: wrote {len(series)} symbols, {len(errs)} errors")
+
+
+def update_sentiment():
+    """sentiment.json (v4.9.0): market mood for the Depot tab.
+    - stocks: CNN's Fear & Greed index (0 = extreme fear, 100 = extreme greed), from the JSON behind its page.
+      CNN offers no official API, so if it fails Radar's own estimate stands in: S&P 500 vs its 125-day average
+      (CNN's momentum part) and the VIX against its last year (CNN's volatility part), averaged.
+    - crypto: the Crypto Fear & Greed index from alternative.me (free, public API).
+    Rewritten only when a value changed."""
+    import urllib.request
+    def get(url):
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (radar price job)", "Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.loads(r.read().decode("utf-8"))
+    try:
+        prev = json.loads(SENTIMENT.read_text(encoding="utf-8"))
+    except Exception:
+        prev = {}
+    out = {"stocks": None, "crypto": None, "vix": None}
+    try:
+        j = get("https://production.dataviz.cnn.io/index/fearandgreed/graphdata")
+        f = j["fear_and_greed"]
+        hist = j.get("fear_and_greed_historical", {}).get("data", [])
+        wk = {}
+        for p in hist:   # one point per week for the small chart
+            d = datetime.fromtimestamp(p["x"] / 1000, timezone.utc)
+            wk[d.strftime("%G-%V")] = [d.strftime("%Y-%m-%d"), round(float(p["y"]))]
+        out["stocks"] = {"src": "CNN", "score": round(float(f["score"])), "rating": f.get("rating"),
+                         "week": num(f.get("previous_1_week"), 0), "month": num(f.get("previous_1_month"), 0),
+                         "year": num(f.get("previous_1_year"), 0), "hist": sorted(wk.values())[-53:]}
+    except Exception as e:
+        print(f"CNN fear & greed failed: {e}")
+    try:
+        sp = yf.Ticker("^GSPC").history(period="1y", interval="1d", auto_adjust=False)["Close"].dropna()
+        vx = yf.Ticker("^VIX").history(period="1y", interval="1d", auto_adjust=False)["Close"].dropna()
+        mom = float(sp.iloc[-1] / sp.iloc[-125:].mean() - 1) * 100
+        vpct = float((vx < vx.iloc[-1]).mean()) * 100          # where today's VIX sits in its last year
+        out["vix"] = {"v": num(vx.iloc[-1], 2), "avg": num(vx.mean(), 2), "pct": round(vpct)}
+        if not out["stocks"]:
+            m = max(0, min(100, 50 + mom * 5))                  # ±10 % vs the 125-day average spans the scale
+            out["stocks"] = {"src": "Radar", "score": round((m + (100 - vpct)) / 2), "rating": None,
+                             "parts": {"momentum": round(m), "volatility": round(100 - vpct)}}
+    except Exception as e:
+        print(f"VIX / S&P failed: {e}")
+    try:
+        c = get("https://api.alternative.me/fng/?limit=31")["data"]
+        out["crypto"] = {"score": int(c[0]["value"]), "rating": c[0]["value_classification"],
+                         "month": int(c[-1]["value"]) if len(c) > 30 else None}
+    except Exception as e:
+        print(f"crypto fear & greed failed: {e}")
+    for k in ("stocks", "crypto", "vix"):
+        if not out[k] and prev.get(k):
+            out[k] = {**prev[k], "stale": True}   # keep the last good value
+    body = {k: out[k] for k in out}
+    if {k: prev.get(k) for k in out} == body:
+        print("sentiment: no change")
+        return
+    SENTIMENT.write_text(json.dumps({"updated": datetime.now(timezone.utc).isoformat(timespec="seconds"), **body},
+                                    separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    print(f"sentiment: stocks {out['stocks'] and out['stocks'].get('score')}, crypto {out['crypto'] and out['crypto'].get('score')}")
+
+
 def main():
     if not IDEAS.exists() and not PORT.exists():
         print("no ideas.json or portfolio.json yet")
@@ -266,6 +379,11 @@ def main():
     sym_of = lambda i: (i.get("symbol") or i.get("ticker") or "").strip().upper()
     symbols = sorted(({sym_of(i) for i in live_ideas}
                       | {(h.get("symbol") or "").strip().upper() for h in holdings}) - {""})
+    try:
+        mk = json.loads(MARKETS.read_text(encoding="utf-8")).get("markets", []) if MARKETS.exists() else []
+        symbols = sorted(set(symbols) | {(m.get("symbol") or "").strip().upper() for m in mk} - {""})
+    except Exception as e:
+        print(f"markets.json unreadable: {e}")
     first_log = {}  # earliest logged date per symbol: dividends since then are kept
     log_dates = set()
     for i in live_ideas:
@@ -321,6 +439,10 @@ def main():
                     if ttm > 0:
                         q["divTTM"] = round(ttm, 4)
                         q["yieldTTM"] = round(ttm / price * 100, 2)
+                    # v4.9.0: ex-dates and amounts of the last ~13 months, for the dividend calendar
+                    cal = du[du.index > now_ts - pd.Timedelta(days=395)]
+                    if len(cal):
+                        q["divCal"] = [[ix.strftime("%Y-%m-%d"), round(float(v), 4)] for ix, v in cal.items()]
                     since = first_log.get(s)
                     if since is not None:  # payments with ex-date after logging
                         cut = pd.Timestamp(since).tz_localize("UTC") - pd.Timedelta(days=1)
@@ -348,6 +470,14 @@ def main():
         update_history(sorted(set(symbols) | {BENCH}), codes, quotes)
     except Exception as e:   # the benchmark data must never block the prices
         print(f"history failed: {e}")
+    try:
+        update_weekly(sorted(set(symbols) | {BENCH}))
+    except Exception as e:   # nor must the chart data
+        print(f"weekly failed: {e}")
+    try:
+        update_sentiment()
+    except Exception as e:
+        print(f"sentiment failed: {e}")
     fx, fx_at = fetch_fx(codes, sorted(log_dates))
     if not fx and prev.get("fx"):  # FX failed: keep the last good rates
         fx, fx_at = prev.get("fx", {}), prev.get("fxAt", {})

@@ -41,6 +41,30 @@ Cards without a quote show "⚠ no quote".
 Notes: Yahoo data is unofficial and can lag ~15 min or occasionally fail from GitHub's servers — then the last good price is kept and marked with a yellow dot.
 GitHub pauses scheduled workflows in repos with no activity for 60 days; one click in the Actions tab re-enables it.
 
+## Phone alerts (v4.9.0)
+
+The prices workflow runs `.github/scripts/notify.py` after every price update and sends a push message to your phone via [ntfy](https://ntfy.sh) (free, no account) when:
+
+- a holding reaches its **add level** or **2nd add level** (own `addBelow`/`addBelow2`, else the linked card's `buyBelow`),
+- a stock falls **20 % or more below its 52-week high** without reaching its level,
+- gold, silver or Bitcoin (`markets.json`) fall 20 % below their high.
+
+Each stock message carries the investor check ("buy-the-dip signal" or "re-check the thesis", same rule as the app) and whether the price is above or below its 200-day line. One message per crossing: the state is kept in `alerts.json` (symbols and levels only), and a level must be left by 3 % (a dip: back within 17 % of the high) before it can alert again.
+
+Setup, once:
+1. Install the **ntfy** app (iPhone / Android) and subscribe to a topic with a long random name, e.g. `radar-7f3k29xq81`. The name is the password: anyone who knows it can read the messages, so don't use something guessable.
+2. Repo → Settings → Secrets and variables → Actions → **New repository secret**: name `NTFY_TOPIC`, value your topic name.
+3. Actions → *prices* → Run workflow. The log lists what it checked; messages only come on a new crossing.
+
+Without the secret the step still runs and keeps `alerts.json` current, it just sends nothing.
+
+## Charts, investor check, savings plan (v4.9.0)
+
+- `weekly.json` (prices workflow, once a day): 6 years of weekly closes per symbol for the chart and the trend signals in each sheet (40- and 52-week lines, golden/death cross, 12-month momentum, vs MSCI World).
+- **Investor check** in the Business part of a stock: return on capital ≥ 15 %, earnings yield (EBIT / EV) ≥ 7 %, net debt / EBITDA ≤ 3×, PEG (info), drawdown. 20 %+ below the high and the first three pass → "Buy-the-dip signal", else "Re-check thesis". Rules of thumb from Greenblatt, Buffett and Lynch; thresholds in `INV` in `index.html` and `notify.py`.
+- **Savings plan** on Next €: monthly amount → core ETF + stocks at your level + cash reserve for dips. Settings stay in the browser.
+- **Gold, silver & Bitcoin** in the Depot tab, from `markets.json` (Yahoo symbols in €: `4GLD.DE`, `XAD6.DE`, `BTC-EUR`).
+
 ## Workflow
 
 Radar → Researching → Watchlist → Bought → Passed / Sold
