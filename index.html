@@ -1258,8 +1258,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.15.0';
+const VERSION='4.15.1';
 const CHANGELOG=[
+  {v:'4.15.1',d:'2026-11-19',t:'Faster start on the iPhone',items:[
+    'The app opens at once again: on a slow connection it shows the last saved copy after 1.5 seconds at most instead of waiting for GitHub, and loads the new version in the background for the next start.',
+    'Numbers and dates are formatted with reusable formatters, which cuts the time to draw the screens by about half (much more on Safari).']},
   {v:'4.15.0',d:'2026-11-19',t:'Your real return from your transactions',items:[
     'Depot → "Your real return": import the transactions CSV from Trade Republic (or pytr export_transactions). It is read in this browser and kept only on this device, like the statement.',
     'Your return a year, money-weighted (your timing counts), unrealised gain on what is still invested, realised gains from sales and dividends actually received, and a table of what you bought, sold and received each year.',
@@ -1685,10 +1688,14 @@ function posOf(i){ const q=quoteOf(i),c=curOf(i); if(!q||!(q.yearHigh>q.yearLow)
 const curOfI=i=>quoteOf(i)?.currency||i.currency||'';
 const ago=iso=>{ if(!iso) return ''; const m=Math.round((Date.now()-new Date(iso))/60000);
   return m<60?`${m} min ago`:m<1440?`${Math.round(m/60)} h ago`:new Date(iso).toLocaleDateString('de-DE'); };
-const fmtN=(v,d=2)=>v==null||v===''?'—':Number(v).toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:d});
-const fmtP=(v,c)=>v==null||v===''?'—':Number(v).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+(c?' '+c:'');
-const fmtPct=(v,d=1)=>v==null?'—':Math.abs(v)<0.5*10**-d?(0).toLocaleString('de-DE',{minimumFractionDigits:d})+' %':(v>0?'+':'')+Number(v).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d})+' %';
-const fmtDate=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'numeric'}):'—';
+// v4.15.1: one formatter per format, made once. toLocaleString with options builds a new one on every call, which made
+// the first screen take seconds on an iPhone (thousands of numbers per render).
+const NF={}, nf=(mn,mx)=>NF[mn+'_'+mx]||(NF[mn+'_'+mx]=new Intl.NumberFormat('de-DE',{minimumFractionDigits:mn,maximumFractionDigits:mx}));
+const DF=new Intl.DateTimeFormat('de-DE',{day:'numeric',month:'short',year:'numeric'}), DFc={};
+const fmtN=(v,d=2)=>v==null||v===''?'—':nf(0,d).format(Number(v));
+const fmtP=(v,c)=>v==null||v===''?'—':nf(2,2).format(Number(v))+(c?' '+c:'');
+const fmtPct=(v,d=1)=>v==null?'—':Math.abs(v)<0.5*10**-d?nf(d,d).format(0)+' %':(v>0?'+':'')+nf(d,d).format(Number(v))+' %';
+const fmtDate=s=>s?(DFc[s]||(DFc[s]=DF.format(new Date(s+'T00:00:00')))):'—';
 const stars=n=>{n=n||0;return `<span class="stars">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></span>`;};
 const stageOf=i=>STATUSES.find(s=>s.k===i.status)||STATUSES[0];
 function liveDot(i){ const q=quoteOf(i); return q?`<span class="live ${q.stale?'stale':''}" title="${q.stale?'last update failed, older price':'live quote'}"></span>`:''; }
@@ -3121,7 +3128,8 @@ function valWire(p,levelSel,cur){
     if(st){ $(levelSel).value=niceRound(st); const e2=$(levelSel+'2'); if(e2) e2.value=niceRound(l); toast('Starter and 2nd level set, save to keep them'); }
     else { $(levelSel).value=niceRound(l); toast('Level set, save to keep it'); } };
   upd(); }
-const fmtDay=s=>s?new Date(s+'T00:00:00').toLocaleDateString('de-DE',{day:'numeric',month:'short'}):'—';
+const DDF=new Intl.DateTimeFormat('de-DE',{day:'numeric',month:'short'}), DDc={}, fmtDay=s=>s?(DDc[s]||(DDc[s]=DDF.format(new Date(s+'T00:00:00')))):'—';
+const MDF=new Intl.DateTimeFormat('en-GB',{month:'short',year:'numeric',timeZone:'UTC'});
 // v3.5.0: the detail sheet says the tier once. One block: decision line → the three score bars → the level line.
 const PART_W={buy:60,yld:30,rng:10};   // the normal weights (scoreOf); a missing input's points are shared by the others
 const sbarsHtml=(s,lbl)=>{ const miss=['buy','yld','rng'].filter(k=>!s.parts.find(p=>p.k===k));
@@ -3140,7 +3148,7 @@ function seenOf(sym,lvl,cur,c){
   const px=S.px, n0=Math.max(0,px.length-SEEN.win), W=px.slice(n0).filter(v=>v!=null); if(W.length<12) return null;
   let last=-1; px.forEach((v,k)=>{ if(v!=null&&v<=lvl) last=k; });
   let lowK=-1; px.forEach((v,k)=>{ if(k>=n0&&v!=null&&(lowK<0||v<px[lowK])) lowK=k; });
-  const mon=k=>ymEnd(S.from,k).toLocaleDateString('en-GB',{month:'short',year:'numeric',timeZone:'UTC'});
+  const mon=k=>MDF.format(ymEnd(S.from,k));
   return {now:c>0&&c<=lvl,n:W.filter(v=>v<=lvl).length,win:W.length,last:last<0?null:mon(last),inWin:last>=n0,
     low:lowK<0?null:px[lowK],lowAt:lowK<0?null:mon(lowK),yrs:Math.round(px.length/12)}; }
 function seenHtml(sym,lvl,cur,c){ const o=seenOf(sym,lvl,cur,c); if(!o) return '';
@@ -3804,9 +3812,9 @@ function hWhy(h,s){
 }
 function wtHtml(h,w){ if(w==null) return ''; const cap=capOf(h), f=isFund(h), over=!f&&w>cap;
   return `<span class="wt num ${over?'over':''}" title="${f?'Share of the depot':`Share of the depot, your max is ${fmtN(cap,1)} %`}"><i><em style="width:${Math.min(100,w/(f?25:cap)*100).toFixed(0)}%"></em></i>${fmtN(w,1)} %${f?'':`<small> / ${fmtN(cap,1)}</small>`}</span>`; }
-const fmtEur=v=>v==null?'—':'€ '+Math.round(v).toLocaleString('de-DE');
+const fmtEur=v=>v==null?'—':'€ '+nf(0,0).format(Math.round(v));
 const hName=h=>h&&(h.nick||h.name)||'';   // v4.2.0: optional short list name (funds), the full name stays in the sheet
-const fmtK=v=>v==null?'—':v>=10000?'€ '+(v/1000).toLocaleString('de-DE',{maximumFractionDigits:1})+'k':fmtEur(v);
+const fmtK=v=>v==null?'—':v>=10000?'€ '+nf(0,1).format(v/1000)+'k':fmtEur(v);
 
 function portRows(){
   const T=depotTotal();
