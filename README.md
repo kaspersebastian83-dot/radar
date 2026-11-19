@@ -65,6 +65,10 @@ Without the secret the step still runs and keeps `alerts.json` current, it just 
 - **Savings plan** on Next €: monthly amount → core ETF + stocks at your level + cash reserve for dips. Settings stay in the browser.
 - **Gold, silver & Bitcoin** in the Depot tab, from `markets.json` (Yahoo symbols in €: `4GLD.DE`, `XAD6.DE`, `BTC-EUR`).
 
+## Overview tab (v4.10.0)
+
+The first tab shows everything on one screen: a ticker strip (depot value, today, MSCI World, gold, silver, Bitcoin, Fear & Greed, VIX) and panels for the portfolio, signals that need you, today's movers, the heat map, dividends after tax, market mood, gold/silver/Bitcoin, your next money, risk and mix, and your picks vs MSCI World. Each panel links to its tab. It only reads the numbers the other tabs already compute.
+
 ## Workflow
 
 Radar → Researching → Watchlist → Bought → Passed / Sold
