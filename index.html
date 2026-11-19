@@ -978,6 +978,27 @@ input:focus,select:focus,textarea:focus{box-shadow:inset 0 0 0 1.5px var(--acc);
 .incpb .chip,.seg button,.vtag,.pill,.sc,.tiers span,.epill,.own,.rcl,.xo,.plr .k,.log .rel h4 .cur{border-radius:5px!important}
 .seg,#sync,.sortbar select,.pbar input{border-radius:8px!important}
 .incpb .chip.on{background:var(--acc);color:var(--acc-ink)}
+/* v4.12.0: calm Home */
+.calm{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 16px}
+.cc{background:var(--panel);border-radius:var(--r);box-shadow:inset 0 0 0 1px var(--line),var(--sh);padding:16px 18px;min-width:0;display:flex;flex-direction:column;gap:4px;border:0;text-align:left;font:inherit;color:var(--ink)}
+.ck{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.cbig{font-size:34px;line-height:1.15;font-weight:700;letter-spacing:-.02em}.cbig small{font-size:16px;font-weight:600;color:var(--mute);letter-spacing:0}
+.cline{margin:0;font-size:15.5px;color:var(--ink2)}
+.cc-act{grid-column:1/-1}
+@media(max-width:700px){.calm{grid-template-columns:minmax(0,1fr)}}
+.cline .num{white-space:nowrap}
+.cact{display:flex;flex-direction:column;margin-top:4px}
+.ca{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border:0;border-top:1px solid var(--line2);background:none;font:inherit;font-size:16px;color:var(--ink);text-align:left;cursor:pointer}
+.ca:first-child{border-top:0}.ca i{font-style:normal;color:var(--mute);font-size:20px}.ca b{font-weight:700}
+.cdot{width:10px;height:10px;border-radius:50%}
+.cok{margin:6px 0 0;font-size:17px;font-weight:600;color:var(--teal)}.cok span{display:block;font-size:14px;font-weight:500;color:var(--mute);margin-top:2px}
+.cmuted{margin:6px 0 0;font-size:13.5px;color:var(--mute)}
+.cc-nx{flex-direction:row;flex-wrap:wrap;align-items:center;cursor:pointer;grid-column:1/-1}.cc-nx .ck{flex-basis:100%}.cc-nx .cline{flex:1;font-size:16px;color:var(--ink)}.cc-nx i{font-style:normal;color:var(--mute);font-size:20px}
+.ovmore{margin:8px 0 0}
+.ovmore>summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:14px 18px;background:var(--panel);border-radius:var(--r);box-shadow:inset 0 0 0 1px var(--line);font-weight:700;font-size:16px}
+.ovmore>summary::-webkit-details-marker{display:none}.ovmore>summary small{font-weight:500;font-size:13px;color:var(--mute)}
+.ovmore>summary::after{content:"Show ▾";position:absolute;right:18px;font-size:13px;font-weight:600;color:var(--acc)}.ovmore>summary{position:relative}.ovmore[open]>summary::after{content:"Hide ▴"}
+.ovmore[open]>summary{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -996,7 +1017,7 @@ input:focus,select:focus,textarea:focus{box-shadow:inset 0 0 0 1.5px var(--acc);
   </div>
 </header>
 <div class="tabfade" aria-hidden="true"></div>
-<nav class="tabbar seg" aria-label="Tabs"><button data-v="home" title="Everything at a glance"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.500" height="9" rx="1.500"/><rect x="13.500" y="3" width="7.500" height="5" rx="1.500"/><rect x="13.500" y="11" width="7.500" height="10" rx="1.500"/><rect x="3" y="15" width="7.500" height="6" rx="1.500"/></svg><span>Overview</span></button><button data-v="board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.500 1 2.500h6c0-1 .3-1.800 1-2.500A6 6 0 0 0 12 3z"/></svg><span>Ideas</span></button><button data-v="port" title="Your holdings"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg><span>Portfolio</span><span class="badge" id="portBadge" hidden></span></button><button data-v="next" title="Where your next money goes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8.500 12.500 12 16l3.500-3.500"/></svg><span>Next €</span></button><button data-v="depot" title="Income, tax, mix and your statement"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Depot</span></button></nav>
+<nav class="tabbar seg" aria-label="Tabs"><button data-v="home" title="Everything at a glance"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.500" height="9" rx="1.500"/><rect x="13.500" y="3" width="7.500" height="5" rx="1.500"/><rect x="13.500" y="11" width="7.500" height="10" rx="1.500"/><rect x="3" y="15" width="7.500" height="6" rx="1.500"/></svg><span>Home</span></button><button data-v="board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.500 1 2.500h6c0-1 .3-1.800 1-2.500A6 6 0 0 0 12 3z"/></svg><span>Ideas</span></button><button data-v="port" title="Your holdings"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg><span>Portfolio</span><span class="badge" id="portBadge" hidden></span></button><button data-v="depot" title="Income, tax, mix and your statement"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Depot</span></button></nav>
 
 <main>
   <div class="stalebar" id="staleBar" hidden></div>
@@ -1027,8 +1048,8 @@ input:focus,select:focus,textarea:focus{box-shadow:inset 0 0 0 1.5px var(--acc);
     <div class="dcard dpad"><div class="inc" id="incBox"></div></div>
     <div class="dcard">
       <details class="dfold" id="dfDivPlus"><summary><span><b>Dividend calendar &amp; snowball</b><small id="dsDivPlus"></small></span></summary><div class="dbody"><div class="inc" id="divPlusBox"></div></div></details>
-      <details class="dfold" id="dfMood" open><summary><span><b>Market mood: Fear &amp; Greed</b><small id="dsMood"></small></span></summary><div class="dbody"><div class="inc" id="moodBox"></div></div></details>
-      <details class="dfold" id="dfHeat" open><summary><span><b>Heat map</b><small id="dsHeat"></small></span></summary><div class="dbody"><div class="inc" id="heatBox"></div></div></details>
+      <details class="dfold" id="dfMood"><summary><span><b>Market mood: Fear &amp; Greed</b><small id="dsMood"></small></span></summary><div class="dbody"><div class="inc" id="moodBox"></div></div></details>
+      <details class="dfold" id="dfHeat"><summary><span><b>Heat map</b><small id="dsHeat"></small></span></summary><div class="dbody"><div class="inc" id="heatBox"></div></div></details>
       <details class="dfold"><summary><span><b>Withholding tax</b><small id="dsLeak"></small></span></summary><div class="dbody"><div class="inc" id="leakBox"></div></div></details>
       <details class="dfold"><summary><span><b>X-ray</b><small>Sector, currency, country, biggest stocks</small></span></summary><div class="dbody"><div class="inc" id="xrayBox"></div></div></details>
       <details class="dfold"><summary><span><b>Gold, silver &amp; Bitcoin</b><small id="dsMk"></small></span></summary><div class="dbody"><div class="inc" id="mkBox"></div></div></details>
@@ -1215,8 +1236,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.11.0';
+const VERSION='4.12.0';
 const CHANGELOG=[
+  {v:'4.12.0',d:'2026-11-19',t:'Simpler: a calm Home screen',items:[
+    'Home now answers four questions in plain words: what your depot is worth and how it did today, what (if anything) to do now, your dividends a month after tax, and where your next money should go.',
+    'All the detail panels (ticker strip, signals, movers, heat map, market mood, gold and Bitcoin, risk) fold away under "Market details" on Home. Open it when you want it; Radar remembers.',
+    'Four tabs instead of five: Next € is reached from the "Your next money" card on Home. Market mood and the heat map start folded on the Depot tab.']},
   {v:'4.11.0',d:'2026-11-19',t:'A more professional look',items:[
     'New visual style: neutral greys and one deep-blue accent instead of the pastel blue glass, a near-black terminal look in dark mode, solid panels with fine borders, smaller corners, small uppercase section labels and tabular figures throughout.',
     'Nothing moved: same tabs, same places, same touch sizes.']},
@@ -2396,12 +2421,12 @@ function renderHome(){
   // 3 · signals: what needs you
   const TD=todayData(), sig=[];
   const oname=o=>o.kind==='hold'?(o.r.h.short||o.r.h.symbol):o.i.ticker, oopen=o=>o.kind==='hold'?`data-hid="${esc(o.r.h.id)}"`:`data-iid="${esc(o.i.id)}"`;
-  for(const o of TD.level) sig.push({t:'At level',c:'var(--t-buy)',nm:oname(o),at:oopen(o),why:o.kind==='hold'?'holding in the add zone':'idea in the buy zone',r:0});
+  for(const o of TD.level) sig.push({t:'At level',c:'var(--t-buy)',nm:oname(o),at:oopen(o),why:o.kind==='hold'?'holding in the add zone':'idea in the buy zone',say:o.kind==='hold'?'has reached your add level':'has reached your buy price',r:0});
   const seen=new Set(TD.level.map(o=>o.kind==='hold'?hSym(o.r.h):symOf(o.i)));
   const dipc=[...holdings().filter(h=>!isFund(h)&&hSym(h)&&(!depot||posOf_(h))).map(h=>({sym:hSym(h),nm:h.short||h.symbol,at:`data-hid="${esc(h.id)}"`,own:h})),
     ...live().filter(i=>!ideaState(i).out&&symOf(i)).map(i=>({sym:symOf(i),nm:i.ticker,at:`data-iid="${esc(i.id)}"`,own:i}))];
   for(const c of dipc){ if(seen.has(c.sym)) continue; const v=invOf(c.sym,c.own); if(!v||!(v.verdict==='buy'||v.verdict==='recheck')) continue; seen.add(c.sym);
-    sig.push({t:v.verdict==='buy'?'Dip ✓':'Dip ?',c:v.verdict==='buy'?'var(--teal)':'var(--ochre)',nm:c.nm,at:c.at,why:`${fmtN(-v.dd,0)} % below high · ${v.verdict==='buy'?'passes the investor check':'re-check the thesis'}`,r:v.verdict==='buy'?1:2,dd:v.dd}); }
+    sig.push({t:v.verdict==='buy'?'Dip ✓':'Dip ?',c:v.verdict==='buy'?'var(--teal)':'var(--ochre)',nm:c.nm,at:c.at,why:`${fmtN(-v.dd,0)} % below high · ${v.verdict==='buy'?'passes the investor check':'re-check the thesis'}`,say:`is ${fmtN(-v.dd,0)} % below its high ${v.verdict==='buy'?'and still passes the investor check':'but fails part of the investor check'}`,r:v.verdict==='buy'?1:2,dd:v.dd}); }
   for(const o of TD.due) sig.push({t:'Review',c:'var(--ochre)',nm:oname(o),at:oopen(o),why:'thesis review is due',r:3});
   for(const o of TD.earn) sig.push({t:'Results',c:'var(--research)',nm:oname(o),at:oopen(o),why:`reports in ${earnOf(o.key).dn} day${earnOf(o.key).dn===1?'':'s'}`,r:4});
   sig.sort((a,b)=>a.r-b.r||(a.dd??0)-(b.dd??0));
@@ -2451,7 +2476,23 @@ function renderHome(){
   if(B.length) P.push(ovPanel('bm','Your picks vs MSCI World','depot',`<p class="ovhero"><b>${B.filter(o=>o.b.gap>0).length} of ${B.length}</b> holdings beat the MSCI World since you bought them.</p>
     <div class="ovl ov3">${[...B.slice(0,2),...B.slice(-2).filter(o=>!B.slice(0,2).includes(o))].map(o=>`<button type="button" class="ovr" data-hid="${esc(o.h.id)}"><b>${esc(o.h.short||o.h.symbol)}</b><small>${fmtPct(o.b.s,0)} vs ${fmtPct(o.b.b,0)}</small><span class="num ${ovSg(o.b.gap)}">${fmtPct(o.b.gap,0)}</span></button>`).join('')}</div>`,'Total return in € with dividends, from your "Bought around" date. Best two and worst two.'));
   const upd=prices.updated?`Prices ${agoShort(prices.updated)} old`:'No prices yet';
-  box.innerHTML=`<div class="ovtape">${tape}</div><p class="ovstamp">${upd}${depot?` · statement of ${fmtDay(depot.asOf)}`:''} · tap any panel title to go to the detail</p><div class="ovgrid">${P.join('')}</div>`;
+  // v4.12.0: the calm part on top answers four questions in plain words; the terminal panels fold away below it
+  const act=sig.filter(x=>x.r<=1), rest=sig.filter(x=>x.r>1), cnt=k=>rest.filter(x=>x.t===k).length;
+  const restTxt=[cnt('Dip ?')&&`${cnt('Dip ?')} dip${cnt('Dip ?')>1?'s':''} to re-check`,cnt('Review')&&`${cnt('Review')} review${cnt('Review')>1?'s':''} due`,cnt('Results')&&`${cnt('Results')} result${cnt('Results')>1?'s':''} this week`].filter(Boolean).join(' · ');
+  const calm=`<div class="calm">
+    <section class="cc cc-dep"><span class="ck">Your depot</span>${noDep?'<p class="ovnil">Import your Trade Republic statement (Depot → Statement) to see it.</p>':`
+      <b class="cbig num">${fmtEur(D.T)}</b>
+      <p class="cline"><span class="num ${ovSg(D.dEur)}">${ovEur(D.dEur)} (${fmtPct(D.dPct,1)})</span> today${D.y1!=null?` · <span class="num ${ovSg(D.y1)}">${fmtPct(D.y1,1)}</span> in 12 months`:''}</p>`}</section>
+    ${I&&I.R.length?`<section class="cc cc-div"><span class="ck">Dividends</span><b class="cbig num">${fmtEur(I.net2/12)}<small> a month</small></b><p class="cline">after all taxes · ${fmtEur(I.net2)} a year</p></section>`:''}
+    <section class="cc cc-act"><span class="ck">What to do now</span>${act.length?`<div class="cact">${act.slice(0,3).map(s=>`<button type="button" class="ca" ${s.at}><span class="cdot" style="background:${s.c}"></span><span><b>${esc(s.nm)}</b> ${esc(s.say)}</span><i>›</i></button>`).join('')}</div>${act.length>3?`<p class="cmuted">and ${act.length-3} more under Market details</p>`:''}`
+      :`<p class="cok">✓ Nothing needs you today.${TD.near?` <span>Closest: ${esc(TD.near.tk)}, ${abv(TD.near.above)} % above its level.</span>`:''}</p>`}
+      ${restTxt?`<p class="cmuted">Also: ${restTxt}, under Market details.</p>`:''}</section>
+    <button type="button" class="cc cc-nx" data-go="next"><span class="ck">Your next ${fmtEur(nextAmt)}</span><span class="cline">${top?`<b>${esc(top.nm||top.tk)}</b>, ≈ ${pp(top.adj)} % a year`:'Nothing at your level: keep it in cash or your ETF'}</span><i>›</i></button>
+  </div>`;
+  let more=false; try{ more=localStorage.getItem('radar.homeMore.v1')==='1'; }catch{}
+  box.innerHTML=`${calm}<details class="ovmore" ${more?'open':''}><summary>Market details<small>prices, signals, movers, heat map, mood, gold &amp; Bitcoin, risk</small></summary>
+    <div class="ovtape">${tape}</div><p class="ovstamp">${upd}${depot?` · statement of ${fmtDay(depot.asOf)}`:''}</p><div class="ovgrid">${P.join('')}</div></details>`;
+  box.querySelector('.ovmore').addEventListener('toggle',e=>{ try{ localStorage.setItem('radar.homeMore.v1',e.target.open?'1':'0'); }catch{} });
   box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ switchView(b.dataset.go); window.scrollTo({top:0}); });
   box.querySelectorAll('[data-hid]').forEach(b=>b.onclick=()=>openHold(b.dataset.hid));
   box.querySelectorAll('[data-iid]').forEach(b=>b.onclick=()=>openRead(b.dataset.iid));
@@ -2558,8 +2599,8 @@ const mqWide=window.matchMedia('(min-width:720px)');
 const showTable=()=>view==='board'&&tableMode&&mqWide.matches;
 function applyVis(){ const tbl=showTable(), f=!!focus;
   $('#viewFocus').hidden=!f;
-  $('#viewBoard').hidden=f||view!=='board'||tbl; $('#viewScore').hidden=f||!tbl; $('#viewPort').hidden=f||view!=='port'; $('#viewNext').hidden=f||view!=='next'; $('#viewDepot').hidden=f||view!=='depot'; $('#viewHome').hidden=f||view!=='home';
-  $('#pgTitle').textContent=f?FOCUS_T[focus]:view==='home'?'Overview':view==='port'?'Portfolio':view==='next'?'Next €':view==='depot'?'Depot':'Ideas';
+  $('#viewBoard').hidden=f||view!=='board'||tbl; $('#viewScore').hidden=f||!tbl; $('#viewPort').hidden=f||view!=='port'; $('#viewNext').hidden=f||view!=='next'; $('#viewDepot').hidden=f||view!=='depot'; $('#viewHome').hidden=f||view!=='home'; $('#today').hidden=view==='home'&&!f;
+  $('#pgTitle').textContent=f?FOCUS_T[focus]:view==='home'?'Home':view==='port'?'Portfolio':view==='next'?'Next €':view==='depot'?'Depot':'Ideas';
   document.body.classList.toggle('wide',(tbl||view==='home')&&!f); }
 function render(){ applyVis(); if(focus) renderFocus(); else view==='home'?renderHome():view==='port'?renderPort():view==='next'?renderNext():view==='depot'?renderDepot():showTable()?renderScore():renderBoard();
   renderToday(); renderSub(); renderPxInfo(); renderBadge(); }
@@ -2568,7 +2609,7 @@ function renderSub(){
   let t;
   if(view==='port'){ const H=holdings(), T=depotTotal();
     t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtK(T)}`:''} · ${depot?('as of '+fmtDay(depot.asOf)).replace(/ /g,'\u00a0'):'no statement yet'}`; }
-  else if(view==='home'){ const T=depotTotal(); t=`everything at a glance${T!=null?' · '+fmtK(T):''}`; }
+  else if(view==='home'){ const T=depotTotal(); t=depot?`as of ${fmtDay(depot.asOf)}`:'no statement on this device yet'; }
   else if(view==='next') t=`ranked by discount to fair value${depot?'':' · no statement, so no mix check'}`;
   else if(view==='depot'){ const T=depotTotal(); t=depot?`${T!=null?fmtK(T)+' · ':''}as of ${fmtDay(depot.asOf)}`:'no statement on this device yet'; }
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
