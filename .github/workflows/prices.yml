@@ -38,6 +38,7 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           NTFY_SERVER: ${{ vars.NTFY_SERVER }}
+          NTFY_DIGEST: ${{ vars.NTFY_DIGEST }}
         run: python .github/scripts/notify.py
 
       - name: Commit prices.json, history.json, weekly.json, sentiment.json and alerts.json

@@ -69,6 +69,11 @@ Without the secret the step still runs and keeps `alerts.json` current, it just 
 
 The first tab shows everything on one screen: a ticker strip (depot value, today, MSCI World, gold, silver, Bitcoin, Fear & Greed, VIX) and panels for the portfolio, signals that need you, today's movers, the heat map, dividends after tax, market mood, gold/silver/Bitcoin, your next money, risk and mix, and your picks vs MSCI World. Each panel links to its tab. It only reads the numbers the other tabs already compute.
 
+## Depot over time and morning digest (v4.13.0)
+
+- Home → Your depot → "Value over time": today's share counts × month-end prices from `history.json`, in € at each month's rate, against the same start value in MSCI World (EUNL). Stats use total return, so dividends count on both sides. It shows how what you own did, not your past trades.
+- `notify.py` sends one "Radar this morning" message a day (first run after 07:00 UTC) when a holding is at its add level or in a buy-the-dip signal, with the Fear & Greed reading. Set the repository variable `NTFY_DIGEST` to `off` to stop it.
+
 ## Workflow
 
 Radar → Researching → Watchlist → Bought → Passed / Sold

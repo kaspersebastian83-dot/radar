@@ -306,6 +306,37 @@ def main():
         if k not in seen:
             del st[k]
 
+    # v4.13.0: morning digest, once a day after 8:00 Berlin (07:00 UTC; 06:00 in summer), only when something is at a
+    # level or in a buy-the-dip signal. Same picture as "What to do now" on Home. NTFY_DIGEST=off turns it off.
+    today = now.strftime("%Y-%m-%d")
+    digest = None
+    if os.environ.get("NTFY_DIGEST", "").strip().lower() != "off" and now.hour >= 7 and state.get("digest") != today:
+        names = {up(h.get("symbol")): (h.get("short") or h.get("name") or up(h.get("symbol"))) for h in holdings}
+        at, buy = [], []
+        for sym, o in st.items():
+            if o.get("market"):
+                continue
+            if o.get("level"):
+                at.append(f"{names.get(sym, sym)}{' (2nd level)' if o['level'] == 2 else ''}")
+            elif o.get("dip"):
+                q = quotes.get(sym) or {}
+                if pos(q.get("price")) and inv_check(sym, q, comp, fx)[0] == "buy":
+                    hi = pos(q.get("yearHigh"))
+                    buy.append(f"{names.get(sym, sym)} {abs((q['price'] / hi - 1) * 100):.0f} % below high" if hi else names.get(sym, sym))
+        if at or buy:
+            lines = []
+            if at:
+                lines.append("At your add level: " + ", ".join(sorted(at)))
+            if buy:
+                lines.append("Buy-the-dip signal: " + ", ".join(sorted(buy)))
+            sm = load(pathlib.Path("sentiment.json"), {}).get("stocks") or {}
+            if sm.get("score") is not None:
+                sc = sm["score"]
+                word = "extreme fear" if sc < 25 else "fear" if sc < 45 else "neutral" if sc <= 55 else "greed" if sc <= 75 else "extreme greed"
+                lines.append(f"Market mood: {word} ({sc})")
+            lines.append("Open Radar, Home → What to do now.")
+            digest = ("Radar this morning", "\n".join(lines))
+
     sent = 0
     for sym, title, body, prio in msgs:
         print(f"ALERT {sym}: {title} | {body!r}")
@@ -319,6 +350,16 @@ def main():
                     st.pop(sym, None)
                 else:
                     st[sym] = olds[sym]
+    if digest:
+        print(f"DIGEST: {digest[1]!r}")
+        if topic:
+            try:
+                send(server, topic, digest[0], digest[1], ["sunrise"], 3, click)
+                state["digest"] = today
+            except Exception as e:
+                print(f"ntfy digest failed: {e}; tried again on the next run")
+        else:
+            state["digest"] = today
     if msgs and not topic:
         print("NTFY_TOPIC not set: nothing sent (see README → Phone alerts).")
 
