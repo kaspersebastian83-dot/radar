@@ -2187,8 +2187,8 @@ function divCalendar(I){
   let spread=0;
   for(const r of I.R){ const h=r.h, x=px(h), q=quoteOf(x), p=posOf_(h), cur=curOfI(x), net=1-(r.leak||0);
     const cal=q&&Array.isArray(q.divCal)?q.divCal:null;
-    if(cal&&cal.length&&!r.fund||cal&&cal.length&&r.fund){ for(const [d,a] of cal){ const dt=new Date(d+'T12:00:00'); dt.setFullYear(dt.getFullYear()+1);
-        let k=(dt.getFullYear()-y0)*12+dt.getMonth()-m0; if(k<0) k+=12; if(k>11) k-=12; if(k<0||k>11) continue;
+    if(cal&&cal.length){ for(const [d,a] of cal){ const dt=new Date(d+'T12:00:00'); dt.setFullYear(dt.getFullYear()+1);
+        const k=(dt.getFullYear()-y0)*12+dt.getMonth()-m0; if(k<0||k>11) continue;   // older than a year (divCal keeps ~13 months): already counted by this year's payment
         const e=eurOf(a*p.shares,cur); if(e==null) continue; M[k].eur+=e*net; M[k].who.push([h.short||h.symbol,e*net]); } }
     else if(r.eur>0){ spread+=r.eur*net; } }
   if(spread>0) M.forEach(m=>m.eur+=spread/12);

@@ -216,7 +216,8 @@ def main():
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     click = f"https://{repo.split('/')[0]}.github.io/{repo.split('/')[1]}/" if "/" in repo else None
 
-    msgs, seen = [], set()   # (title, body, priority)
+    msgs, seen = [], set()   # (sym, title, body, priority)
+    olds = {}                # state before this run, put back for a symbol whose message fails to send
 
     def dip_of(sym, q, old):
         """1 when 20 % or more below the 52-week high; stays 1 until back within 17 %."""
@@ -235,6 +236,7 @@ def main():
         q = quotes.get(h.get("symbol")) or quotes.get(sym) or {}
         p = pos(q.get("price"))
         old = st.get(sym, {})
+        olds[sym] = dict(old) if sym in st else None
         if not p or not fresh(q, now):
             continue
         fund_like = h.get("kind") in ("fund", "bond")
@@ -286,6 +288,7 @@ def main():
         q = quotes.get(m.get("symbol")) or quotes.get(sym) or {}
         p = pos(q.get("price"))
         old = st.get(sym, {})
+        olds[sym] = dict(old) if sym in st else None
         if not p or not fresh(q, now):
             continue
         dip, dd = dip_of(sym, q, old)
@@ -311,7 +314,11 @@ def main():
                 send(server, topic, title, body, ["chart_with_downwards_trend"], prio, click)
                 sent += 1
             except Exception as e:  # never fail the price job over a notification
-                print(f"ntfy failed for {sym}: {e}")
+                print(f"ntfy failed for {sym}: {e}; it is retried on the next run")
+                if olds.get(sym) is None:   # keep the old state, so the crossing is still new next time
+                    st.pop(sym, None)
+                else:
+                    st[sym] = olds[sym]
     if msgs and not topic:
         print("NTFY_TOPIC not set: nothing sent (see README → Phone alerts).")
 
