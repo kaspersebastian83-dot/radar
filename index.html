@@ -1010,6 +1010,13 @@ input:focus,select:focus,textarea:focus{box-shadow:inset 0 0 0 1.5px var(--acc);
 .dhstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:4px 0 6px}.dhstats div{display:flex;flex-direction:column;min-width:0}.dhstats span{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dhstats b{font-size:17px}
 @media(max-width:420px){.dhstats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #homeBody .dhstats .up{color:var(--teal)}#homeBody .dhstats .dn{color:var(--coral)}
+/* v4.14.0: what-if, coming up, tax year */
+.wi .wiv{margin:4px 0 10px;padding:10px 12px;border-radius:var(--r2);font-size:14.5px;font-weight:600}.wiv.ok{background:var(--teal-soft);color:var(--teal)}.wiv.warn{background:var(--ochre-soft);color:var(--ochre)}
+.wit{display:flex;flex-direction:column;margin:0 0 10px}.wir{display:grid;grid-template-columns:minmax(0,1fr) 60px 60px 62px;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line2)}
+.wir span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wir b{text-align:right}.wir small{color:var(--mute);font-size:12px;text-align:right}.wih b{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+.wir .dn{color:var(--coral)}.wik{margin:6px 0 8px}.wik .up{color:var(--teal)}
+.cul .ovr{grid-template-columns:72px auto minmax(0,1fr)}
+.taxbar{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;margin:10px 0 4px}.taxbar i{display:block;height:100%;background:var(--ochre)}
 </style>
 </head>
 <body>
@@ -1058,6 +1065,8 @@ input:focus,select:focus,textarea:focus{box-shadow:inset 0 0 0 1.5px var(--acc);
   <section id="viewDepot" hidden>
     <div class="dcard dpad"><div class="inc" id="incBox"></div></div>
     <div class="dcard">
+      <details class="dfold" id="dfComing"><summary><span><b>Coming up</b><small id="dsComing"></small></span></summary><div class="dbody"><div class="inc" id="comingBox"></div></div></details>
+      <details class="dfold" id="dfTax"><summary><span><b>Tax year</b><small id="dsTax"></small></span></summary><div class="dbody"><div class="inc" id="taxBox"></div></div></details>
       <details class="dfold" id="dfDivPlus"><summary><span><b>Dividend calendar &amp; snowball</b><small id="dsDivPlus"></small></span></summary><div class="dbody"><div class="inc" id="divPlusBox"></div></div></details>
       <details class="dfold" id="dfMood"><summary><span><b>Market mood: Fear &amp; Greed</b><small id="dsMood"></small></span></summary><div class="dbody"><div class="inc" id="moodBox"></div></div></details>
       <details class="dfold" id="dfHeat"><summary><span><b>Heat map</b><small id="dsHeat"></small></span></summary><div class="dbody"><div class="inc" id="heatBox"></div></div></details>
@@ -1247,8 +1256,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.13.0';
+const VERSION='4.14.0';
 const CHANGELOG=[
+  {v:'4.14.0',d:'2026-11-19',t:'What if I buy, coming up, tax year',items:[
+    'Next €: "What if I buy…" — pick any holding or idea and an amount, and see the shares you get, its new weight against your max, the sector and currency shares before and after, the dividends it adds after withholding and German tax, and its investor-check and trend signals, with a plain warning when it breaks one of your limits.',
+    'Depot: "Coming up" lists results and expected ex-dividend dates for the next 45 days, with the € you can expect per payment.',
+    'Depot: "Tax year" shows your taxable dividends a year, how much of the Sparer-Pauschbetrag they use, the German tax and the foreign tax you can\'t credit.']},
   {v:'4.13.0',d:'2026-11-19',t:'Your depot over time, morning digest',items:[
     'Tap "Value over time" on the Your depot card: what the shares you own today were worth at every month-end over 1, 3, 5 or 10 years, against the same money in MSCI World (dashed). Below it: price change, change with dividends, MSCI World and the worst fall. Touch the chart to read a month.',
     'Phone alerts: one "Radar this morning" message after 8:00 when something is at your add level or in a buy-the-dip signal, with the market mood. Nothing on quiet days. Turn it off with the repo variable NTFY_DIGEST = off.']},
@@ -2440,6 +2453,86 @@ function wireDepHist(root){
     const X=4+(P[k][0]-t0)/(t1-t0)*(640-62); ln.setAttribute('x1',X); ln.setAttribute('x2',X); ln.style.display='';
     rd.innerHTML=`${fmtDate(new Date(P[k][0]).toISOString().slice(0,10))}: <b>${fmtEur(P[k][1])}</b>${Bv[k]!=null?` · MSCI World ${fmtEur(Bv[k])}`:''}`; };
   svg.onpointermove=mv; svg.onpointerdown=mv; svg.onpointerleave=()=>{ ln.style.display='none'; rd.innerHTML='&nbsp;'; }; }
+// ---------- What if I buy… (v4.14.0) ----------
+// One planned purchase against the depot as it is: the new weight against your max, the dividend it adds after
+// withholding and German tax (at the margin, so the allowance counts only if some is left), the sector and currency
+// shares before and after, and the signals Radar already has for it. Nothing is ordered or saved.
+let wiSym=null;
+function wiCands(){ return nextCands().filter(r=>r.c>0&&r.inDepot!==false).sort((a,b)=>String(a.tk).localeCompare(String(b.tk))); }
+function whatIf(r,amt){
+  const T=depotTotal()||0, T1=T+amt, pe=eurOf(r.c,r.cur), sh=pe?amt/pe:null;
+  const w0=T>0?r.eur/T*100:0, w1=T1>0?(r.eur+amt)/T1*100:null;
+  const X=xrRows(), grp=key=>{ const m={}; if(X) for(const x of X.rows) if(!x.fund){ const k=x[key]||'Unknown'; m[k]=(m[k]||0)+x.eur; } return m; };
+  const sec=grp('sector'), fxg=grp('cur'), fk=fxCode(r.cur)[0]||r.cur||'EUR';
+  const s0=T>0?(sec[r.sector]||0)/T*100:0, s1=T1>0?((sec[r.sector]||0)+amt)/T1*100:0;
+  const c0=T>0?(fxg[fk]||0)/T*100:0, c1=T1>0?((fxg[fk]||0)+amt)/T1*100:0;
+  // dividend: gross from today's trailing yield; withholding = what can't be credited + what can; German tax at the margin
+  const y=r.y||0, div=amt*y/100, leak=leakOf(r.cc,r.rc), cred=credOf(r.cc), I=incomeOf(), left=I?Math.max(0,I.P-I.taxable):Infinity;
+  const taxed=Math.max(0,div-left), de=taxed*Math.max(0,.25-cred)*(1+INC.soli/100), netY=div*(1-leak-cred)-de;   // withheld abroad in full; German tax only on the part above the allowance
+  const sym=r.sym, inv=invOf(sym,r.kind==='hold'?port.holdings.find(h=>h.id===r.id):data.ideas.find(i=>i.id===r.id)), tr=trendOf(sym);
+  const warn=[];
+  if(w1!=null&&w1>r.cap) warn.push(`${r.tk} would be ${fmtN(w1,1)} % of your depot, above your max of ${fmtN(r.cap,1)} %.`);
+  if(s1>NX.sectorCap&&s1>s0) warn.push(`${r.sector} would be ${fmtN(s1,1)} %, above the ${NX.sectorCap} % line.`);
+  if(fk!=='EUR'&&c1>NX.fxCap&&c1>c0) warn.push(`${fk} stocks would be ${fmtN(c1,1)} %, above the ${NX.fxCap} % line.`);
+  if(r.lvl&&r.c>r.lvl) warn.push(`The price is ${abv((r.c/r.lvl-1)*100)} % above your ${r.kind==='hold'?'add level':'buy price'}.`);
+  if(r.broken) warn.push('Its thesis is marked as broken.');
+  if(inv&&inv.verdict==='recheck') warn.push('It has fallen 20 % or more and fails part of the investor check.');
+  return {T,T1,sh,pe,w0,w1,s0,s1,c0,c1,fk,div,netY,taxed,left,leak,y,inv,tr,warn}; }
+function whatIfHtml(){
+  const C=wiCands(); if(!C.length) return '';
+  if(!wiSym||!C.some(r=>r.sym===wiSym)) wiSym=(nextRank(nextAmt).ready[0]||C[0]).sym;
+  const r=C.find(x=>x.sym===wiSym), W=whatIf(r,nextAmt), noDep=!depot;
+  const row=(k,a,b,note)=>`<div class="wir"><span>${k}</span><b class="num">${a}</b><b class="num">${b}</b><small>${note||''}</small></div>`;
+  const ar=a=>`${fmtN(a,1)} %`;
+  const iv=W.inv&&W.inv.verdict?INV_V[W.inv.verdict]:null, tv=W.tr?TR_V[W.tr.verdict]:null;
+  return `<div class="sec wi"><h4>What if I buy…</h4>
+    <div class="plctl"><label>Stock<select id="wiSel">${C.map(x=>`<option value="${esc(x.sym)}" ${x.sym===wiSym?'selected':''}>${esc(x.tk)} · ${esc(x.nm||'')}${x.kind==='hold'?' (held)':''}</option>`).join('')}</select></label>
+      <label>Amount (€)<input type="number" id="wiAmt" value="${nextAmt}" step="100" min="0" style="width:110px"></label></div>
+    <p class="wiv ${W.warn.length?'warn':'ok'}">${W.warn.length?'Careful: '+esc(W.warn.join(' ')):'Fits your limits.'}</p>
+    ${noDep?'<p class="hint">Import your statement to see weights and the mix.</p>':`<div class="wit"><div class="wir wih"><span></span><b>now</b><b>after</b><small></small></div>
+      ${row('Weight',ar(W.w0),`<span class="${W.w1>r.cap?'dn':''}">${ar(W.w1)}</span>`,`max ${fmtN(r.cap,1)} %`)}
+      ${row(esc(r.sector),ar(W.s0),`<span class="${W.s1>NX.sectorCap?'dn':''}">${ar(W.s1)}</span>`,`line ${NX.sectorCap} %`)}
+      ${W.fk!=='EUR'?row(esc(W.fk)+' stocks',ar(W.c0),`<span class="${W.c1>NX.fxCap?'dn':''}">${ar(W.c1)}</span>`,`line ${NX.fxCap} %`):''}</div>`}
+    <div class="ovkpi wik"><div><span>You get</span><b class="num">${W.sh!=null?fmtN(W.sh,W.sh<10?2:0):'—'}</b><small>shares at ${fmtEur(W.pe)}</small></div>
+      <div><span>Dividends</span><b class="num up">+${fmtEur(W.netY)}</b><small>a year after tax · ${fmtN(W.y,1)} % yield</small></div>
+      <div><span>Signals</span><b>${iv?`<span style="color:${iv[1]}">${iv[0]}</span>`:'—'}</b><small>${tv?tv[0]:'trend after the next update'}</small></div></div>
+    <p class="hint">Dividends from today's trailing yield, after foreign withholding and German tax${W.left===Infinity?'':W.left>0?` (${fmtEur(W.left)} of your allowance is still free, so the first part is tax-free)`:' (your allowance is used up, so 26,375 % applies)'}. Nothing is ordered; change the stock or amount to compare.</p></div>`; }
+function wireWhatIf(root){
+  const s=root.querySelector('#wiSel'), a=root.querySelector('#wiAmt'); if(!s) return;
+  s.onchange=()=>{ wiSym=s.value; renderNext(); };
+  a.onchange=()=>{ const v=Number(a.value); if(v>0){ nextAmt=v; try{localStorage.setItem(LS_NEXT,String(v));}catch{} } renderNext(); }; }
+// ---------- Coming up (v4.14.0): results and expected ex-dividend dates, next 45 days ----------
+function comingUp(days=45){
+  const t0=today(), lim=new Date(Date.now()+days*864e5).toISOString().slice(0,10), out=[], seen=new Set();
+  for(const h of holdings()){ const sym=hSym(h); if(!sym||seen.has(sym)) continue; seen.add(sym); const p=posOf_(h);
+    if(depot&&!p) continue;
+    const e=earnOf(sym); if(e&&e.next&&e.next<=lim) out.push({d:e.next,k:'Results',tk:h.short||h.symbol,id:h.id,kind:'hold'});
+    const q=quoteOf(px(h)), cal=q&&Array.isArray(q.divCal)?q.divCal:[];
+    for(const [d,a] of cal){ const n=new Date(d+'T12:00:00'); n.setFullYear(n.getFullYear()+1); const ds=n.toISOString().slice(0,10);
+      if(ds>=t0&&ds<=lim){ const e2=p?eurOf(a*p.shares,curOfI(px(h))):null; out.push({d:ds,k:'Ex-dividend',tk:h.short||h.symbol,id:h.id,kind:'hold',est:true,eur:e2}); } } }
+  for(const i of live()){ const sym=symOf(i); if(!sym||seen.has(sym)||ideaState(i).out) continue; seen.add(sym);
+    const e=earnOf(sym); if(e&&e.next&&e.next<=lim) out.push({d:e.next,k:'Results',tk:i.ticker,id:i.id,kind:'idea'}); }
+  return out.sort((a,b)=>a.d.localeCompare(b.d)); }
+function renderComing(){
+  const box=$('#comingBox'); if(!box) return; const L=comingUp();
+  box.innerHTML=L.length?`<div class="ovl cul">${L.map(o=>`<button type="button" class="ovr" ${o.kind==='hold'?`data-hid="${esc(o.id)}"`:`data-iid="${esc(o.id)}"`}><span class="ovt" style="--tc:${o.k==='Results'?'var(--research)':'var(--teal)'}">${o.k==='Results'?'Results':'Ex-div'}</span><b>${esc(o.tk)}</b><small>${fmtDate(o.d)}${o.est?' (expected)':''}${o.eur?` · ≈ ${fmtEur(o.eur)} gross`:''}</small></button>`).join('')}</div>
+    <p class="hint">Results dates from Yahoo. Ex-dividend dates are last year's, moved one year ahead, so they can shift by days. Own the share the day before the ex-date to get the dividend; it is paid 2–6 weeks later.</p>`
+    :'<p class="hint">No results or expected ex-dividend dates in the next 45 days.</p>';
+  box.querySelectorAll('[data-hid]').forEach(b=>b.onclick=()=>openHold(b.dataset.hid));
+  box.querySelectorAll('[data-iid]').forEach(b=>b.onclick=()=>openRead(b.dataset.iid));
+  const n=L.filter(o=>o.k!=='Results').length, m=L.length-n, e=$('#dsComing');
+  if(e) e.textContent=L.length?`${m} result${m===1?'':'s'} · ${n} ex-dividend date${n===1?'':'s'} in 45 days`:'Nothing in the next 45 days'; }
+// ---------- Tax year (v4.14.0) ----------
+function renderTaxYear(){
+  const box=$('#taxBox'); if(!box) return; const I=incomeOf();
+  if(!I){ box.innerHTML='<p class="hint">Import your statement to see your tax year.</p>'; return; }
+  const used=Math.min(I.taxable,I.P), left=Math.max(0,I.P-I.taxable), pct=I.P>0?used/I.P*100:100, yr=new Date().getFullYear();
+  box.innerHTML=`<div class="ovkpi"><div><span>Taxable a year</span><b class="num">${fmtEur(I.taxable)}</b><small>${fmtEur(I.G)} gross dividends</small></div>
+    <div><span>Allowance</span><b class="num">${fmtEur(used)} / ${fmtEur(I.P)}</b><small>${left>0?fmtEur(left)+' still free':'used up'}</small></div>
+    <div><span>German tax</span><b class="num dn">${fmtEur(I.tax)}</b><small>+ ${fmtEur(I.L)} foreign, not creditable</small></div></div>
+    <div class="taxbar"><i style="width:${Math.min(100,pct)}%"></i></div>
+    <p class="hint">${left>0?`About ${fmtEur(left)} of dividends a year stay tax-free. `:`Your ${fmtEur(I.P)} allowance covers about ${fmtN(I.P/Math.max(1,I.taxable)*12,1)} months of dividends; after that Trade Republic withholds 26,375 % (25 % + Soli, before any church tax). `}Equity ETFs count only 70 % (Teilfreistellung). Foreign withholding up to 15 % is credited against the German 25 %; what's above that is lost unless you reclaim it. This is a run-rate for a full year from today's holdings, not your ${yr} statement: Trade Republic's annual tax report (Jahressteuerbescheinigung) is what counts for your tax return.</p>`;
+  const e=$('#dsTax'); if(e) e.textContent=`${fmtEur(I.tax)} German tax a year · allowance ${left>0?fmtEur(left)+' free':'used up'}`; }
 // ---------- Overview (v4.10.0) ----------
 // One screen with everything that matters, terminal style: a ticker strip on top, then small panels. Each panel
 // reads the same numbers as its own tab (nothing new is computed here) and links there for the detail.
@@ -4066,7 +4159,8 @@ function renderNext(){
       :top?`<span class="k">At your level, but not better than bonds</span><b class="tk">${esc(top.tk)} ≈ ${pp(top.adj)} % a year</b>${nextIncOf(top)!=null?`<span class="inc num">${nextIncTxt(top)}, after withholding</span>`:''}<span class="ex">${esc(b.nm)} yields ${pp(b.y)} % for much less risk. Keep it there or in cash until something cheaper shows up.</span>`
       :`<span class="k">Nothing is at your level today</span><b class="tk">Keep the ${amt} in cash or your usual ETF</b><span class="ex">${R.wait[0]?`Closest by expected return: ${R.wait.slice(0,2).map(r=>`${esc(r.tk)} (${pp(r.adj)} %, ${r.above!=null?abv(r.above)+' % above its level':'no level'})`).join(', ')}.`:''}${b?` ${esc(b.nm)} yields ${pp(b.y)} %.`:''}</span>`}
     </div>`;
-  { const pl=document.createElement('div'); pl.innerHTML=planHtml(); body.appendChild(pl.firstElementChild); wirePlan(body); }   // v4.9.0
+  { const pl=document.createElement('div'); pl.innerHTML=planHtml(); body.appendChild(pl.firstElementChild); wirePlan(body); }
+  { const wd=document.createElement('div'); wd.innerHTML=whatIfHtml(); if(wd.firstElementChild){ body.appendChild(wd.firstElementChild); wireWhatIf(body); } }   // v4.14.0   // v4.9.0
   const g=document.createElement('div'); g.className='list';
   const list=(t,a,empty,fk)=>{ if(!a.length&&!empty) return; g.appendChild(groupEl(t,a.map(nextRow),empty,fk)); };
   const readyEls=R.ready.map(nextRow);
@@ -4553,7 +4647,7 @@ function renderDepot(){
   else set('#dsLeak','What each country keeps');
   const B=holdings().filter(h=>hSym(h)&&hSym(h)!==BENCH.sym&&h.kind!=='bond'&&(!depot||posOf_(h))).map(benchOf).filter(o=>o&&o.gap!=null);
   set('#dsBench',B.length?`${B.filter(o=>o.gap>0).length} of ${B.length} holdings ahead`:'Set "Bought around" dates to see it');
-  renderMarkets(); renderMood(); renderHeat(); renderDivPlus();
+  renderMarkets(); renderMood(); renderHeat(); renderDivPlus(); renderComing(); renderTaxYear();
   renderDepotHint();
   if(!depot) $('#dfStmt').open=true;
 }
