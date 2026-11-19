@@ -1,0 +1,8 @@
+{
+  "note": "Gold, silver and Bitcoin for the Depot tab (v4.9.0). Yahoo Finance symbols, priced in EUR. No share counts here.",
+  "markets": [
+    {"symbol": "4GLD.DE", "name": "Gold", "note": "Xetra-Gold, 1 unit = 1 g of gold, in €"},
+    {"symbol": "XAD6.DE", "name": "Silver", "note": "Xtrackers Physical Silver ETC, in €"},
+    {"symbol": "BTC-EUR", "name": "Bitcoin", "note": "1 bitcoin in €"}
+  ]
+}

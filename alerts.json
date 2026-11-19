@@ -1,0 +1,187 @@
+{
+ "symbols": {
+  "6367.T": {
+   "dip": 0,
+   "l1": 17000.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "8053.T": {
+   "dip": 0,
+   "l1": 1180.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "8058.T": {
+   "dip": 0,
+   "l1": 2300.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "ALV.DE": {
+   "dip": 0,
+   "l1": 370.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "AMZN": {
+   "dip": 0,
+   "l1": 180.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "ASML.AS": {
+   "dip": 1,
+   "l1": 870.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "AXP": {
+   "dip": 0,
+   "l1": 309.0,
+   "l2": 265.0,
+   "level": 0,
+   "since": null
+  },
+  "BEPC": {
+   "dip": 1,
+   "l1": 23.5,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "CVX": {
+   "dip": 0,
+   "l1": 105.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "DG.PA": {
+   "dip": 1,
+   "l1": 103.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "ENEL.MI": {
+   "dip": 0,
+   "l1": 7.1,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "EOAN.DE": {
+   "dip": 0,
+   "l1": 11.1,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "EUN5.DE": {
+   "dip": 0,
+   "l1": null,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "EUNL.DE": {
+   "dip": 0,
+   "l1": null,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "EXW1.DE": {
+   "dip": 0,
+   "l1": null,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "GOOGL": {
+   "dip": 1,
+   "l1": 265.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "IS3N.DE": {
+   "dip": 0,
+   "l1": null,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "JNJ": {
+   "dip": 0,
+   "l1": 180.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "KO": {
+   "dip": 0,
+   "l1": 74.0,
+   "l2": 68.0,
+   "level": 0,
+   "since": null
+  },
+  "MAIN": {
+   "dip": 0,
+   "l1": 41.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "META": {
+   "dip": 1,
+   "l1": 520.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "MUV2.DE": {
+   "dip": 0,
+   "l1": 455.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "O": {
+   "dip": 0,
+   "l1": 52.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "PLD": {
+   "dip": 0,
+   "l1": 104.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "SAN.PA": {
+   "dip": 0,
+   "l1": 75.0,
+   "l2": null,
+   "level": 0,
+   "since": null
+  },
+  "VGWD.DE": {
+   "dip": 0,
+   "l1": null,
+   "l2": null,
+   "level": 0,
+   "since": null
+  }
+ },
+ "version": 1
+}
