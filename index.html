@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#eef6fe" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e2036" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f4f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Radar">
@@ -899,6 +899,85 @@ input[type=file]{display:none}
 #incBox .dfold{margin:4px -16px -16px;border-top:1px solid var(--line)}
 #incBox .dfold .dbody{padding:0 16px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ================= v4.11.0: professional style =================
+   Replaces the pastel blue glass of v4.0.0 with a sober finance look: neutral greys and one deep-blue accent in light
+   mode, a near-black terminal palette in dark mode, solid panels with hairline borders instead of blur, smaller radii,
+   square-ish controls, small uppercase section labels and tabular figures. Same layout and sizes for touch. */
+:root{
+  --bg:#f2f4f7;--bg1:#f2f4f7;--bg2:#f2f4f7;--panel:#ffffff;--panel2:#f6f7f9;--ink:#101828;--ink2:#344054;--mute:#667085;--line:#e1e4ea;--line2:#eceef2;
+  --ochre:#a15c07;--ochre-soft:#fdf3e2;--teal:#067a52;--teal-soft:#e3f5ec;--coral:#c0362c;--coral-soft:#fdecea;
+  --research:#1d5fa6;--acc:#163f73;--acc-ink:#ffffff;--acc-soft:rgba(22,63,115,.08);--out:#98a2b3;--radar:#5b4fa3;--watch:#b7791f;--bought:#067a52;
+  --glass:var(--panel);--glass2:var(--panel);--edge:inset 0 0 0 1px var(--line);--sh:0 1px 2px rgba(16,24,40,.05);--sh2:0 4px 16px rgba(16,24,40,.10);
+  --sheet:var(--bg);--sheet-top:var(--bg);--dim:rgba(16,24,40,.5);
+  --r:10px;--r2:8px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0b0d10;--bg1:#0b0d10;--bg2:#0b0d10;--panel:#14171c;--panel2:#1a1e24;--ink:#e7e9ee;--ink2:#b4bac5;--mute:#848c99;--line:#262b33;--line2:#1e2229;
+  --ochre:#e3a23b;--ochre-soft:#2a2112;--teal:#34b27f;--teal-soft:#10281f;--coral:#ef6b5e;--coral-soft:#2f1714;
+  --research:#6aa2e6;--acc:#8fb8f0;--acc-ink:#0b0d10;--acc-soft:rgba(143,184,240,.12);--out:#5f6875;--bought:#34b27f;
+  --glass:var(--panel);--glass2:var(--panel);--edge:inset 0 0 0 1px var(--line);--sh:none;--sh2:0 6px 24px rgba(0,0,0,.5);
+  --sheet:var(--bg);--sheet-top:var(--bg);--dim:rgba(0,0,0,.65);
+}}
+html,body{font-family:Inter,"SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-feature-settings:"tnum" 1,"cv11" 1;letter-spacing:-.003em}
+body{background:var(--bg)}
+html{background:var(--bg)}
+*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#pgTitle{font-size:26px;line-height:34px;font-weight:700;letter-spacing:-.015em}
+.subbar{font-size:13.5px;color:var(--mute)}
+.ver{font-weight:600;letter-spacing:.02em}
+/* controls: squared, quiet */
+.btn{border-radius:8px;box-shadow:inset 0 0 0 1px var(--line);background:var(--panel);font-weight:600;font-size:14.5px}
+.btn.primary{background:var(--acc);color:var(--acc-ink);box-shadow:none}
+.btn.quiet{box-shadow:none;background:transparent}
+.btn.helpbig{border-radius:var(--r)}
+.gbtn{border-radius:10px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.gbtn.new::after{box-shadow:0 0 0 2px var(--panel)}
+.chip{border-radius:6px;box-shadow:inset 0 0 0 1px var(--line);background:var(--panel);font-weight:600}
+.chip.on{background:var(--acc);color:var(--acc-ink);box-shadow:none}.chip.on b{color:var(--acc-ink)}
+input,select,textarea{border-radius:8px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);font-weight:500}
+input:focus,select:focus,textarea:focus{box-shadow:inset 0 0 0 1.5px var(--acc);outline:none}
+.today button{border-radius:8px;box-shadow:inset 0 0 0 1px var(--line);background:var(--panel);font-size:14px}
+.today button.on{background:var(--acc);color:var(--acc-ink);box-shadow:none}
+.today .px{box-shadow:none}
+/* tab bar: a solid bar with a top hairline, the active tab marked by the accent */
+.tabbar.seg{border-radius:14px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line),var(--sh2);height:62px}
+.tabbar.seg button{border-radius:10px;font-size:10.5px;letter-spacing:.02em;text-transform:uppercase;font-weight:700;color:var(--mute)}
+.tabbar.seg button.on{background:var(--acc-soft);color:var(--acc)}
+.tabbar.seg button svg{stroke-width:1.7}
+.tabfade{background:linear-gradient(transparent,var(--bg) 78%)}
+.toast{border-radius:8px;background:var(--ink);color:var(--panel)}
+/* lists and cards: solid panels, hairline borders */
+.ghd{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);padding:0 2px 8px}
+.ghd span:last-child{font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:none}
+.rows,.card2,.nxhero,.pstrip>div,.addopts button,.empty,.tablewrap,.srow,.sum>div{box-shadow:inset 0 0 0 1px var(--line),var(--sh);border-radius:var(--r)}
+.row2{background:linear-gradient(var(--line2),var(--line2)) no-repeat 0 0/100% 1px}
+.row2:first-child{background:transparent}
+.row2:hover{background-color:var(--panel2)}
+.rsc{border-radius:8px}
+.r1 .tk{font-weight:700;letter-spacing:.01em}
+.rpx b{font-weight:600}
+#viewDepot .dcard{box-shadow:inset 0 0 0 1px var(--line),var(--sh);border-radius:var(--r)}
+#viewDepot .rows{background:var(--panel2)}
+.c2box,.c2blk,.kpi,.dbox,.quote,.verrow{background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line2)}
+.hlp .hex{background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line2)}
+/* sheets */
+.sheet{border-radius:14px 14px 0 0;box-shadow:0 -1px 0 var(--line),var(--sh2)}
+@media(min-width:720px){.sheet{border-radius:14px}}
+.grab{border-radius:14px 14px 0 0}
+.sheet h3 [data-close]{border-radius:8px;box-shadow:inset 0 0 0 1px var(--line);background:var(--panel)}
+.psegs{border-radius:9px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
+.psegs button{border-radius:7px}
+.pane>.sec,.pane>.card2,.pane>.quote,.pane>.kpis,.pane>.folds,.pane>.dbox,.pane>.stagebar{border-radius:var(--r);box-shadow:inset 0 0 0 1px var(--line)}
+.sec>h4,.shd{font-size:12px!important;font-weight:700!important;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+@media(min-width:720px){.pane-edit .foot2,#mEdit .foot2{border-radius:0 0 14px 14px}}
+/* badges and pills: rectangular tags */
+.bz,.qpill,.badge,.pay{border-radius:5px!important}
+/* Overview: the accent rule on top of each panel in the brand colour */
+.ovp{border-top:2px solid var(--acc);border-radius:var(--r);box-shadow:var(--sh)}
+.ovtape{border-radius:var(--r)}
+.incpb .chip,.seg button,.vtag,.pill,.sc,.tiers span,.epill,.own,.rcl,.xo,.plr .k,.log .rel h4 .cur{border-radius:5px!important}
+.seg,#sync,.sortbar select,.pbar input{border-radius:8px!important}
+.incpb .chip.on{background:var(--acc);color:var(--acc-ink)}
 </style>
 </head>
 <body>
@@ -1136,8 +1215,11 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.10.0';
+const VERSION='4.11.0';
 const CHANGELOG=[
+  {v:'4.11.0',d:'2026-11-19',t:'A more professional look',items:[
+    'New visual style: neutral greys and one deep-blue accent instead of the pastel blue glass, a near-black terminal look in dark mode, solid panels with fine borders, smaller corners, small uppercase section labels and tabular figures throughout.',
+    'Nothing moved: same tabs, same places, same touch sizes.']},
   {v:'4.10.0',d:'2026-11-19',t:'Overview: everything on one screen',items:[
     'New first tab, Overview: a ticker strip (depot value, today in € and %, MSCI World, gold, silver, Bitcoin, Fear & Greed, VIX) and panels for the portfolio, signals that need you (at level, dips with the investor check, reviews, results this week), today\'s movers, the heat map, dividends after tax with the next 12 months, market mood, gold, silver and Bitcoin, your next money and savings plan, risk and mix, and your picks vs MSCI World.',
     'Every panel says in one line what it means and links to its tab for the detail; tap a stock to open it. Nothing new is calculated: it shows the same numbers as the other tabs.',
