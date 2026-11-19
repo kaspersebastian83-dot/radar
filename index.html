@@ -625,6 +625,37 @@ body.wide .bar,body.wide main,body.wide .subbar{max-width:1240px}
 .mspark{width:100%;height:48px;display:block;margin-top:10px}.mspark path{fill:none;vector-effect:non-scaling-stroke}.msl{display:flex;justify-content:space-between;font-size:11px;color:var(--mute)}
 .mtip{margin:8px 0 0;font-size:13.5px;font-weight:600}
 .hctl{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}.hctl .chip{width:auto;flex:none}
+/* Overview (v4.10.0): terminal-style one-screen summary */
+.ovtape{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin:4px 0 6px}
+.ovc{background:var(--panel);padding:7px 10px;box-shadow:1px 1px 0 var(--line2);min-width:0;display:flex;flex-direction:column}.ovc span{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovc b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovc small{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mute)}
+#homeBody .up{color:var(--teal)}#homeBody .dn{color:var(--coral)}
+.ovstamp{font-size:11.5px;color:var(--mute);margin:0 2px 10px}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;align-items:start}
+@media(max-width:700px){.ovgrid{grid-template-columns:minmax(0,1fr)}}
+.ovp{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:0 12px 10px;min-width:0;border-top:3px solid var(--ochre)}
+.ovp header{display:flex;align-items:center;gap:8px;padding:8px 0 6px;border-bottom:1px solid var(--line2);margin-bottom:8px}
+.ovp h3{margin:0;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);flex:1;min-width:0}
+.ovgo{border:0;background:none;color:var(--acc,var(--research));font:inherit;font-size:12px;font-weight:600;padding:2px 0;cursor:pointer;white-space:nowrap}
+.ovsub{font-size:11.5px;color:var(--mute);margin:8px 0 0;line-height:1.4}.ovnil{color:var(--ink2);font-size:13.5px;margin:4px 0}
+.ovkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}.ovkpi>div{min-width:0;display:flex;flex-direction:column}
+.ovkpi span{font-size:10.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovkpi b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovkpi small{font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovkpi.sm{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px}.ovkpi.sm b{font-size:15px}
+@media(max-width:420px){.ovkpi{grid-template-columns:repeat(2,minmax(0,1fr))}.ovkpi.sm{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ovl{display:flex;flex-direction:column}.ovl hr{border:0;border-top:1px dashed var(--line);margin:3px 0}
+.ovr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;align-items:baseline;padding:5px 0;border:0;border-bottom:1px solid var(--line2);background:none;font:inherit;color:var(--ink);text-align:left;width:100%}
+button.ovr{cursor:pointer}button.ovr:hover{background:var(--panel2)}.ovr:last-child{border-bottom:0}
+.ovr b{font-size:13.5px;white-space:nowrap}.ovr small{font-size:12px;color:var(--mute);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ovr .ovt{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--tc,var(--ink2));background:color-mix(in srgb,var(--tc,var(--mute)) 14%,transparent);border-radius:4px;padding:1px 6px;text-align:center;min-width:62px}
+.ovl:not(.ov4):not(.ov3) .ovr{grid-template-columns:72px auto minmax(0,1fr)}
+.ov4 .ovr{grid-template-columns:auto minmax(0,1fr) auto auto}.ov4 .ovr>.num{text-align:right;font-size:13px;white-space:nowrap;min-width:56px}
+.ov3 .ovr{grid-template-columns:auto minmax(0,1fr) auto;align-items:center}.ov3 .ovr>.num{text-align:right;font-size:13px}
+.ov3 .ovt.k{min-width:48px}.ovt.k.etf{--tc:var(--research)}.ovt.k.stock{--tc:var(--teal)}.ovt.k.cash{--tc:var(--ochre)}
+.ovbar{display:block;height:7px;background:var(--panel2);border-radius:4px;overflow:hidden}.ovbar i{display:block;height:100%;background:var(--research);border-radius:4px}
+.ovhero{margin:0 0 8px;font-size:14px;line-height:1.4}
+.ovcal{height:64px;margin-top:10px}
+.ovmood{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center}.ovmood>div{display:flex;flex-direction:column;align-items:center}.ovmood span{font-size:10.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
 .heat{position:relative;width:100%;border-radius:var(--r2);overflow:hidden;background:var(--panel2)}
 .ht{position:absolute;border:1px solid var(--panel);padding:3px 4px;margin:0;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;color:var(--ink);font:inherit;cursor:pointer;text-align:center}
 .ht b{font-size:12px;line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ht small{font-size:11px;font-variant-numeric:tabular-nums}
@@ -886,11 +917,12 @@ input[type=file]{display:none}
   </div>
 </header>
 <div class="tabfade" aria-hidden="true"></div>
-<nav class="tabbar seg" aria-label="Tabs"><button class="on" data-v="board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.500 1 2.500h6c0-1 .3-1.800 1-2.500A6 6 0 0 0 12 3z"/></svg><span>Ideas</span></button><button data-v="port" title="Your holdings"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg><span>Portfolio</span><span class="badge" id="portBadge" hidden></span></button><button data-v="next" title="Where your next money goes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8.500 12.500 12 16l3.500-3.500"/></svg><span>Next €</span></button><button data-v="depot" title="Income, tax, mix and your statement"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Depot</span></button></nav>
+<nav class="tabbar seg" aria-label="Tabs"><button data-v="home" title="Everything at a glance"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.500" height="9" rx="1.500"/><rect x="13.500" y="3" width="7.500" height="5" rx="1.500"/><rect x="13.500" y="11" width="7.500" height="10" rx="1.500"/><rect x="3" y="15" width="7.500" height="6" rx="1.500"/></svg><span>Overview</span></button><button data-v="board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.500 1 2.500h6c0-1 .3-1.800 1-2.500A6 6 0 0 0 12 3z"/></svg><span>Ideas</span></button><button data-v="port" title="Your holdings"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg><span>Portfolio</span><span class="badge" id="portBadge" hidden></span></button><button data-v="next" title="Where your next money goes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8.500 12.500 12 16l3.500-3.500"/></svg><span>Next €</span></button><button data-v="depot" title="Income, tax, mix and your statement"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg><span>Depot</span></button></nav>
 
 <main>
   <div class="stalebar" id="staleBar" hidden></div>
   <div class="today" id="today" aria-label="Today"></div>
+  <section id="viewHome" hidden><div id="homeBody"></div></section>
   <section id="viewFocus" hidden><div class="list" id="focusBody"></div></section>
   <section id="viewBoard"><div class="list" id="grid"></div></section>
   <section id="viewScore" hidden>
@@ -1104,8 +1136,12 @@ const STATUSES = [
 // ---------- version ----------
 // Bump VERSION and add an entry on top of CHANGELOG with every change to the app.
 // major: new area of the app · minor: new feature · patch: fix or small tweak
-const VERSION='4.9.0';
+const VERSION='4.10.0';
 const CHANGELOG=[
+  {v:'4.10.0',d:'2026-11-19',t:'Overview: everything on one screen',items:[
+    'New first tab, Overview: a ticker strip (depot value, today in € and %, MSCI World, gold, silver, Bitcoin, Fear & Greed, VIX) and panels for the portfolio, signals that need you (at level, dips with the investor check, reviews, results this week), today\'s movers, the heat map, dividends after tax with the next 12 months, market mood, gold, silver and Bitcoin, your next money and savings plan, risk and mix, and your picks vs MSCI World.',
+    'Every panel says in one line what it means and links to its tab for the detail; tap a stock to open it. Nothing new is calculated: it shows the same numbers as the other tabs.',
+    'A new device opens on Overview; otherwise Radar still opens on the tab you used last.']},
   {v:'4.9.0',d:'2026-11-19',t:'Charts, investor check, savings plan, mood, heat map, gold and Bitcoin, alerts',items:[
     'Price chart in every stock\'s sheet: 1, 3, 5 or 15 years, with the 40-week line (the weekly twin of the 200-day line), the 52-week line and your add levels. Touch the chart to read a date and price. Under it the long-term signals: price above or below the 200-day line, the 52-week line rising or falling, golden or death cross (50 vs 200 days), 12-month momentum and strength vs MSCI World, summed up as Uptrend, Mixed or Downtrend.',
     'Investor check in the Business part: return on capital (≥ 15 %), earnings yield on the whole company (EBIT / enterprise value, ≥ 7 %), net debt / EBITDA (red above 3×), PEG (information only) and the fall from the 52-week high. 20 % or more below the high with the first three passing is a "Buy-the-dip signal"; failing one is "Re-check thesis". Rows show "dip ✓" or "dip ?" when a stock is 20 % or more below its high. Banks and insurers use return on equity and earnings / price; REITs and utilities their cash per share growth and their own debt scale.',
@@ -2229,6 +2265,115 @@ function renderDivPlus(){
   box.querySelectorAll('.dtr[data-hid]').forEach(e=>e.onclick=()=>openHold(e.dataset.hid));
   const d=$('#dsDivPlus'); if(d) d.textContent=`${fmtEur(I.net2/12)} a month now · ${R2.length?fmtEur(R2[R2.length-1].net/12)+' in '+R2[R2.length-1].y+' years':''}`;
 }
+// ---------- Overview (v4.10.0) ----------
+// One screen with everything that matters, terminal style: a ticker strip on top, then small panels. Each panel
+// reads the same numbers as its own tab (nothing new is computed here) and links there for the detail.
+const OV_GO={port:'Portfolio',next:'Next €',depot:'Depot',board:'Ideas'};
+const ovSg=v=>v==null?'':v>=0?'up':'dn';
+const ovEur=v=>v==null?'—':`${v>=0.5?'+':v<=-0.5?'−':'±'}${fmtEur(Math.abs(v))}`;
+function ovPanel(k,title,go,body,sub){
+  return `<section class="ovp ovp-${k}"><header><h3>${title}</h3>${go?`<button type="button" class="ovgo" data-go="${go}">${OV_GO[go]} ›</button>`:''}</header><div class="ovb">${body}</div>${sub?`<p class="ovsub">${sub}</p>`:''}</section>`; }
+function ovY1(sym){ const W=wkPts(sym); if(W&&W.pts.length>53){ const P=W.pts; return (P[P.length-1].v/P[P.length-53].v-1)*100; }
+  const M=moPts(sym); if(M&&M.pts.length>13){ const P=M.pts; return (P[P.length-1].v/P[P.length-13].v-1)*100; } return null; }
+function ovQ(sym){ const q=(prices.quotes||{})[sym]; if(!q||!(q.price>0)) return null;
+  return {q,day:q.prevClose>0?(q.price/q.prevClose-1)*100:null,dd:q.yearHigh>0?(q.price/q.yearHigh-1)*100:null}; }
+function ovCell(lbl,val,chg,cls,tip){ return `<div class="ovc" ${tip?`title="${esc(tip)}"`:''}><span>${lbl}</span><b class="num">${val}</b><small class="num ${cls||''}">${chg||'&nbsp;'}</small></div>`; }
+function ovData(){
+  const T=depotTotal(), H=holdings().map(h=>{ const v=valueOf(h), x=px(h), d=dayOf(x), q=quoteOf(x);
+    return {h,x,v,d,q,eur:v?v.eur:0,dEur:v&&d!=null?v.eur-v.eur/(1+d/100):null,dd:q&&q.yearHigh>0&&q.price>0?(q.price/q.yearHigh-1)*100:null}; });
+  const V=H.filter(o=>o.eur>0), S=(a,f)=>a.reduce((s,o)=>s+(f(o)||0),0);
+  const dEur=V.some(o=>o.dEur!=null)?S(V,o=>o.dEur):null, base=T!=null&&dEur!=null?T-dEur:null;
+  const wavg=f=>{ let s=0,w=0; for(const o of V){ const v=f(o); if(v!=null){ s+=v*o.eur; w+=o.eur; } } return w?s/w:null; };
+  let cost=0, gain=0, nC=0; for(const o of V){ const r=hRetOf(o.h); if(r&&r.gain!=null){ cost+=posOf_(o.h).shares*r.cost; gain+=r.gain; nC++; } }
+  return {T,H,V,dEur,dPct:base>0?dEur/base*100:null,dd:wavg(o=>o.dd),y1:wavg(o=>ovY1(hSym(o.h))),gain:nC?gain:null,gPct:nC&&cost>0?gain/cost*100:null,nC,cash:depot?depot.cash||0:null};
+}
+function renderHome(){
+  const box=$('#homeBody'); if(!box) return;
+  const D=ovData(), I=incomeOf(), noDep=!depot;
+  // 1 · ticker strip
+  const mk=mkts.map(m=>({m,o:ovQ(String(m.symbol||'').toUpperCase())}));
+  const W=ovQ(BENCH.sym), S=mood&&mood.stocks, C=mood&&mood.crypto, VX=mood&&mood.vix;
+  const tape=[
+    ovCell('Depot',D.T!=null?fmtK(D.T):'—',D.dPct!=null?`${fmtPct(D.dPct,2)} today`:'',ovSg(D.dPct),'Value of your depot incl. cash, at live prices'),
+    ovCell('Today',D.dEur!=null?ovEur(D.dEur):'—',D.dPct!=null?fmtPct(D.dPct,2):'',ovSg(D.dEur),'How much your depot moved since yesterday\'s close'),
+    ovCell('MSCI World',W?fmtP(W.q.price,W.q.currency):'—',W&&W.day!=null?fmtPct(W.day,2):'',ovSg(W&&W.day),`${BENCH.sym}, the ETF your picks are measured against`),
+    ...mk.map(({m,o})=>ovCell(esc(m.name),o?(o.q.price>=1000?fmtK(o.q.price):fmtP(o.q.price,o.q.currency)):'—',o&&o.day!=null?fmtPct(o.day,1):'',ovSg(o&&o.day),m.note||m.symbol)),
+    ovCell('Fear &amp; Greed',S&&S.score!=null?String(S.score):'—',S&&S.score!=null?moodWord(S.score):'',S&&S.score!=null?(S.score<45?'dn':S.score>55?'up':''):'','0 = extreme fear, 100 = extreme greed'),
+    ovCell('VIX',VX?fmtN(VX.v,1):'—',VX?`avg ${fmtN(VX.avg,1)}`:'',VX&&VX.v>VX.avg?'dn':'','The market\'s fear gauge: above its average = nervous market'),
+  ].join('');
+  const P=[];
+  // 2 · portfolio
+  P.push(ovPanel('pf','Portfolio','port',noDep?'<p class="ovnil">Import your Trade Republic statement (Depot → Statement) to see your € figures.</p>':
+    `<div class="ovkpi"><div><span>Value</span><b class="num">${fmtEur(D.T)}</b></div>
+      <div><span>Today</span><b class="num ${ovSg(D.dEur)}">${ovEur(D.dEur)}</b><small class="num ${ovSg(D.dPct)}">${fmtPct(D.dPct,2)}</small></div>
+      <div><span>Since you bought</span><b class="num ${ovSg(D.gain)}">${D.gain!=null?ovEur(D.gain):'—'}</b><small class="num ${ovSg(D.gPct)}">${D.gPct!=null?fmtPct(D.gPct,1):'add buy prices'}</small></div>
+      <div><span>12 months</span><b class="num ${ovSg(D.y1)}">${D.y1!=null?fmtPct(D.y1,1):'—'}</b><small>price only</small></div>
+      <div><span>Below 52w high</span><b class="num ${D.dd!=null&&D.dd<-10?'dn':''}">${D.dd!=null?fmtN(-D.dd,1)+' %':'—'}</b><small>on average</small></div>
+      <div><span>Cash</span><b class="num">${fmtEur(D.cash)}</b><small>${D.V.length} positions</small></div></div>`,
+    noDep?'':`"Since you bought" counts ${D.nC} of ${D.V.length} holdings that have a buy price, without dividends. Averages are weighted by € value.`));
+  // 3 · signals: what needs you
+  const TD=todayData(), sig=[];
+  const oname=o=>o.kind==='hold'?(o.r.h.short||o.r.h.symbol):o.i.ticker, oopen=o=>o.kind==='hold'?`data-hid="${esc(o.r.h.id)}"`:`data-iid="${esc(o.i.id)}"`;
+  for(const o of TD.level) sig.push({t:'At level',c:'var(--t-buy)',nm:oname(o),at:oopen(o),why:o.kind==='hold'?'holding in the add zone':'idea in the buy zone',r:0});
+  const seen=new Set(TD.level.map(o=>o.kind==='hold'?hSym(o.r.h):symOf(o.i)));
+  const dipc=[...holdings().filter(h=>!isFund(h)&&hSym(h)&&(!depot||posOf_(h))).map(h=>({sym:hSym(h),nm:h.short||h.symbol,at:`data-hid="${esc(h.id)}"`,own:h})),
+    ...live().filter(i=>!ideaState(i).out&&symOf(i)).map(i=>({sym:symOf(i),nm:i.ticker,at:`data-iid="${esc(i.id)}"`,own:i}))];
+  for(const c of dipc){ if(seen.has(c.sym)) continue; const v=invOf(c.sym,c.own); if(!v||!(v.verdict==='buy'||v.verdict==='recheck')) continue; seen.add(c.sym);
+    sig.push({t:v.verdict==='buy'?'Dip ✓':'Dip ?',c:v.verdict==='buy'?'var(--teal)':'var(--ochre)',nm:c.nm,at:c.at,why:`${fmtN(-v.dd,0)} % below high · ${v.verdict==='buy'?'passes the investor check':'re-check the thesis'}`,r:v.verdict==='buy'?1:2,dd:v.dd}); }
+  for(const o of TD.due) sig.push({t:'Review',c:'var(--ochre)',nm:oname(o),at:oopen(o),why:'thesis review is due',r:3});
+  for(const o of TD.earn) sig.push({t:'Results',c:'var(--research)',nm:oname(o),at:oopen(o),why:`reports in ${earnOf(o.key).dn} day${earnOf(o.key).dn===1?'':'s'}`,r:4});
+  sig.sort((a,b)=>a.r-b.r||(a.dd??0)-(b.dd??0));
+  const sigH=sig.length?`<div class="ovl">${sig.slice(0,9).map(s=>`<button type="button" class="ovr" ${s.at}><span class="ovt" style="--tc:${s.c}">${s.t}</span><b>${esc(s.nm)}</b><small>${esc(s.why)}</small></button>`).join('')}</div>${sig.length>9?`<p class="ovsub">+ ${sig.length-9} more</p>`:''}`
+    :`<p class="ovnil">Nothing needs you today.${TD.near?` Closest to its level: <b>${esc(TD.near.tk)}</b>, ${abv(TD.near.above)} % above.`:''}</p>`;
+  P.push(ovPanel('sig','Signals: what needs you',null,sigH,'At level = your buy or add price is reached. Dip ✓ = 20 % or more below its high and still passes quality, price and debt. Dip ? = fallen as far, but check why first.'));
+  // 4 · movers
+  const M=D.H.filter(o=>o.d!=null&&(o.eur>0||noDep)).sort((a,b)=>b.d-a.d);
+  const mv=a=>a.map(o=>`<button type="button" class="ovr" data-hid="${esc(o.h.id)}"><b>${esc(o.h.short||o.h.symbol)}</b><small>${esc(hName(o.h))}</small><span class="num ${ovSg(o.d)}">${fmtPct(o.d,1)}</span><span class="num ${ovSg(o.dEur)}">${o.dEur!=null?ovEur(o.dEur):''}</span></button>`).join('');
+  P.push(ovPanel('mv','Today\'s movers','port',M.length?`<div class="ovl ov4">${mv(M.slice(0,3))}${M.length>3?`<hr>${mv(M.slice(-3).filter(o=>!M.slice(0,3).includes(o)))}`:''}</div>`:'<p class="ovnil">Appears with the next price update.</p>'));
+  // 5 · heat map (today)
+  if(D.V.length){ const Ht=box.clientWidth>900?46:70, tiles=squarify(D.V.map(o=>({hd:o.h,v:o.eur,d:o.d})).sort((a,b)=>b.v-a.v),0,0,100,Ht);
+    const col=v=>v==null?'var(--panel2)':`color-mix(in srgb, ${v>=0?'var(--teal)':'var(--coral)'} ${Math.round(12+Math.min(1,Math.abs(v)/3)*78)}%, var(--panel2))`;
+    P.push(ovPanel('hm','Heat map: today','depot',`<div class="heat" style="aspect-ratio:100/${Ht}">${tiles.map(t=>`<button type="button" class="ht" data-hid="${esc(t.hd.id)}" style="left:${t.x}%;top:${t.y/Ht*100}%;width:${t.w}%;height:${t.h/Ht*100}%;background:${col(t.d)}" title="${esc(hName(t.hd))}: ${fmtEur(t.v)}${t.d!=null?', '+fmtPct(t.d,1):''}">${t.w*t.h>100*Ht*.015?`<b>${esc(t.hd.short||t.hd.symbol||'')}</b><small>${t.d!=null?fmtPct(t.d,1):'–'}</small>`:''}</button>`).join('')}</div>`,'Size = € value, colour = today\'s move (full colour at ±3 %). Tap a tile to open it.')); }
+  // 6 · dividends
+  if(I&&I.R.length){ const Cl=divCalendar(I), mx=Math.max(...Cl.M.map(m=>m.eur),1), n3=Cl.M.slice(0,3).reduce((a,m)=>a+m.eur,0);
+    P.push(ovPanel('dv','Dividends','depot',`<div class="ovkpi"><div><span>Net a year</span><b class="num">${fmtEur(I.net2)}</b><small>${fmtEur(I.net2/12)} a month</small></div>
+      <div><span>Gross</span><b class="num">${fmtEur(I.G)}</b><small>${I.T>0?fmtN(I.G/I.T*100,2)+' % yield':''}</small></div>
+      <div><span>Taxes</span><b class="num dn">${fmtEur(I.L+I.tax)}</b><small>${fmtEur(I.L)} abroad · ${fmtEur(I.tax)} DE</small></div>
+      <div><span>Next 3 months</span><b class="num">${fmtEur(n3)}</b><small>before DE tax</small></div></div>
+      <div class="dcal ovcal">${Cl.M.map(m=>`<div class="dcm" title="${MON[m.mo]} ${m.yr}: ${fmtEur(m.eur)}"><i style="height:${Math.max(2,m.eur/mx*100)}%"></i><span>${MON[m.mo][0]}</span></div>`).join('')}</div>`,
+      `Net = after foreign withholding and German tax (26,375 % above your ${fmtEur(I.P)} allowance). Bars: the next 12 months, from last year's ex-dates.`)); }
+  else P.push(ovPanel('dv','Dividends','depot','<p class="ovnil">Import your statement to see your dividend income in €, after taxes.</p>'));
+  // 7 · market mood
+  P.push(ovPanel('md','Market mood','depot',S||C?`<div class="ovmood">${[['Stocks',S],['Crypto',C]].filter(x=>x[1]&&x[1].score!=null).map(([t,o])=>`<div><div class="mg">${gaugeSvg(o.score)}<b class="num" style="color:${moodCol(o.score)}">${o.score}</b></div><span>${t}</span><b style="color:${moodCol(o.score)}">${moodWord(o.score)}</b></div>`).join('')}</div>`
+    :'<p class="ovnil">Appears after the next price update.</p>',S&&S.score!=null?(S.score<45?'Fear: dips get more common. This is when your add levels tend to get hit.':S.score>55?'Greed: prices run ahead. Be patient with levels and build the cash reserve.':'Neutral: stick to the plan.'):''));
+  // 8 · gold, silver, bitcoin
+  P.push(ovPanel('mk','Gold, silver &amp; Bitcoin','depot',`<div class="ovl ov4">${mk.map(({m,o})=>{ const t=trendOf(String(m.symbol).toUpperCase()), v=t?TR_V[t.verdict]:null;
+    return `<div class="ovr"><b>${esc(m.name)}</b><small>${v?`<span style="color:${v[1]}">${t.verdict==='up'?'▲':t.verdict==='down'?'▼':'◆'} ${v[0]}</span>`:'trend after the next update'}${o&&o.dd!=null?` · ${fmtN(-o.dd,0)} % below high`:''}</small><span class="num">${o?fmtP(o.q.price,''):'—'}</span><span class="num ${ovSg(o&&o.day)}">${o&&o.day!=null?fmtPct(o.day,1):''}</span></div>`; }).join('')}</div>`,'Prices in €. No company behind them, so only price, trend and drawdown.'));
+  // 9 · next money
+  const PL=planOf(), R=nextRank(nextAmt), top=R.ready[0];
+  P.push(ovPanel('nx','Your next money','next',`<p class="ovhero">${top?`Best place for ${fmtEur(nextAmt)} today: <b>${esc(top.nm||top.tk)}</b> <span class="num">≈ ${pp(top.adj)} % a year</span>`:`Nothing is at your level today: keep the ${fmtEur(nextAmt)} in cash or your ETF.`}</p>
+    <div class="ovl ov3">${PL.lines.map(l=>`<div class="ovr"><span class="ovt k ${l.kind.toLowerCase()}">${l.kind}</span><b>${esc(l.nm)}</b><span class="num">${fmtEur(l.eur)}</span></div>`).join('')}</div>`,`Your monthly savings plan of ${fmtEur(PL.amt)}. Change it on Next €.`));
+  // 10 · risk and mix
+  const X=xrRows();
+  if(X){ const stk=X.rows.filter(r=>!r.fund).sort((a,b)=>b.w-a.w), over=stk.filter(r=>r.cap!=null&&r.w>r.cap), sec=xrGroup(X,'sector').filter(g=>!g.grey), cur=xrGroup(X,'cur').filter(g=>!g.grey&&g.k!=='EUR');
+    const fx=cur.reduce((s,g)=>s+g.w,0), big=[...X.rows].sort((a,b)=>b.w-a.w).slice(0,5);
+    const t=trendOf, tc={up:0,mixed:0,down:0}; for(const r of stk){ const v=t(hSym(r.h)); if(v) tc[v.verdict]++; }
+    P.push(ovPanel('rk','Risk &amp; mix','depot',`<div class="ovl ov3">${big.map(r=>`<button type="button" class="ovr" data-hid="${esc(r.h.id)}"><b>${esc(r.tk)}</b><span class="ovbar"><i style="width:${Math.min(100,r.w/20*100)}%;${r.cap!=null&&r.w>r.cap?'background:var(--coral)':''}"></i></span><span class="num">${fmtN(r.w,1)} %</span></button>`).join('')}</div>
+      <div class="ovkpi sm"><div><span>Over max weight</span><b class="num ${over.length?'dn':''}">${over.length}</b><small>${over.length?esc(over.map(r=>r.tk).join(', ')):'none'}</small></div>
+      <div><span>Top sector</span><b class="num ${sec[0]&&sec[0].w>NX.sectorCap?'dn':''}">${sec[0]?fmtN(sec[0].w,0)+' %':'—'}</b><small>${sec[0]?esc(sec[0].k):''}</small></div>
+      <div><span>Foreign currency</span><b class="num ${fx>NX.fxCap?'dn':''}">${fmtN(fx,0)} %</b><small>stocks not in €</small></div>
+      <div><span>Trend</span><b class="num">${tc.up}▲ ${tc.down}▼</b><small>${tc.mixed} mixed</small></div></div>`,
+      `Bars: share of your depot (full bar = 20 %), red above your max weight. Lines: ${NX.sectorCap} % per sector, ${NX.fxCap} % per foreign currency. Trend: stocks above or below their 200-day line.`)); }
+  // 11 · vs MSCI World
+  const B=holdings().filter(h=>hSym(h)&&hSym(h)!==BENCH.sym&&h.kind!=='bond'&&(!depot||posOf_(h))).map(h=>({h,b:benchOf(h)})).filter(o=>o.b&&o.b.gap!=null).sort((a,b)=>b.b.gap-a.b.gap);
+  if(B.length) P.push(ovPanel('bm','Your picks vs MSCI World','depot',`<p class="ovhero"><b>${B.filter(o=>o.b.gap>0).length} of ${B.length}</b> holdings beat the MSCI World since you bought them.</p>
+    <div class="ovl ov3">${[...B.slice(0,2),...B.slice(-2).filter(o=>!B.slice(0,2).includes(o))].map(o=>`<button type="button" class="ovr" data-hid="${esc(o.h.id)}"><b>${esc(o.h.short||o.h.symbol)}</b><small>${fmtPct(o.b.s,0)} vs ${fmtPct(o.b.b,0)}</small><span class="num ${ovSg(o.b.gap)}">${fmtPct(o.b.gap,0)}</span></button>`).join('')}</div>`,'Total return in € with dividends, from your "Bought around" date. Best two and worst two.'));
+  const upd=prices.updated?`Prices ${agoShort(prices.updated)} old`:'No prices yet';
+  box.innerHTML=`<div class="ovtape">${tape}</div><p class="ovstamp">${upd}${depot?` · statement of ${fmtDay(depot.asOf)}`:''} · tap any panel title to go to the detail</p><div class="ovgrid">${P.join('')}</div>`;
+  box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ switchView(b.dataset.go); window.scrollTo({top:0}); });
+  box.querySelectorAll('[data-hid]').forEach(b=>b.onclick=()=>openHold(b.dataset.hid));
+  box.querySelectorAll('[data-iid]').forEach(b=>b.onclick=()=>openRead(b.dataset.iid));
+}
 // override chips: auto · wonderful · good · fair (stored as `quality` on the card or holding, synced)
 const qualChips=(id,cur,inh)=>`<div class="qchips" id="${id}"><span>Quality</span>${['auto',...QUAL_SET].map(k=>`<button type="button" class="chip ${(cur||'auto')===k?'on':''}" data-q="${k}">${k}</button>`).join('')}</div>${inh?`<p class="hint" style="margin:4px 0 0">${esc(inh)}</p>`:''}`;
 function wireBiz(root,rerender){
@@ -2331,16 +2476,17 @@ const mqWide=window.matchMedia('(min-width:720px)');
 const showTable=()=>view==='board'&&tableMode&&mqWide.matches;
 function applyVis(){ const tbl=showTable(), f=!!focus;
   $('#viewFocus').hidden=!f;
-  $('#viewBoard').hidden=f||view!=='board'||tbl; $('#viewScore').hidden=f||!tbl; $('#viewPort').hidden=f||view!=='port'; $('#viewNext').hidden=f||view!=='next'; $('#viewDepot').hidden=f||view!=='depot';
-  $('#pgTitle').textContent=f?FOCUS_T[focus]:view==='port'?'Portfolio':view==='next'?'Next €':view==='depot'?'Depot':'Ideas';
-  document.body.classList.toggle('wide',tbl&&!f); }
-function render(){ applyVis(); if(focus) renderFocus(); else view==='port'?renderPort():view==='next'?renderNext():view==='depot'?renderDepot():showTable()?renderScore():renderBoard();
+  $('#viewBoard').hidden=f||view!=='board'||tbl; $('#viewScore').hidden=f||!tbl; $('#viewPort').hidden=f||view!=='port'; $('#viewNext').hidden=f||view!=='next'; $('#viewDepot').hidden=f||view!=='depot'; $('#viewHome').hidden=f||view!=='home';
+  $('#pgTitle').textContent=f?FOCUS_T[focus]:view==='home'?'Overview':view==='port'?'Portfolio':view==='next'?'Next €':view==='depot'?'Depot':'Ideas';
+  document.body.classList.toggle('wide',(tbl||view==='home')&&!f); }
+function render(){ applyVis(); if(focus) renderFocus(); else view==='home'?renderHome():view==='port'?renderPort():view==='next'?renderNext():view==='depot'?renderDepot():showTable()?renderScore():renderBoard();
   renderToday(); renderSub(); renderPxInfo(); renderBadge(); }
 // line under the tabs: what you're looking at, price age, sort
 function renderSub(){
   let t;
   if(view==='port'){ const H=holdings(), T=depotTotal();
     t=`${H.length} holding${H.length===1?'':'s'}${T!=null?` · ${fmtK(T)}`:''} · ${depot?('as of '+fmtDay(depot.asOf)).replace(/ /g,'\u00a0'):'no statement yet'}`; }
+  else if(view==='home'){ const T=depotTotal(); t=`everything at a glance${T!=null?' · '+fmtK(T):''}`; }
   else if(view==='next') t=`ranked by discount to fair value${depot?'':' · no statement, so no mix check'}`;
   else if(view==='depot'){ const T=depotTotal(); t=depot?`${T!=null?fmtK(T)+' · ':''}as of ${fmtDay(depot.asOf)}`:'no statement on this device yet'; }
   else { const n=live().filter(i=>filter==='all'||i.status===filter).length, st=STATUSES.find(s=>s.k===filter);
@@ -2741,7 +2887,7 @@ function renderScore(){
 $('#sortSel').onchange=e=>{ sortKey=e.target.value; sortDir=['score','toBuy','yld','dev','day','chg','conviction'].includes(sortKey)?-1:1; renderScore(); };
 $('#sortDir').onclick=()=>{ sortDir*=-1; renderScore(); };
 $$('#scoreTbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else{sortKey=k;sortDir=-1;} renderScore();});
-function switchView(v){ view=v==='port'||v==='next'||v==='depot'?v:'board'; focus=null; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
+function switchView(v){ view=v==='home'||v==='port'||v==='next'||v==='depot'?v:'board'; focus=null; try{localStorage.setItem(LS_VIEW,view);}catch{} $$('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.v===view));
   render(); }
 $$('.seg button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
@@ -4682,7 +4828,7 @@ renderVersion();
 let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2200); }
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ pull(); pullP(); loadPrices(); } });
 
-let v0='board'; try{ v0=localStorage.getItem(LS_VIEW)||'board'; }catch{}
+let v0='home'; try{ v0=localStorage.getItem(LS_VIEW)||'home'; }catch{}
 if(v0==='score'){ tableMode=true; try{localStorage.setItem(LS_TABLE,'1');}catch{} }   // the old Scorecard tab lives on as the desktop table
 switchView(v0);
 pull();
