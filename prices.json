@@ -1,13 +1,13 @@
 {
-  "updated": "2026-11-20T20:18:07+00:00",
+  "updated": "2026-11-20T23:06:46+00:00",
   "quotes": {
     "4GLD.DE": {
       "price": 103.78,
       "prevClose": 107.94,
       "currency": "EUR",
       "yearHigh": 149.11,
-      "yearLow": 107.5,
-      "time": "2026-11-20T20:17:11+00:00"
+      "yearLow": 103.3,
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "6367.T": {
       "price": 23765.0,
@@ -121,28 +121,28 @@
         ]
       ],
       "payFreq": 1,
-      "avgYield5y": 4.72,
-      "yieldLow5y": 3.78,
+      "avgYield5y": 4.71,
+      "yieldLow5y": 3.74,
       "yieldHigh5y": 6.67,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:17:11+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "AMZN": {
-      "price": 248.275,
+      "price": 246.82,
       "prevClose": 257.37,
       "currency": "USD",
       "yearHigh": 287.2,
       "yearLow": 196.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "APD": {
-      "price": 300.035,
+      "price": 297.09,
       "prevClose": 303.83,
       "currency": "USD",
       "yearHigh": 324.0,
       "yearLow": 229.11,
       "divTTM": 7.22,
-      "yieldTTM": 2.41,
+      "yieldTTM": 2.43,
       "divCal": [
         [
           "2026-01-02",
@@ -167,14 +167,14 @@
       "yieldLow5y": 1.92,
       "yieldHigh5y": 2.99,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "ASML.AS": {
       "price": 1168.0,
       "prevClose": 1288.2,
       "currency": "EUR",
       "yearHigh": 1741.0,
-      "yearLow": 822.2,
+      "yearLow": 837.1,
       "divTTM": 8.06,
       "yieldTTM": 0.69,
       "divCal": [
@@ -204,16 +204,16 @@
       "yieldLow5y": 0.46,
       "yieldHigh5y": 1.64,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:17:11+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "AXP": {
-      "price": 304.475,
+      "price": 301.7,
       "prevClose": 311.11,
       "currency": "USD",
       "yearHigh": 387.49,
       "yearLow": 290.97,
       "divTTM": 3.67,
-      "yieldTTM": 1.21,
+      "yieldTTM": 1.22,
       "divCal": [
         [
           "2026-01-02",
@@ -237,16 +237,16 @@
       "yieldLow5y": 0.85,
       "yieldHigh5y": 1.59,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "BEPC": {
-      "price": 29.82,
+      "price": 29.61,
       "prevClose": 30.46,
       "currency": "USD",
       "yearHigh": 45.18,
       "yearLow": 27.57,
       "divTTM": 1.549,
-      "yieldTTM": 5.19,
+      "yieldTTM": 5.23,
       "divCal": [
         [
           "2025-11-28",
@@ -270,24 +270,24 @@
       "yieldLow5y": 2.81,
       "yieldHigh5y": 5.89,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "BTC-EUR": {
-      "price": 53253.5312,
+      "price": 53886.5508,
       "prevClose": 56440.7188,
       "currency": "EUR",
       "yearHigh": 84056.0938,
       "yearLow": 50632.6055,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "CVX": {
-      "price": 209.79,
+      "price": 208.37,
       "prevClose": 206.5,
       "currency": "USD",
       "yearHigh": 236.48,
       "yearLow": 146.49,
       "divTTM": 7.12,
-      "yieldTTM": 3.39,
+      "yieldTTM": 3.42,
       "divCal": [
         [
           "2025-11-18",
@@ -315,7 +315,7 @@
       "yieldLow5y": 2.99,
       "yieldHigh5y": 4.89,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "DG.PA": {
       "price": 111.0,
@@ -452,8 +452,8 @@
       "prevClose": 126.79,
       "currency": "EUR",
       "yearHigh": 132.41,
-      "yearLow": 106.97,
-      "time": "2026-11-20T20:17:11+00:00"
+      "yearLow": 107.205,
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "EXW1.DE": {
       "price": 60.0,
@@ -489,7 +489,7 @@
       "time": "2026-11-20T20:17:11+00:00"
     },
     "GOOGL": {
-      "price": 268.89,
+      "price": 265.29,
       "prevClose": 272.66,
       "currency": "USD",
       "yearHigh": 408.61,
@@ -514,18 +514,18 @@
           0.22
         ]
       ],
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "IS3N.DE": {
       "price": 40.955,
       "prevClose": 43.08,
       "currency": "EUR",
       "yearHigh": 51.006,
-      "yearLow": 36.86,
-      "time": "2026-11-20T20:17:11+00:00"
+      "yearLow": 36.876,
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "JNJ": {
-      "price": 271.215,
+      "price": 270.47,
       "prevClose": 267.14,
       "currency": "USD",
       "yearHigh": 290.25,
@@ -555,16 +555,16 @@
       "yieldLow5y": 1.93,
       "yieldHigh5y": 3.4,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "KO": {
-      "price": 97.345,
+      "price": 96.99,
       "prevClose": 96.09,
       "currency": "USD",
       "yearHigh": 100.56,
       "yearLow": 67.27,
       "divTTM": 2.1,
-      "yieldTTM": 2.16,
+      "yieldTTM": 2.17,
       "divCal": [
         [
           "2025-12-01",
@@ -585,13 +585,13 @@
       ],
       "payFreq": 4,
       "avgYield5y": 2.82,
-      "yieldLow5y": 2.16,
+      "yieldLow5y": 2.17,
       "yieldHigh5y": 3.25,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "LIN": {
-      "price": 505.74,
+      "price": 502.83,
       "prevClose": 510.21,
       "currency": "USD",
       "yearHigh": 548.2,
@@ -622,16 +622,16 @@
       "yieldLow5y": 1.11,
       "yieldHigh5y": 1.7,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "MAIN": {
-      "price": 55.4,
+      "price": 55.05,
       "prevClose": 55.66,
       "currency": "USD",
       "yearHigh": 65.23,
       "yearLow": 48.95,
       "divTTM": 4.34,
-      "yieldTTM": 7.83,
+      "yieldTTM": 7.88,
       "divCal": [
         [
           "2025-11-07",
@@ -707,16 +707,16 @@
       "yieldLow5y": 6.32,
       "yieldHigh5y": 9.15,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "MCO": {
-      "price": 471.36,
+      "price": 466.83,
       "prevClose": 471.84,
       "currency": "USD",
       "yearHigh": 546.88,
       "yearLow": 402.28,
       "divTTM": 4.03,
-      "yieldTTM": 0.85,
+      "yieldTTM": 0.86,
       "divCal": [
         [
           "2025-11-21",
@@ -741,10 +741,10 @@
       "yieldLow5y": 0.63,
       "yieldHigh5y": 1.12,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "META": {
-      "price": 564.01,
+      "price": 560.84,
       "prevClose": 596.22,
       "currency": "USD",
       "yearHigh": 779.82,
@@ -769,7 +769,7 @@
           0.525
         ]
       ],
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "MUV2.DE": {
       "price": 580.0,
@@ -850,13 +850,13 @@
       "time": "2026-11-20T20:17:11+00:00"
     },
     "O": {
-      "price": 58.2599,
+      "price": 58.03,
       "prevClose": 57.66,
       "currency": "USD",
       "yearHigh": 67.94,
       "yearLow": 53.15,
       "divTTM": 3.25,
-      "yieldTTM": 5.58,
+      "yieldTTM": 5.6,
       "divCal": [
         [
           "2025-10-31",
@@ -916,16 +916,16 @@
       "yieldLow5y": 3.85,
       "yieldHigh5y": 6.41,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "PLD": {
-      "price": 123.955,
+      "price": 122.5,
       "prevClose": 123.36,
       "currency": "USD",
       "yearHigh": 153.35,
       "yearLow": 122.61,
       "divTTM": 4.22,
-      "yieldTTM": 3.4,
+      "yieldTTM": 3.44,
       "divCal": [
         [
           "2025-12-16",
@@ -949,7 +949,7 @@
       "yieldLow5y": 1.5,
       "yieldHigh5y": 3.81,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "RIO.L": {
       "price": 5640.0,
@@ -992,11 +992,11 @@
         ]
       ],
       "payFreq": 1,
-      "avgYield5y": 4.13,
+      "avgYield5y": 4.14,
       "yieldLow5y": 3.18,
       "yieldHigh5y": 5.64,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:17:11+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "SY1.DE": {
       "price": 94.52,
@@ -1025,7 +1025,7 @@
       "prevClose": 81.13,
       "currency": "EUR",
       "yearHigh": 84.78,
-      "yearLow": 67.0,
+      "yearLow": 67.59,
       "divTTM": 2.0232,
       "yieldTTM": 2.52,
       "divCal": [
@@ -1051,16 +1051,16 @@
       "yieldLow5y": 2.43,
       "yieldHigh5y": 4.05,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:17:11+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "VICI": {
-      "price": 24.405,
+      "price": 24.2,
       "prevClose": 24.19,
       "currency": "USD",
       "yearHigh": 30.485,
       "yearLow": 22.425,
       "divTTM": 1.81,
-      "yieldTTM": 7.42,
+      "yieldTTM": 7.48,
       "divCal": [
         [
           "2025-12-17",
@@ -1085,13 +1085,13 @@
       "yieldLow5y": 4.21,
       "yieldHigh5y": 7.88,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "WKL.AS": {
       "price": 85.88,
       "prevClose": 86.32,
       "currency": "EUR",
-      "yearHigh": 93.86,
+      "yearHigh": 93.38,
       "yearLow": 54.64,
       "divTTM": 2.6,
       "yieldTTM": 3.03,
@@ -1111,24 +1111,24 @@
       "yieldLow5y": 1.25,
       "yieldHigh5y": 4.41,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:17:11+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "XAD6.DE": {
       "price": 352.04,
       "prevClose": 380.14,
       "currency": "EUR",
       "yearHigh": 951.2,
-      "yearLow": 378.2,
-      "time": "2026-11-20T20:17:11+00:00"
+      "yearLow": 351.96,
+      "time": "2026-11-20T23:06:46+00:00"
     },
     "ZTS": {
-      "price": 79.885,
+      "price": 79.11,
       "prevClose": 80.79,
       "currency": "USD",
       "yearHigh": 132.49,
       "yearLow": 68.77,
       "divTTM": 2.12,
-      "yieldTTM": 2.65,
+      "yieldTTM": 2.68,
       "divCal": [
         [
           "2025-10-31",
@@ -1157,15 +1157,15 @@
       "yieldLow5y": 0.41,
       "yieldHigh5y": 2.99,
       "yieldYears": 5.0,
-      "time": "2026-11-20T20:18:07+00:00"
+      "time": "2026-11-20T23:06:46+00:00"
     }
   },
   "errors": {},
   "fx": {
-    "CHF": 0.92046,
-    "GBP": 0.83812,
-    "JPY": 173.837997,
-    "USD": 1.097333
+    "CHF": 0.92081,
+    "GBP": 0.8381,
+    "JPY": 173.904007,
+    "USD": 1.097454
   },
   "fxAt": {
     "CHF": {
