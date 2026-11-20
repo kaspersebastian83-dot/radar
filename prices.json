@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-19T23:36:28+00:00",
+  "updated": "2026-11-20T05:55:27+00:00",
   "quotes": {
     "4GLD.DE": {
       "price": 107.94,
@@ -10,13 +10,13 @@
       "time": "2026-11-19T23:36:28+00:00"
     },
     "6367.T": {
-      "price": 23940.0,
-      "prevClose": 23040.0,
+      "price": 23795.0,
+      "prevClose": 23940.0,
       "currency": "JPY",
       "yearHigh": 26440.0,
       "yearLow": 17380.0,
       "divTTM": 360.0,
-      "yieldTTM": 1.5,
+      "yieldTTM": 1.51,
       "divCal": [
         [
           "2026-03-30",
@@ -32,16 +32,16 @@
       "yieldLow5y": 0.65,
       "yieldHigh5y": 2.06,
       "yieldYears": 5.0,
-      "time": "2026-11-19T18:04:43+00:00"
+      "time": "2026-11-20T05:55:27+00:00"
     },
     "8053.T": {
-      "price": 1578.0,
-      "prevClose": 1609.5,
+      "price": 1504.0,
+      "prevClose": 1578.0,
       "currency": "JPY",
       "yearHigh": 1943.75,
       "yearLow": 1160.25,
       "divTTM": 42.0,
-      "yieldTTM": 2.66,
+      "yieldTTM": 2.79,
       "divCal": [
         [
           "2026-03-30",
@@ -57,16 +57,16 @@
       "yieldLow5y": 2.03,
       "yieldHigh5y": 6.8,
       "yieldYears": 5.0,
-      "time": "2026-11-19T23:36:28+00:00"
+      "time": "2026-11-20T05:55:27+00:00"
     },
     "8058.T": {
-      "price": 4951.0,
-      "prevClose": 5100.0,
+      "price": 4835.0,
+      "prevClose": 4951.0,
       "currency": "JPY",
       "yearHigh": 6012.0,
       "yearLow": 3507.0,
       "divTTM": 117.0,
-      "yieldTTM": 2.36,
+      "yieldTTM": 2.42,
       "divCal": [
         [
           "2026-03-30",
@@ -82,7 +82,7 @@
       "yieldLow5y": 1.93,
       "yieldHigh5y": 3.93,
       "yieldYears": 5.0,
-      "time": "2026-11-19T23:36:28+00:00"
+      "time": "2026-11-20T05:55:27+00:00"
     },
     "AI.PA": {
       "price": 189.14,
@@ -273,12 +273,12 @@
       "time": "2026-11-19T23:36:28+00:00"
     },
     "BTC-EUR": {
-      "price": 56334.8008,
-      "prevClose": 57407.6016,
+      "price": 56355.1719,
+      "prevClose": 56471.3281,
       "currency": "EUR",
       "yearHigh": 84056.0938,
       "yearLow": 50632.6055,
-      "time": "2026-11-19T23:36:28+00:00"
+      "time": "2026-11-20T05:55:27+00:00"
     },
     "CVX": {
       "price": 206.5,
@@ -1162,10 +1162,10 @@
   },
   "errors": {},
   "fx": {
-    "CHF": 0.92561,
-    "GBP": 0.83807,
-    "JPY": 175.106995,
-    "USD": 1.097093
+    "CHF": 0.92474,
+    "GBP": 0.83764,
+    "JPY": 174.781006,
+    "USD": 1.098177
   },
   "fxAt": {
     "CHF": {
