@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-26T19:42:40+00:00",
+  "updated": "2026-11-27T02:14:10+00:00",
   "quotes": {
     "4GLD.DE": {
       "price": 104.69,
@@ -10,13 +10,13 @@
       "time": "2026-11-26T17:45:19+00:00"
     },
     "6367.T": {
-      "price": 23860.0,
-      "prevClose": 24390.0,
+      "price": 23925.0,
+      "prevClose": 23860.0,
       "currency": "JPY",
       "yearHigh": 26440.0,
       "yearLow": 17380.0,
       "divTTM": 360.0,
-      "yieldTTM": 1.51,
+      "yieldTTM": 1.5,
       "divCal": [
         [
           "2026-03-30",
@@ -32,16 +32,16 @@
       "yieldLow5y": 0.65,
       "yieldHigh5y": 2.06,
       "yieldYears": 5.0,
-      "time": "2026-11-26T17:45:19+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "8053.T": {
-      "price": 1530.5,
-      "prevClose": 1538.0,
+      "price": 1583.5,
+      "prevClose": 1530.5,
       "currency": "JPY",
       "yearHigh": 1943.75,
       "yearLow": 1196.5,
       "divTTM": 42.0,
-      "yieldTTM": 2.74,
+      "yieldTTM": 2.65,
       "divCal": [
         [
           "2026-03-30",
@@ -57,16 +57,16 @@
       "yieldLow5y": 2.03,
       "yieldHigh5y": 6.8,
       "yieldYears": 5.0,
-      "time": "2026-11-26T17:45:19+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "8058.T": {
-      "price": 5050.0,
-      "prevClose": 5037.0,
+      "price": 5143.0,
+      "prevClose": 5050.0,
       "currency": "JPY",
       "yearHigh": 6012.0,
       "yearLow": 3507.0,
       "divTTM": 117.0,
-      "yieldTTM": 2.32,
+      "yieldTTM": 2.27,
       "divCal": [
         [
           "2026-03-30",
@@ -78,11 +78,11 @@
         ]
       ],
       "payFreq": 2,
-      "avgYield5y": 2.97,
+      "avgYield5y": 2.96,
       "yieldLow5y": 1.93,
       "yieldHigh5y": 3.93,
       "yieldYears": 5.0,
-      "time": "2026-11-26T17:45:19+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "AI.PA": {
       "price": 190.32,
@@ -121,11 +121,11 @@
         ]
       ],
       "payFreq": 1,
-      "avgYield5y": 4.71,
-      "yieldLow5y": 3.72,
+      "avgYield5y": 4.72,
+      "yieldLow5y": 3.77,
       "yieldHigh5y": 6.67,
       "yieldYears": 5.0,
-      "time": "2026-11-26T17:45:19+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "AMZN": {
       "price": 244.43,
@@ -273,12 +273,12 @@
       "time": "2026-11-26T02:14:37+00:00"
     },
     "BTC-EUR": {
-      "price": 55281.6211,
-      "prevClose": 55037.9297,
+      "price": 55742.6094,
+      "prevClose": 55121.3398,
       "currency": "EUR",
       "yearHigh": 84056.0938,
       "yearLow": 50270.7617,
-      "time": "2026-11-26T19:42:40+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "CVX": {
       "price": 210.95,
@@ -404,11 +404,11 @@
         ]
       ],
       "payFreq": 4,
-      "avgYield5y": 6.41,
+      "avgYield5y": 6.42,
       "yieldLow5y": 3.91,
       "yieldHigh5y": 9.9,
       "yieldYears": 5.0,
-      "time": "2026-11-26T17:45:19+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "EOAN.DE": {
       "price": 18.86,
@@ -978,7 +978,7 @@
       "prevClose": 5527.0,
       "currency": "GBp",
       "yearHigh": 9117.0,
-      "yearLow": 5355.0,
+      "yearLow": 5363.0,
       "divTTM": 348.4323,
       "yieldTTM": 6.19,
       "divCal": [
@@ -997,13 +997,13 @@
       "yieldLow5y": 3.73,
       "yieldHigh5y": 15.65,
       "yieldYears": 5.0,
-      "time": "2026-11-26T17:45:19+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "SAN.PA": {
       "price": 98.83,
       "prevClose": 98.16,
       "currency": "EUR",
-      "yearHigh": 98.86,
+      "yearHigh": 99.87,
       "yearLow": 69.75,
       "divTTM": 4.12,
       "yieldTTM": 4.17,
@@ -1018,7 +1018,7 @@
       "yieldLow5y": 3.18,
       "yieldHigh5y": 5.64,
       "yieldYears": 5.0,
-      "time": "2026-11-26T17:45:19+00:00"
+      "time": "2026-11-27T02:14:10+00:00"
     },
     "SY1.DE": {
       "price": 97.18,
@@ -1184,10 +1184,10 @@
   },
   "errors": {},
   "fx": {
-    "CHF": 0.91497,
-    "GBP": 0.83699,
-    "JPY": 174.714005,
-    "USD": 1.097333
+    "CHF": 0.91513,
+    "GBP": 0.83669,
+    "JPY": 174.757996,
+    "USD": 1.098056
   },
   "fxAt": {
     "CHF": {
