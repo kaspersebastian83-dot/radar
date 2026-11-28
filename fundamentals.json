@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-21T13:41:41+00:00",
+ "updated": "2026-11-28T14:29:59+00:00",
  "companies": {
   "6367.T": {
    "sector": "Industrials",
@@ -430,9 +430,9 @@
      2
     ]
    ],
-   "nextEarnings": "2026-11-02",
+   "nextEarnings": "2027-02-04",
    "lastEarnings": "2026-11-02",
-   "time": "2026-11-09T09:58:07+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "8058.T": {
    "sector": "Industrials",
@@ -868,9 +868,9 @@
      1
     ]
    ],
-   "nextEarnings": null,
+   "nextEarnings": "2027-02-19",
    "lastEarnings": "2022-04-27",
-   "time": "2026-11-10T11:53:55+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "ALV.DE": {
    "sector": "Financial Services",
@@ -1175,9 +1175,9 @@
     }
    ],
    "divYears": [],
-   "nextEarnings": "2026-10-29",
+   "nextEarnings": "2027-02-04",
    "lastEarnings": "2026-10-29",
-   "time": "2026-11-09T09:58:07+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "APD": {
    "sector": "Basic Materials",
@@ -1583,9 +1583,9 @@
      4
     ]
    ],
-   "nextEarnings": "2026-10-14",
+   "nextEarnings": "2027-01-27",
    "lastEarnings": "2026-10-14",
-   "time": "2026-11-09T09:58:07+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "AXP": {
    "sector": "Financial Services",
@@ -2360,8 +2360,8 @@
      2
     ]
    ],
-   "nextEarnings": null,
-   "time": "2026-11-06T19:30:25+00:00"
+   "nextEarnings": "2027-02-05",
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "ENEL.MI": {
    "sector": "Utilities",
@@ -3111,9 +3111,9 @@
      4
     ]
    ],
-   "nextEarnings": "2026-10-28",
+   "nextEarnings": "2027-02-03",
    "lastEarnings": "2026-10-28",
-   "time": "2026-11-09T09:58:07+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "JNJ": {
    "sector": "Healthcare",
@@ -3553,9 +3553,9 @@
      4
     ]
    ],
-   "nextEarnings": "2026-10-27",
+   "nextEarnings": "2027-02-09",
    "lastEarnings": "2026-10-27",
-   "time": "2026-11-09T09:58:07+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "LIN": {
    "sector": "Basic Materials",
@@ -3774,9 +3774,9 @@
      4
     ]
    ],
-   "nextEarnings": "2026-10-29",
+   "nextEarnings": "2027-02-04",
    "lastEarnings": "2026-10-29",
-   "time": "2026-11-10T11:53:55+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "MAIN": {
    "sector": "Financial Services",
@@ -4170,9 +4170,9 @@
      4
     ]
    ],
-   "nextEarnings": "2026-10-21",
+   "nextEarnings": "2027-02-17",
    "lastEarnings": "2026-10-21",
-   "time": "2026-11-11T19:54:36+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "META": {
    "sector": "Communication Services",
@@ -4708,9 +4708,9 @@
      1
     ]
    ],
-   "nextEarnings": null,
+   "nextEarnings": "2027-02-18",
    "lastEarnings": "2021-02-18",
-   "time": "2026-11-13T10:23:42+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "NG.L": {
    "sector": "Utilities",
@@ -5145,9 +5145,9 @@
      13
     ]
    ],
-   "nextEarnings": "2026-11-02",
+   "nextEarnings": "2027-02-23",
    "lastEarnings": "2026-11-02",
-   "time": "2026-11-09T09:58:07+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "PLD": {
    "sector": "Real Estate",
@@ -5577,9 +5577,9 @@
      2
     ]
    ],
-   "nextEarnings": null,
+   "nextEarnings": "2027-02-18",
    "lastEarnings": "2016-03-03",
-   "time": "2026-11-10T11:53:55+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "SAN.PA": {
    "sector": "Healthcare",
@@ -5694,12 +5694,12 @@
     ],
     [
      2005,
-     1.4551,
+     1.456,
      2
     ],
     [
      2006,
-     1.8025,
+     1.8034,
      2
     ],
     [
@@ -5800,7 +5800,7 @@
    ],
    "nextEarnings": "2027-01-28",
    "lastEarnings": "2026-10-30",
-   "time": "2026-11-21T13:41:41+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   },
   "SY1.DE": {
    "sector": "Basic Materials",
@@ -6498,9 +6498,9 @@
      4
     ]
    ],
-   "nextEarnings": "2026-11-05",
+   "nextEarnings": "2027-02-11",
    "lastEarnings": "2026-11-05",
-   "time": "2026-11-09T09:58:07+00:00"
+   "time": "2026-11-28T14:29:59+00:00"
   }
  },
  "errors": {}
